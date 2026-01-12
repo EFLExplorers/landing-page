@@ -1,19 +1,31 @@
 import styles from "./RegisterCTASection.module.css";
 import Link from "next/link";
+import { PageSection } from "../../../pages/api/page-content";
 
-export const RegisterCTASection = () => {
+export interface RegisterCTASectionProps {
+  section: PageSection | null;
+}
+
+export const RegisterCTASection = ({ section }: RegisterCTASectionProps) => {
+  // Database-driven content only
+  if (!section?.content) return null;
+
+  const title = section.content.title;
+  const subtitle = section.content.subtitle;
+  const buttonText = section.content.button_text;
+  const buttonHref = section.content.button_href;
+
   return (
     <section className={styles.registerCta}>
       <div className={styles.registerCtaContent}>
         <h2 className={styles.registerCtaTitle}>
-          Ready to Start Your English Learning Journey?
+          {title}
         </h2>
         <p className={styles.registerCtaSubtitle}>
-          Join our community of learners and get access to all our premium
-          features.
+          {subtitle}
         </p>
-        <Link href="/Auth/register" className={styles.registerCtaButton}>
-          Create Your Account
+        <Link href={buttonHref} className={styles.registerCtaButton}>
+          {buttonText}
         </Link>
       </div>
     </section>

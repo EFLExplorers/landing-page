@@ -1,33 +1,39 @@
 import styles from "./ContactHeroSection.module.css";
+import { PageSection } from "../../../pages/api/page-content";
 
-export const ContactHeroSection = () => {
+export interface ContactHeroSectionProps {
+  section: PageSection | null;
+}
+
+export const ContactHeroSection = ({ section }: ContactHeroSectionProps) => {
+  // Database-driven content only
+  if (!section?.content) return null;
+
+  const title = section.content.title;
+  const subtitle = section.content.subtitle;
+  const body = section.content.body;
+  const contactInfo = section.content.contact_info || [];
+
   return (
     <section className={styles.hero}>
       <div className={styles.content}>
-        <h1 className={styles.title}>Get in Touch</h1>
+        <h1 className={styles.title}>{title}</h1>
         <p className={styles.subtitle}>
-          Have questions about our English learning programs? We're here to help! 
-          Reach out to us and let's start your learning journey together.
+          {subtitle} {body}
         </p>
         <div className={styles.contactInfo}>
-          <div className={styles.infoItem}>
-            <span className={styles.icon}>📍</span>
-            <div className={styles.infoText}>
-              123 Learning Street, Education City, EC 12345
+          {contactInfo.map((info: any, index: number) => (
+            <div key={index} className={styles.infoItem}>
+              <span className={styles.icon}>{info.icon}</span>
+              <div className={styles.infoText}>
+                {info.href ? (
+                  <a href={info.href}>{info.text}</a>
+                ) : (
+                  info.text
+                )}
+              </div>
             </div>
-          </div>
-          <div className={styles.infoItem}>
-            <span className={styles.icon}>📧</span>
-            <div className={styles.infoText}>
-              <a href="mailto:contact@eslexplorers.com">contact@eslexplorers.com</a>
-            </div>
-          </div>
-          <div className={styles.infoItem}>
-            <span className={styles.icon}>📞</span>
-            <div className={styles.infoText}>
-              <a href="tel:+1234567890">+1 (234) 567-890</a>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </section>

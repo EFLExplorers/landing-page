@@ -1,13 +1,23 @@
 import styles from "./TaglineSection.module.css";
+import { PageSection } from "../../../pages/api/page-content";
 
-export const TaglineSection = () => {
+export interface TaglineSectionProps {
+  section: PageSection | null;
+}
+
+export const TaglineSection = ({ section }: TaglineSectionProps) => {
+  // Database-driven content only
+  if (!section?.content) return null;
+
+  const title = section.content.title;
+  const subtitle = section.content.body;
+
   return (
     <section className={styles.tagline}>
       <div className={styles.content}>
-        <h2 className={styles.title}>Explore the universe of language!</h2>
+        <h2 className={styles.title}>{title}</h2>
         <p className={styles.subtitle}>
-          We provide teachers with stellar ESL resources and guide students on
-          an exciting journey to English mastery!
+          {subtitle}
         </p>
       </div>
     </section>
