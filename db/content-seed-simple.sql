@@ -1,4 +1,4 @@
--- Simplified Seed Data for ESL Explorers
+-- Simplified Seed Data for EFL Explorers
 -- This version avoids ON CONFLICT and works reliably
 -- Run AFTER content-schema.sql has been applied
 
@@ -7,9 +7,9 @@
 -- ============================================
 INSERT INTO public.pages (route, title, meta_description)
 VALUES
-  ('/', 'ESL Explorers - Home', 'Start your English learning journey with ESL Explorers'),
-  ('/about', 'About ESL Explorers', 'Learn more about the ESL Explorers team, mission, and vision'),
-  ('/contact', 'Contact ESL Explorers', 'Get in touch with ESL Explorers for course and platform information')
+  ('/', 'EFL Explorers - Home', 'Start your English learning journey with EFL Explorers'),
+  ('/about', 'About EFL Explorers', 'Learn more about the EFL Explorers team, mission, and vision'),
+  ('/contact', 'Contact EFL Explorers', 'Get in touch with EFL Explorers for course and platform information')
 ON CONFLICT (route) DO UPDATE SET
   title = EXCLUDED.title,
   meta_description = EXCLUDED.meta_description;
@@ -34,7 +34,7 @@ SELECT
   p.id,
   'tagline',
   'tagline',
-  '{"title": "Explore the universe", "text": "stellar ESL resources"}',
+  '{"title": "Explore the universe", "text": "stellar EFL resources"}',
   20,
   true
 FROM public.pages p WHERE p.route = '/'
@@ -67,7 +67,7 @@ VALUES
 INSERT INTO public.content_items (content_type, content, sort_order, active)
 VALUES
   ('service', '{"title": "Student Portal", "description": "Our lessons make learning feel like an exciting adventure, where young learners can explore and grow. Each lesson keeps students feeling they''re in class.", "icon": "🎓", "background_icons": ["📖","✏️","🎯"]}', 10, true),
-  ('service', '{"title": "Teacher Resources", "description": "Access a comprehensive library of teaching materials, lesson plans, and interactive activities designed to make your ESL classes more engaging and effective.", "icon": "📚", "background_icons": ["📝","🎨","🔍"]}', 20, true),
+  ('service', '{"title": "Teacher Resources", "description": "Access a comprehensive library of teaching materials, lesson plans, and interactive activities designed to make your EFL classes more engaging and effective.", "icon": "📚", "background_icons": ["📝","🎨","🔍"]}', 20, true),
   ('service', '{"title": "Interactive Learning", "description": "Engage students with our interactive games and exploration features that make learning English fun while building confidence.", "icon": "🎮", "background_icons": ["🎲","🏆","⭐"]}', 30, true),
   ('service', '{"title": "Progress Tracking", "description": "Monitor student progress with detailed analytics and personalized learning paths that adapt to each student''s needs.", "icon": "📊", "background_icons": ["📈","🎯","🏅"]}', 40, true),
   ('service', '{"title": "Assessment Tools", "description": "Comprehensive evaluation tools and quizzes that help measure learning outcomes and identify areas for improvement in real-time.", "icon": "✅", "background_icons": ["📋","🎯","📝"]}', 50, true),
@@ -104,7 +104,7 @@ VALUES
 -- ============================================
 INSERT INTO public.team_members (name, role, title, image_url, bio, expertise, sort_order, active)
 VALUES
-  ('Shinade Groves', 'Chief Executive Officer', 'CEO & Founder', '/assets/images/characters/Emma.png', 'Passionate about revolutionizing ESL education through innovative technology and engaging content.', ARRAY['Leadership', 'Education Strategy', 'Product Vision'], 10, true),
+  ('Shinade Groves', 'Chief Executive Officer', 'CEO & Founder', '/assets/images/characters/Emma.png', 'Passionate about revolutionizing EFL education through innovative technology and engaging content.', ARRAY['Leadership', 'Education Strategy', 'Product Vision'], 10, true),
   ('Bobby Brown', 'Lead Developer', 'Technical Lead', '/assets/images/characters/Luke.png', 'Full-stack developer dedicated to creating seamless learning experiences through cutting-edge technology.', ARRAY['Full-Stack Development', 'UI/UX', 'System Architecture'], 20, true),
   ('Nathan Van Der Watt', 'Senior Designer', 'Creative Lead', '/assets/images/characters/Riley.png', 'Creative visionary focused on designing beautiful, intuitive interfaces that enhance the learning experience.', ARRAY['Visual Design', 'User Experience', 'Brand Identity'], 30, true);
 
@@ -133,21 +133,17 @@ VALUES
 -- ============================================
 
 -- Hero section
-INSERT INTO public.page_sections (page_id, section_key, section_type, heading, subheading, body, cta_label, cta_href, sort_order, active, data)
+INSERT INTO public.page_sections (page_id, section_key, section_type, content, sort_order, active)
 SELECT
   p.id,
   'hero',
   'hero',
-  'Start your learning journey today!',
-  'We''re so happy you''re here! However, you will need to register to get started.',
-  NULL,
-  NULL,
-  NULL,
+  '{"title": "Start your learning journey today!", "subtitle": "We''re so happy you''re here! However, you will need to register to get started.", "buttons": [{"label": "Register Student", "href": "/register/student"}, {"label": "Register Teacher", "href": "/register/teacher"}]}'::jsonb,
   10,
-  true,
-  '{"buttons": [{"label": "Register Student", "href": "/register/student"}, {"label": "Register Teacher", "href": "/register/teacher"}]}'::jsonb
+  true
 FROM public.pages p WHERE p.route = '/'
-ON CONFLICT (page_id, section_key) DO NOTHING;
+ON CONFLICT (page_id, section_key) DO UPDATE SET
+  content = '{"title": "Start your learning journey today!", "subtitle": "We''re so happy you''re here! However, you will need to register to get started.", "buttons": [{"label": "Register Student", "href": "/register/student"}, {"label": "Register Teacher", "href": "/register/teacher"}]}'::jsonb;
 
 -- Tagline section
 INSERT INTO public.page_sections (page_id, section_key, section_type, heading, subheading, body, sort_order, active, data)
@@ -156,13 +152,65 @@ SELECT
   'tagline',
   'text',
   'Explore the universe of language!',
-  'We provide teachers with stellar ESL resources and guide students on an exciting journey to English mastery!',
+  'We provide teachers with stellar EFL resources and guide students on an exciting journey to English mastery!',
   NULL,
   20,
   true,
   '{}'::jsonb
 FROM public.pages p WHERE p.route = '/'
 ON CONFLICT (page_id, section_key) DO NOTHING;
+
+-- Learning tools section
+INSERT INTO public.page_sections (page_id, section_key, section_type, content, sort_order, active)
+SELECT
+  p.id,
+  'learning-tools',
+  'content',
+  '{"title": "Learning Tools", "subtitle": "Discover our comprehensive suite of tools designed to make learning English engaging and effective"}'::jsonb,
+  30,
+  true
+FROM public.pages p WHERE p.route = '/'
+ON CONFLICT (page_id, section_key) DO UPDATE SET
+  content = '{"title": "Learning Tools", "subtitle": "Discover our comprehensive suite of tools designed to make learning English engaging and effective"}'::jsonb;
+
+-- How We Teach section
+INSERT INTO public.page_sections (page_id, section_key, section_type, content, sort_order, active)
+SELECT
+  p.id,
+  'how-we-teach',
+  'tabs',
+  '{"title": "How We Teach", "description": "Our comprehensive approach to education combines various learning methods to ensure maximum engagement and retention.", "tabs": [{"title": "Lessons", "content": "Interactive lessons designed by experts to help you master new concepts quickly and effectively."}, {"title": "Activities", "content": "Hands-on activities that reinforce learning through practical application of concepts."}, {"title": "Minigames", "content": "Fun and engaging minigames that make learning enjoyable while testing your knowledge."}, {"title": "Assessments", "content": "Comprehensive assessments to track your progress and identify areas for improvement."}]}'::jsonb,
+  40,
+  true
+FROM public.pages p WHERE p.route = '/'
+ON CONFLICT (page_id, section_key) DO UPDATE SET
+  content = '{"title": "How We Teach", "description": "Our comprehensive approach to education combines various learning methods to ensure maximum engagement and retention.", "tabs": [{"title": "Lessons", "content": "Interactive lessons designed by experts to help you master new concepts quickly and effectively."}, {"title": "Activities", "content": "Hands-on activities that reinforce learning through practical application of concepts."}, {"title": "Minigames", "content": "Fun and engaging minigames that make learning enjoyable while testing your knowledge."}, {"title": "Assessments", "content": "Comprehensive assessments to track your progress and identify areas for improvement."}]}'::jsonb;
+
+-- Services section
+INSERT INTO public.page_sections (page_id, section_key, section_type, content, sort_order, active)
+SELECT
+  p.id,
+  'services',
+  'content',
+  '{"title": "Our Services", "subtitle": "Discover how we make learning English an exciting journey for both students and teachers"}'::jsonb,
+  50,
+  true
+FROM public.pages p WHERE p.route = '/'
+ON CONFLICT (page_id, section_key) DO UPDATE SET
+  content = '{"title": "Our Services", "subtitle": "Discover how we make learning English an exciting journey for both students and teachers"}'::jsonb;
+
+-- Pricing section
+INSERT INTO public.page_sections (page_id, section_key, section_type, content, sort_order, active)
+SELECT
+  p.id,
+  'pricing',
+  'content',
+  '{"title": "Pricing", "subtitle": "Choose the plan that is right for you"}'::jsonb,
+  60,
+  true
+FROM public.pages p WHERE p.route = '/'
+ON CONFLICT (page_id, section_key) DO UPDATE SET
+  content = '{"title": "Pricing", "subtitle": "Choose the plan that is right for you"}'::jsonb;
 
 -- Register CTA section
 INSERT INTO public.page_sections (page_id, section_key, section_type, heading, subheading, body, cta_label, cta_href, sort_order, active, data)
@@ -189,7 +237,7 @@ SELECT
   p.id,
   'hero',
   'hero',
-  'About ESL Explorers',
+  'About EFL Explorers',
   'Pioneering the future of English language learning',
   NULL,
   10,
@@ -219,7 +267,7 @@ SELECT
   'text',
   NULL,
   NULL,
-  'Adventure awaits - learn English with ESL Explorers',
+  'Adventure awaits - learn English with EFL Explorers',
   30,
   true,
   '{}'::jsonb
@@ -233,7 +281,7 @@ SELECT
   'text',
   'Our Mission',
   NULL,
-  'At ESL Explorers, we believe learning English should be an exciting journey, not a daunting task. Our mission is to transform language education through innovative technology, engaging content, and personalized learning experiences. We empower both teachers and students with tools that make learning effective, enjoyable, and accessible to everyone, regardless of their background or location.',
+  'At EFL Explorers, we believe learning English should be an exciting journey, not a daunting task. Our mission is to transform language education through innovative technology, engaging content, and personalized learning experiences. We empower both teachers and students with tools that make learning effective, enjoyable, and accessible to everyone, regardless of their background or location.',
   40,
   true,
   '{"icon": "🎯", "points": ["Interactive Learning Experiences", "Global Community Building", "Comprehensive Curriculum"]}'::jsonb
@@ -247,7 +295,7 @@ SELECT
   'text',
   'Our Vision',
   NULL,
-  'We envision a world where language barriers dissolve and every individual can confidently communicate in English. Our platform will be the leading destination for ESL education, known for its innovative approach, engaging content, and proven results. We see a future where learning English is not just about grammar and vocabulary, but about connecting cultures and building bridges between people worldwide.',
+  'We envision a world where language barriers dissolve and every individual can confidently communicate in English. Our platform will be the leading destination for EFL education, known for its innovative approach, engaging content, and proven results. We see a future where learning English is not just about grammar and vocabulary, but about connecting cultures and building bridges between people worldwide.',
   50,
   true,
   '{"icon": "🔮", "goals": ["Global Accessibility", "Innovation Leadership", "Cultural Exchange"]}'::jsonb
@@ -295,7 +343,7 @@ SELECT
   'Reach out to us and let''s start your learning journey together.',
   10,
   true,
-  '{"contact_info": [{"icon": "📍", "text": "123 Learning Street, Education City, EC 12345"}, {"icon": "📧", "text": "contact@eslexplorers.com", "href": "mailto:contact@eslexplorers.com"}, {"icon": "📞", "text": "+1 (234) 567-890", "href": "tel:+1234567890"}]}'::jsonb
+  '{"contact_info": [{"icon": "📍", "text": "123 Learning Street, Education City, EC 12345"}, {"icon": "📧", "text": "contact@eflexplorers.com", "href": "mailto:contact@eflexplorers.com"}, {"icon": "📞", "text": "+1 (234) 567-890", "href": "tel:+1234567890"}]}'::jsonb
 FROM public.pages p WHERE p.route = '/contact'
 ON CONFLICT (page_id, section_key) DO NOTHING;
 
@@ -318,4 +366,4 @@ VALUES
 -- Testimonials
 INSERT INTO public.testimonials (quote, author_name, author_role, sort_order, active)
 VALUES
-  ('ESL Explorers has transformed my learning experience! The interactive lessons are fantastic.', NULL, NULL, 10, true);
+  ('EFL Explorers has transformed my learning experience! The interactive lessons are fantastic.', NULL, NULL, 10, true);

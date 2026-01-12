@@ -20,12 +20,12 @@ export const RegisterCTASection = ({ section }: RegisterCTASectionProps) => {
     (section.content as any)?.cta_label ??
     (section.data as any)?.cta_label ??
     section.cta_label ??
-    "Create Your Account";
+    "";
   const ctaHref =
     (section.content as any)?.cta_href ??
     (section.data as any)?.cta_href ??
     section.cta_href ??
-    "/Auth/register";
+    "";
 
   return (
     <section className={styles.registerCta} data-cy="register-cta-section">
@@ -36,13 +36,15 @@ export const RegisterCTASection = ({ section }: RegisterCTASectionProps) => {
         <p className={styles.registerCtaSubtitle} data-cy="register-cta-subtitle">
           {subtitle}
         </p>
-        <Link
-          href={ctaHref}
-          className={styles.registerCtaButton}
-          data-cy="register-cta-button"
-        >
-          {ctaLabel}
-        </Link>
+        {ctaLabel && ctaHref ? (
+          <Link
+            href={ctaHref}
+            className={styles.registerCtaButton}
+            data-cy="register-cta-button"
+          >
+            {ctaLabel}
+          </Link>
+        ) : null}
       </div>
     </section>
   );

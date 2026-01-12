@@ -1,21 +1,54 @@
 import { PricingTier } from "../../../pages/api/content";
+import { PageSection } from "../../../pages/api/page-content";
 import styles from "./PricingSection.module.css";
 
 export interface PricingSectionProps {
   pricingTiers: PricingTier[];
+  section?: PageSection | null;
 }
 
-export const PricingSection = ({ pricingTiers }: PricingSectionProps) => {
+const getSectionText = (
+  section?: PageSection | null,
+  key?: string
+): string => {
+  if (!section) return "";
+  const contentText = (section.content as Record<string, any> | undefined)?.[
+    key || "text"
+  ];
+  return (
+    contentText ??
+    section.body ??
+    section.subtitle ??
+    section.title ??
+    section.heading ??
+    ""
+  );
+};
+
+export const PricingSection = ({
+  pricingTiers,
+  section,
+}: PricingSectionProps) => {
   if (!pricingTiers?.length) return null;
+
+  const title =
+    getSectionText(section, "title") ||
+    getSectionText(section, "heading") ||
+    "";
+  const subtitle = getSectionText(section, "subtitle") || getSectionText(section);
 
   return (
     <section className={styles.pricing} data-cy="pricing-section">
-      <h2 className={styles.title} data-cy="pricing-title">
-        Pricing
-      </h2>
-      <p className={styles.subtitle} data-cy="pricing-subtitle">
-        Choose the plan that is right for you
-      </p>
+      {title ? (
+        <h2 className={styles.title} data-cy="pricing-title">
+          {title}
+        </h2>
+      ) : null}
+      {subtitle ? (
+        <p className={styles.subtitle} data-cy="pricing-subtitle">
+          {subtitle}
+        </p>
+      ) : null}
 
       <div className={styles.pricingGrid} data-cy="pricing-grid">
         {pricingTiers.map((tier) => {
@@ -24,6 +57,8 @@ export const PricingSection = ({ pricingTiers }: PricingSectionProps) => {
           const period = (tier.content as any)?.period || "";
           const description =
             tier.description || (tier.content as any)?.description || "";
+          const ctaLabel = (tier.content as any)?.cta_label || "";
+          const ctaHref = (tier.content as any)?.cta_href || "";
           return (
             <div
               key={tier.id}
@@ -36,9 +71,15 @@ export const PricingSection = ({ pricingTiers }: PricingSectionProps) => {
                 {period && <span className={styles.period}>{period}</span>}
               </div>
               <p className={styles.description}>{description}</p>
-              <button className={styles.getStarted} data-cy="pricing-cta">
-                Get started
-              </button>
+              {ctaLabel && ctaHref ? (
+                <a
+                  href={ctaHref}
+                  className={styles.getStarted}
+                  data-cy="pricing-cta"
+                >
+                  {ctaLabel}
+                </a>
+              ) : null}
             </div>
           );
         })}

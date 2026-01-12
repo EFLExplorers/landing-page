@@ -1,9 +1,11 @@
 .services {
   width: 100%;
-  background-color: var(--theme-background);
+  background-color: var(--theme-foreground);
+  background-image: url("/assets/Space4.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  background-attachment: fixed;
   padding: var(--spacing-4xl) 0;
   position: relative;
 }
@@ -15,7 +17,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: var(--theme-background);
+  background-color: var(--theme-foreground);
   opacity: 0.8;
   z-index: 0;
 }
@@ -36,7 +38,8 @@
   padding-bottom: var(--spacing-md);
   text-align: center;
   line-height: var(--leading-tight);
-  text-shadow: 0 6px 12px rgba(0, 0, 0, 0.6), 0 3px 6px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.4);
+  text-shadow: 0 6px 12px rgba(0, 0, 0, 0.6), 0 3px 6px rgba(0, 0, 0, 0.5),
+    0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 .subtitle {
@@ -209,7 +212,12 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background: linear-gradient(
+    45deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
   transform: translateX(-100%);
   transition: transform 0.6s;
   z-index: 1;
@@ -326,7 +334,8 @@
   font-size: var(--font-2xl);
   font-weight: var(--font-semibold);
   margin: 0;
-  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.4),
+    0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .serviceDescription {

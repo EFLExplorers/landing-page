@@ -21,6 +21,10 @@ import {
   RegisterCTASection,
   RegisterCTASectionProps,
 } from "../components/layout/Home/RegisterCTASection";
+import {
+  HowWeTeachSection,
+  HowWeTeachSectionProps,
+} from "../components/layout/Home/HowWeTeachSection";
 import { ContentErrorBoundary } from "../components/common/ErrorBoundary";
 import { PageContent } from "./api/page-content";
 import { PricingTier, Service, LearningTool } from "./api/content";
@@ -29,15 +33,36 @@ interface HomePageProps {
   heroSection: PageContent["sections"][0] | null;
   taglineSection: PageContent["sections"][0] | null;
   registerCTASection: PageContent["sections"][0] | null;
+  servicesSection: PageContent["sections"][0] | null;
+  pricingSection: PageContent["sections"][0] | null;
+  learningToolsSection: PageContent["sections"][0] | null;
+  howWeTeachSection: PageContent["sections"][0] | null;
   pricingTiers: PricingTier[];
   services: Service[];
   learningTools: LearningTool[];
 }
 
+const emptyHomeProps: HomePageProps = {
+  heroSection: null,
+  taglineSection: null,
+  registerCTASection: null,
+  servicesSection: null,
+  pricingSection: null,
+  learningToolsSection: null,
+  howWeTeachSection: null,
+  pricingTiers: [],
+  services: [],
+  learningTools: [],
+};
+
 export const HomePage = ({
   heroSection,
   taglineSection,
   registerCTASection,
+  servicesSection,
+  pricingSection,
+  learningToolsSection,
+  howWeTeachSection,
   pricingTiers,
   services,
   learningTools,
@@ -47,6 +72,7 @@ export const HomePage = ({
     console.log("Hero section:", heroSection?.id || "none");
     console.log("Tagline section:", taglineSection?.id || "none");
     console.log("Register CTA section:", registerCTASection?.id || "none");
+    console.log("How we teach section:", howWeTeachSection?.id || "none");
     console.log(
       "Pricing tiers count:",
       pricingTiers.length,
@@ -67,6 +93,7 @@ export const HomePage = ({
     heroSection,
     taglineSection,
     registerCTASection,
+    howWeTeachSection,
     pricingTiers,
     services,
     learningTools,
@@ -83,15 +110,22 @@ export const HomePage = ({
       </ContentErrorBoundary>
 
       <ContentErrorBoundary contentType="learning tools">
-        <LearningToolsSection tools={learningTools} />
+        <LearningToolsSection
+          section={learningToolsSection}
+          tools={learningTools}
+        />
+      </ContentErrorBoundary>
+
+      <ContentErrorBoundary contentType="how we teach">
+        <HowWeTeachSection section={howWeTeachSection} />
       </ContentErrorBoundary>
 
       <ContentErrorBoundary contentType="services">
-        <ServicesSection services={services} />
+        <ServicesSection section={servicesSection} services={services} />
       </ContentErrorBoundary>
 
       <ContentErrorBoundary contentType="pricing">
-        <PricingSection pricingTiers={pricingTiers} />
+        <PricingSection section={pricingSection} pricingTiers={pricingTiers} />
       </ContentErrorBoundary>
 
       <ContentErrorBoundary contentType="register CTA">
@@ -104,7 +138,19 @@ export const HomePage = ({
 export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
   try {
     // During build time, use direct API calls instead of fetch
-    const { supabase } = await import("../utils/supabaseClient");
+    const { supabase, isSupabaseConfigured } = await import(
+      "../utils/supabaseClient"
+    );
+
+    if (!isSupabaseConfigured) {
+      console.warn(
+        "[Home] Supabase environment variables are missing; using empty content."
+      );
+      return {
+        props: emptyHomeProps,
+        revalidate: 300,
+      };
+    }
 
     // Fetch page content
     const { data: pageData } = await supabase
@@ -140,6 +186,18 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
     const registerCTASection = pageContent.sections.find(
       (s) => s.section_key === "register-cta"
     );
+    const servicesSection = pageContent.sections.find(
+      (s) => s.section_key === "services"
+    );
+    const pricingSection = pageContent.sections.find(
+      (s) => s.section_key === "pricing"
+    );
+    const learningToolsSection = pageContent.sections.find(
+      (s) => s.section_key === "learning-tools"
+    );
+    const howWeTeachSection = pageContent.sections.find(
+      (s) => s.section_key === "how-we-teach"
+    );
 
     // Fetch content types from the unified content_items table
     const [pricingData, servicesData, toolsData] = await Promise.all([
@@ -172,6 +230,10 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
         heroSection: heroSection || null,
         taglineSection: taglineSection || null,
         registerCTASection: registerCTASection || null,
+        servicesSection: servicesSection || null,
+        pricingSection: pricingSection || null,
+        learningToolsSection: learningToolsSection || null,
+        howWeTeachSection: howWeTeachSection || null,
         pricingTiers,
         services,
         learningTools,
@@ -181,14 +243,7 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
   } catch (error) {
     console.error("Error fetching home page data:", error);
     return {
-      props: {
-        heroSection: null,
-        taglineSection: null,
-        registerCTASection: null,
-        pricingTiers: [],
-        services: [],
-        learningTools: [],
-      },
+      props: emptyHomeProps,
       revalidate: 300,
     };
   }

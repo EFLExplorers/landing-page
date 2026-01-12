@@ -18,15 +18,19 @@ export const HeroSection = ({ section }: HeroSectionProps) => {
     "";
   const buttons = ((section.content as any)?.buttons ??
     (section.data as any)?.buttons ??
-    []) as Array<{ label: string; href: string }>;
+    []) as Array<{
+    label?: string;
+    href?: string;
+    text?: string;
+    url?: string;
+  }>;
 
-  const effectiveButtons =
-    buttons && buttons.length
-      ? buttons
-      : [
-          { label: "Register Student", href: "/Auth/register/student" },
-          { label: "Register Teacher", href: "/Auth/register/teacher" },
-        ];
+  const normalizedButtons = (buttons || [])
+    .map((button) => ({
+      label: button.label ?? button.text ?? "",
+      href: button.href ?? button.url ?? "",
+    }))
+    .filter((button) => button.label && button.href);
 
   return (
     <section className={styles.hero} data-cy="hero-section">
@@ -37,22 +41,24 @@ export const HeroSection = ({ section }: HeroSectionProps) => {
         <p className={styles.subtitle} data-cy="hero-subtitle">
           {subtitle}
         </p>
-        <div className={styles.buttonGroup}>
-          {effectiveButtons.map((button) => (
-            <Link
-              key={button.href}
-              href={button.href}
-              className={styles.button}
-              data-cy={
-                button.href.includes("/student")
-                  ? "hero-register-student"
-                  : "hero-register-teacher"
-              }
-            >
-              {button.label}
-            </Link>
-          ))}
-        </div>
+        {normalizedButtons.length ? (
+          <div className={styles.buttonGroup}>
+            {normalizedButtons.map((button) => (
+              <Link key={button.href} href={button.href} legacyBehavior>
+                <a
+                  className={styles.button}
+                  data-cy={
+                    button.href.includes("/student")
+                      ? "hero-register-student"
+                      : "hero-register-teacher"
+                  }
+                >
+                  {button.label}
+                </a>
+              </Link>
+            ))}
+          </div>
+        ) : null}
       </div>
     </section>
   );

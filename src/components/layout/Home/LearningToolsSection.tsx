@@ -1,23 +1,55 @@
 import { LearningTool } from "../../../pages/api/content";
+import { PageSection } from "../../../pages/api/page-content";
 import styles from "./LearningToolsSection.module.css";
 
 export interface LearningToolsSectionProps {
   tools: LearningTool[];
+  section?: PageSection | null;
 }
 
-export const LearningToolsSection = ({ tools }: LearningToolsSectionProps) => {
+const getSectionText = (
+  section?: PageSection | null,
+  key?: string
+): string => {
+  if (!section) return "";
+  const contentText = (section.content as Record<string, any> | undefined)?.[
+    key || "text"
+  ];
+  return (
+    contentText ??
+    section.body ??
+    section.subtitle ??
+    section.title ??
+    section.heading ??
+    ""
+  );
+};
+
+export const LearningToolsSection = ({
+  tools,
+  section,
+}: LearningToolsSectionProps) => {
   if (!tools?.length) return null;
+
+  const title =
+    getSectionText(section, "title") ||
+    getSectionText(section, "heading") ||
+    "";
+  const subtitle = getSectionText(section, "subtitle") || getSectionText(section);
 
   return (
     <section className={styles.tools} data-cy="learning-tools-section">
       <div className={styles.content}>
-        <h2 className={styles.title} data-cy="learning-tools-title">
-          Learning Tools
-        </h2>
-        <p className={styles.subtitle} data-cy="learning-tools-subtitle">
-          Discover our comprehensive suite of tools designed to make learning
-          English engaging and effective
-        </p>
+        {title ? (
+          <h2 className={styles.title} data-cy="learning-tools-title">
+            {title}
+          </h2>
+        ) : null}
+        {subtitle ? (
+          <p className={styles.subtitle} data-cy="learning-tools-subtitle">
+            {subtitle}
+          </p>
+        ) : null}
 
         <div className={styles.toolsGrid} data-cy="learning-tools-grid">
           {tools.map((tool) => {
