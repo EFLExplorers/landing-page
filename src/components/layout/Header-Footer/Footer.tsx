@@ -57,7 +57,7 @@ export const Footer = () => {
 
       <div className={styles.bottomBar} data-cy="footer-bottom-bar">
         <p>All rights reserved</p>
-        <p>Copyright 2024 | Privacy Policy</p>
+        <p>Copyright 2026 | Privacy Policy</p>
         <p>Powered by ESL Explorers</p>
       </div>
     </footer>

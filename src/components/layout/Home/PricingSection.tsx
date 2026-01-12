@@ -1,43 +1,12 @@
+import { PricingTier } from "../../../pages/api/content";
 import styles from "./PricingSection.module.css";
 
-type PricingTier = {
-  name: string;
-  price: string;
-  period: string;
-  description: string;
-};
+export interface PricingSectionProps {
+  pricingTiers: PricingTier[];
+}
 
-export const PricingSection = () => {
-  const pricingTiers: PricingTier[] = [
-    {
-      name: "Free Access",
-      price: "Free",
-      period: "",
-      description:
-        "Free access to basic features and content to help you get started.",
-    },
-    {
-      name: "Individual",
-      price: "$20",
-      period: "/MO",
-      description:
-        "Access to all features and content, perfect for individual learners.",
-    },
-    {
-      name: "Teacher",
-      price: "$25",
-      period: "/MO",
-      description:
-        "Complete access with additional teaching tools and resources.",
-    },
-    {
-      name: "School",
-      price: "$15",
-      period: "/MO",
-      description:
-        "Bulk pricing for schools, includes all features and management tools.",
-    },
-  ];
+export const PricingSection = ({ pricingTiers }: PricingSectionProps) => {
+  if (!pricingTiers?.length) return null;
 
   return (
     <section className={styles.pricing} data-cy="pricing-section">
@@ -49,25 +18,30 @@ export const PricingSection = () => {
       </p>
 
       <div className={styles.pricingGrid} data-cy="pricing-grid">
-        {pricingTiers.map((tier) => (
-          <div
-            key={tier.name}
-            className={styles.pricingCard}
-            data-cy="pricing-card"
-          >
-            <h3 className={styles.tierName}>{tier.name}</h3>
-            <div className={styles.priceContainer}>
-              <span className={styles.price}>{tier.price}</span>
-              {tier.period && (
-                <span className={styles.period}>{tier.period}</span>
-              )}
+        {pricingTiers.map((tier) => {
+          const name = tier.title || (tier.content as any)?.name || "";
+          const price = (tier.content as any)?.price || "";
+          const period = (tier.content as any)?.period || "";
+          const description =
+            tier.description || (tier.content as any)?.description || "";
+          return (
+            <div
+              key={tier.id}
+              className={styles.pricingCard}
+              data-cy="pricing-card"
+            >
+              <h3 className={styles.tierName}>{name}</h3>
+              <div className={styles.priceContainer}>
+                <span className={styles.price}>{price}</span>
+                {period && <span className={styles.period}>{period}</span>}
+              </div>
+              <p className={styles.description}>{description}</p>
+              <button className={styles.getStarted} data-cy="pricing-cta">
+                Get started
+              </button>
             </div>
-            <p className={styles.description}>{tier.description}</p>
-            <button className={styles.getStarted} data-cy="pricing-cta">
-              Get started
-            </button>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );

@@ -7,7 +7,13 @@ export interface PageSection {
   section_type: string;
   title?: string;
   subtitle?: string;
+  heading?: string;
+  subheading?: string;
+  body?: string;
+  cta_label?: string;
+  cta_href?: string;
   content: Record<string, any>;
+  data?: Record<string, any>;
   settings?: Record<string, any>;
   sort_order: number;
   active: boolean;

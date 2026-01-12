@@ -32,14 +32,21 @@ export const AboutPage: NextPage<AboutPageProps> = ({
   teamIntroSection,
   valuesHeaderSection
 }) => {
+  const safePageData: PageContent = pageData || {
+    id: "",
+    route: "/about",
+    title: "",
+    meta_description: "",
+    sections: [],
+  };
 
   return (
     <>
       <Head>
-        <title>{pageData.title || "About Us - ESL Explorers"}</title>
+        <title>{safePageData.title || "About Us - ESL Explorers"}</title>
         <meta
           name="description"
-          content={pageData.meta_description || "Learn about ESL Explorers - Making English learning an exciting adventure through innovative education methods and dedicated teaching."}
+          content={safePageData.meta_description || "Learn about ESL Explorers - Making English learning an exciting adventure through innovative education methods and dedicated teaching."}
         />
         <meta
           name="keywords"
@@ -117,9 +124,19 @@ export const getStaticProps: GetStaticProps<AboutPageProps> = async () => {
     const teamIntroSection = pageContent.sections?.find(s => s.section_key === 'team-intro') || null;
     const valuesHeaderSection = pageContent.sections?.find(s => s.section_key === 'values-header') || null;
 
+    const safePageData: PageContent = pageData
+      ? {
+          id: pageData.id,
+          route: pageData.route,
+          title: pageData.title || "",
+          meta_description: pageData.meta_description || "",
+          sections: sectionsData || [],
+        }
+      : { id: "", route: "/about", title: "", meta_description: "", sections: [] };
+
     return {
       props: {
-        pageData,
+        pageData: safePageData,
         teamMembers,
         stats,
         coreValues,
@@ -137,7 +154,7 @@ export const getStaticProps: GetStaticProps<AboutPageProps> = async () => {
     console.error('Error fetching about page data:', error);
     return {
       props: {
-        pageData: { id: '', route: '/about', sections: [] },
+        pageData: { id: '', route: '/about', title: '', meta_description: '', sections: [] },
         teamMembers: [],
         stats: [],
         coreValues: [],

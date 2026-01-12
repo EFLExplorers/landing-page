@@ -35,7 +35,40 @@ create table if not exists public.content_items (
   updated_at timestamptz not null default now()
 );
 
+-- Backfill columns on existing deployments
+alter table if exists public.content_items
+  add column if not exists slug text unique;
+
+alter table if exists public.content_items
+  add column if not exists title text;
+
+alter table if exists public.content_items
+  add column if not exists subtitle text;
+
+alter table if exists public.content_items
+  add column if not exists description text;
+
+alter table if exists public.content_items
+  add column if not exists content jsonb not null default '{}'::jsonb;
+
+alter table if exists public.content_items
+  add column if not exists metadata jsonb not null default '{}'::jsonb;
+
+alter table if exists public.content_items
+  add column if not exists sort_order integer not null default 0;
+
+alter table if exists public.content_items
+  add column if not exists active boolean not null default true;
+
+-- Ensure defaults for existing rows
+update public.content_items set metadata = '{}'::jsonb where metadata is null;
+update public.content_items set content = '{}'::jsonb where content is null;
+update public.content_items set sort_order = coalesce(sort_order, 0);
+update public.content_items set active = coalesce(active, true);
+
 -- Add indexes for performance
+drop index if exists idx_content_items_type_active;
+drop index if exists idx_content_items_slug;
 create index idx_content_items_type_active on content_items(content_type, active);
 create index idx_content_items_slug on content_items(slug);
 
@@ -57,6 +90,33 @@ create table if not exists public.page_sections (
   updated_at timestamptz not null default now()
 );
 
+-- Backfill columns for existing deployments
+alter table if exists public.page_sections
+  add column if not exists heading text;
+
+alter table if exists public.page_sections
+  add column if not exists subheading text;
+
+alter table if exists public.page_sections
+  add column if not exists body text;
+
+alter table if exists public.page_sections
+  add column if not exists cta_label text;
+
+alter table if exists public.page_sections
+  add column if not exists cta_href text;
+
+alter table if exists public.page_sections
+  add column if not exists data jsonb not null default '{}'::jsonb;
+
+-- Ensure defaults for existing rows
+update public.page_sections set data = '{}'::jsonb where data is null;
+alter table if exists public.page_sections
+  alter column content set default '{}'::jsonb;
+update public.page_sections set content = '{}'::jsonb where content is null;
+alter table if exists public.page_sections
+  alter column content drop not null;
+
 -- Add indexes
 create index idx_page_sections_page_key on page_sections(page_id, section_key);
 create index idx_page_sections_active on page_sections(active, sort_order);
@@ -73,10 +133,29 @@ create table if not exists public.content_relationships (
   created_at timestamptz not null default now()
 );
 
+-- Backfill columns for existing deployments
+alter table if exists public.content_relationships
+  add column if not exists parent_id uuid references content_items(id) on delete cascade;
+
+alter table if exists public.content_relationships
+  add column if not exists child_id uuid references content_items(id) on delete cascade;
+
+alter table if exists public.content_relationships
+  add column if not exists relationship_type text;
+
+alter table if exists public.content_relationships
+  add column if not exists sort_order integer not null default 0;
+
+-- Ensure existing rows have defaults
+update public.content_relationships set sort_order = coalesce(sort_order, 0);
+
 -- Unique constraint to prevent duplicate relationships
-alter table content_relationships
-add constraint unique_relationship
-unique (parent_id, child_id, relationship_type);
+alter table if exists content_relationships
+  drop constraint if exists unique_relationship;
+
+alter table if exists content_relationships
+  add constraint unique_relationship
+  unique (parent_id, child_id, relationship_type);
 
 -- ============================================
 -- 5. Media Assets (NEW - for image/file management)
@@ -92,6 +171,84 @@ create table if not exists public.media_assets (
   size_bytes integer,
   dimensions jsonb, -- for images: {width, height}
   metadata jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+
+-- ============================================
+-- 6. Legacy/Supporting Tables (for seed data)
+-- ============================================
+
+create table if not exists public.faqs (
+  id uuid primary key default gen_random_uuid(),
+  category text,
+  question text,
+  answer text,
+  sort_order integer not null default 0,
+  active boolean not null default true,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.team_members (
+  id uuid primary key default gen_random_uuid(),
+  name text,
+  role text,
+  title text,
+  image_url text,
+  bio text,
+  expertise text[],
+  sort_order integer not null default 0,
+  active boolean not null default true,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.about_stats (
+  id uuid primary key default gen_random_uuid(),
+  number text,
+  label text,
+  sort_order integer not null default 0,
+  active boolean not null default true,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.core_values (
+  id uuid primary key default gen_random_uuid(),
+  icon text,
+  title text,
+  description text,
+  sort_order integer not null default 0,
+  active boolean not null default true,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.lesson_modules (
+  id uuid primary key default gen_random_uuid(),
+  name text,
+  color_token text,
+  recommended_students text,
+  description text,
+  lessons_summary text,
+  duration_summary text,
+  sort_order integer not null default 0,
+  active boolean not null default true,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.teacher_benefits (
+  id uuid primary key default gen_random_uuid(),
+  title text,
+  description text,
+  sort_order integer not null default 0,
+  active boolean not null default true,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.testimonials (
+  id uuid primary key default gen_random_uuid(),
+  quote text,
+  author_name text,
+  author_role text,
+  sort_order integer not null default 0,
+  active boolean not null default true,
   created_at timestamptz not null default now()
 );
 

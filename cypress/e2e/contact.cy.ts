@@ -32,6 +32,6 @@ describe("Contact page", () => {
       .should("have.length.at.least", 3)
       .first()
       .click()
-      .should("have.class", "active");
+      .should("contain", "We offer a wide range of English courses");
   });
 });

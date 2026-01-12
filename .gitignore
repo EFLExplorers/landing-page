@@ -23,6 +23,13 @@ Thumbs.db
 .idea
 .vscode
 
+cypress
+.cypress/
+.cypress/screenshots/
+.cypress/videos/
+.cypress/downloads/
+.cypress/logs/
+.cypress/reports/
 .cypress/screenshots/
 .cypress/videos/
 .cypress/downloads/

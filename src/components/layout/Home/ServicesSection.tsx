@@ -1,50 +1,12 @@
+import { Service } from "../../../pages/api/content";
 import styles from "./ServicesSection.module.css";
 
-export const ServicesSection = () => {
-  const services = [
-    {
-      title: "Student Portal",
-      description:
-        "Our lessons make learning feel like an exciting adventure, where young learners can explore and grow. Each lesson keeps students feeling they're in class.",
-      icon: "🎓",
-      backgroundIcons: ["📖", "✏️", "🎯"],
-    },
-    {
-      title: "Teacher Resources",
-      description:
-        "Access a comprehensive library of teaching materials, lesson plans, and interactive activities designed to make your ESL classes more engaging and effective.",
-      icon: "📚",
-      backgroundIcons: ["📝", "🎨", "🔍"],
-    },
-    {
-      title: "Interactive Learning",
-      description:
-        "Engage students with our interactive games and exploration features that make learning English fun while building confidence.",
-      icon: "🎮",
-      backgroundIcons: ["🎲", "🏆", "⭐"],
-    },
-    {
-      title: "Progress Tracking",
-      description:
-        "Monitor student progress with detailed analytics and personalized learning paths that adapt to each student's needs.",
-      icon: "📊",
-      backgroundIcons: ["📈", "🎯", "🏅"],
-    },
-    {
-      title: "Assessment Tools",
-      description:
-        "Comprehensive evaluation tools and quizzes that help measure learning outcomes and identify areas for improvement in real-time.",
-      icon: "✅",
-      backgroundIcons: ["📋", "🎯", "📝"],
-    },
-    {
-      title: "Communication Hub",
-      description:
-        "Foster collaboration between students, teachers, and parents with our integrated messaging and feedback system.",
-      icon: "💬",
-      backgroundIcons: ["📱", "📧", "👥"],
-    },
-  ];
+export interface ServicesSectionProps {
+  services: Service[];
+}
+
+export const ServicesSection = ({ services }: ServicesSectionProps) => {
+  if (!services?.length) return null;
 
   return (
     <section className={styles.services} data-cy="services-section">
@@ -58,25 +20,37 @@ export const ServicesSection = () => {
         </p>
 
         <div className={styles.servicesGrid} data-cy="services-grid">
-          {services.map((service, index) => (
-            <div
-              key={index}
-              className={styles.serviceCard}
-              data-cy="service-card"
-            >
-              {service.backgroundIcons.map((bgIcon, bgIndex) => (
-                <div key={bgIndex} className={`${styles.backgroundIcon} ${styles[`backgroundIcon${bgIndex + 1}`]}`}>
-                  {bgIcon}
-                </div>
-              ))}
-              <div className={styles.serviceIcon}>{service.icon}</div>
-              <h3 className={styles.serviceTitle}>{service.title}</h3>
-              <p className={styles.serviceDescription}>{service.description}</p>
-              <button className={styles.learnMore} data-cy="service-learn-more">
-                Learn More
-              </button>
-            </div>
-          ))}
+          {services.map((service) => {
+            const title = service.title || "";
+            const description =
+              service.description || (service.content as any)?.description || "";
+            const icon = (service.content as any)?.icon || "";
+            const backgroundIcons =
+              (service.content as any)?.background_icons || [];
+
+            return (
+              <div
+                key={service.id}
+                className={styles.serviceCard}
+                data-cy="service-card"
+              >
+                {backgroundIcons.map((bgIcon: string, bgIndex: number) => (
+                  <div
+                    key={`${service.id}-${bgIndex}`}
+                    className={`${styles.backgroundIcon} ${styles[`backgroundIcon${bgIndex + 1}`]}`}
+                  >
+                    {bgIcon}
+                  </div>
+                ))}
+                <div className={styles.serviceIcon}>{icon}</div>
+                <h3 className={styles.serviceTitle}>{title}</h3>
+                <p className={styles.serviceDescription}>{description}</p>
+                <button className={styles.learnMore} data-cy="service-learn-more">
+                  Learn More
+                </button>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>

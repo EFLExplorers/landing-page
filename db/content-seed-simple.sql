@@ -23,20 +23,22 @@ SELECT
   p.id,
   'hero',
   'hero',
-  '{"title": "Welcome to ESL Explorers", "subtitle": "Start your English learning adventure today", "background_image": "/hero-bg.jpg"}',
+  '{"title": "Start your learning journey today!", "subtitle": "register to get started", "background_image": "/hero-bg.jpg"}',
   10,
   true
-FROM public.pages p WHERE p.route = '/';
+FROM public.pages p WHERE p.route = '/'
+ON CONFLICT (page_id, section_key) DO NOTHING;
 
 INSERT INTO public.page_sections (page_id, section_key, section_type, content, sort_order, active)
 SELECT
   p.id,
   'tagline',
   'tagline',
-  '{"text": "Empowering learners worldwide with innovative English education solutions"}',
+  '{"title": "Explore the universe", "text": "stellar ESL resources"}',
   20,
   true
-FROM public.pages p WHERE p.route = '/';
+FROM public.pages p WHERE p.route = '/'
+ON CONFLICT (page_id, section_key) DO NOTHING;
 
 INSERT INTO public.page_sections (page_id, section_key, section_type, content, sort_order, active)
 SELECT
@@ -46,7 +48,8 @@ SELECT
   '{"title": "Ready to Start Learning?", "subtitle": "Join thousands of students already improving their English", "buttons": [{"text": "Get Started", "url": "/register", "primary": true}, {"text": "Learn More", "url": "/about", "primary": false}]}',
   100,
   true
-FROM public.pages p WHERE p.route = '/';
+FROM public.pages p WHERE p.route = '/'
+ON CONFLICT (page_id, section_key) DO NOTHING;
 
 -- ============================================
 -- 1. Pricing Tiers (content_items table)
@@ -143,7 +146,8 @@ SELECT
   10,
   true,
   '{"buttons": [{"label": "Register Student", "href": "/register/student"}, {"label": "Register Teacher", "href": "/register/teacher"}]}'::jsonb
-FROM public.pages p WHERE p.route = '/';
+FROM public.pages p WHERE p.route = '/'
+ON CONFLICT (page_id, section_key) DO NOTHING;
 
 -- Tagline section
 INSERT INTO public.page_sections (page_id, section_key, section_type, heading, subheading, body, sort_order, active, data)
@@ -157,7 +161,8 @@ SELECT
   20,
   true,
   '{}'::jsonb
-FROM public.pages p WHERE p.route = '/';
+FROM public.pages p WHERE p.route = '/'
+ON CONFLICT (page_id, section_key) DO NOTHING;
 
 -- Register CTA section
 INSERT INTO public.page_sections (page_id, section_key, section_type, heading, subheading, body, cta_label, cta_href, sort_order, active, data)
@@ -173,7 +178,8 @@ SELECT
   90,
   true,
   '{}'::jsonb
-FROM public.pages p WHERE p.route = '/';
+FROM public.pages p WHERE p.route = '/'
+ON CONFLICT (page_id, section_key) DO NOTHING;
 
 -- ============================================
 -- 9. About Page Sections
@@ -189,7 +195,8 @@ SELECT
   10,
   true,
   '{}'::jsonb
-FROM public.pages p WHERE p.route = '/about';
+FROM public.pages p WHERE p.route = '/about'
+ON CONFLICT (page_id, section_key) DO NOTHING;
 
 INSERT INTO public.page_sections (page_id, section_key, section_type, heading, subheading, body, sort_order, active, data)
 SELECT
@@ -202,7 +209,8 @@ SELECT
   20,
   true,
   '{}'::jsonb
-FROM public.pages p WHERE p.route = '/about';
+FROM public.pages p WHERE p.route = '/about'
+ON CONFLICT (page_id, section_key) DO NOTHING;
 
 INSERT INTO public.page_sections (page_id, section_key, section_type, heading, subheading, body, sort_order, active, data)
 SELECT
@@ -215,7 +223,8 @@ SELECT
   30,
   true,
   '{}'::jsonb
-FROM public.pages p WHERE p.route = '/about';
+FROM public.pages p WHERE p.route = '/about'
+ON CONFLICT (page_id, section_key) DO NOTHING;
 
 INSERT INTO public.page_sections (page_id, section_key, section_type, heading, subheading, body, sort_order, active, data)
 SELECT
@@ -228,7 +237,8 @@ SELECT
   40,
   true,
   '{"icon": "🎯", "points": ["Interactive Learning Experiences", "Global Community Building", "Comprehensive Curriculum"]}'::jsonb
-FROM public.pages p WHERE p.route = '/about';
+FROM public.pages p WHERE p.route = '/about'
+ON CONFLICT (page_id, section_key) DO NOTHING;
 
 INSERT INTO public.page_sections (page_id, section_key, section_type, heading, subheading, body, sort_order, active, data)
 SELECT
@@ -241,7 +251,8 @@ SELECT
   50,
   true,
   '{"icon": "🔮", "goals": ["Global Accessibility", "Innovation Leadership", "Cultural Exchange"]}'::jsonb
-FROM public.pages p WHERE p.route = '/about';
+FROM public.pages p WHERE p.route = '/about'
+ON CONFLICT (page_id, section_key) DO NOTHING;
 
 INSERT INTO public.page_sections (page_id, section_key, section_type, heading, subheading, body, sort_order, active, data)
 SELECT
@@ -254,7 +265,8 @@ SELECT
   60,
   true,
   '{"icon": "👥"}'::jsonb
-FROM public.pages p WHERE p.route = '/about';
+FROM public.pages p WHERE p.route = '/about'
+ON CONFLICT (page_id, section_key) DO NOTHING;
 
 INSERT INTO public.page_sections (page_id, section_key, section_type, heading, subheading, body, sort_order, active, data)
 SELECT
@@ -267,7 +279,8 @@ SELECT
   70,
   true,
   '{}'::jsonb
-FROM public.pages p WHERE p.route = '/about';
+FROM public.pages p WHERE p.route = '/about'
+ON CONFLICT (page_id, section_key) DO NOTHING;
 
 -- ============================================
 -- 10. Contact Page Sections
@@ -283,7 +296,8 @@ SELECT
   10,
   true,
   '{"contact_info": [{"icon": "📍", "text": "123 Learning Street, Education City, EC 12345"}, {"icon": "📧", "text": "contact@eslexplorers.com", "href": "mailto:contact@eslexplorers.com"}, {"icon": "📞", "text": "+1 (234) 567-890", "href": "tel:+1234567890"}]}'::jsonb
-FROM public.pages p WHERE p.route = '/contact';
+FROM public.pages p WHERE p.route = '/contact'
+ON CONFLICT (page_id, section_key) DO NOTHING;
 
 -- ============================================
 -- 11. Additional Content (Optional)

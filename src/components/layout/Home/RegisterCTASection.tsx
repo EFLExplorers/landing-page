@@ -1,23 +1,47 @@
-import styles from "./RegisterCTASection.module.css";
 import Link from "next/link";
+import { PageSection } from "../../../pages/api/page-content";
+import styles from "./RegisterCTASection.module.css";
 
-export const RegisterCTASection = () => {
+export interface RegisterCTASectionProps {
+  section: PageSection | null;
+}
+
+export const RegisterCTASection = ({ section }: RegisterCTASectionProps) => {
+  if (!section) return null;
+
+  const title =
+    (section.content as any)?.title ?? section.heading ?? section.title ?? "";
+  const subtitle =
+    (section.content as any)?.subtitle ??
+    section.subheading ??
+    section.subtitle ??
+    "";
+  const ctaLabel =
+    (section.content as any)?.cta_label ??
+    (section.data as any)?.cta_label ??
+    section.cta_label ??
+    "Create Your Account";
+  const ctaHref =
+    (section.content as any)?.cta_href ??
+    (section.data as any)?.cta_href ??
+    section.cta_href ??
+    "/Auth/register";
+
   return (
     <section className={styles.registerCta} data-cy="register-cta-section">
       <div className={styles.registerCtaContent}>
         <h2 className={styles.registerCtaTitle} data-cy="register-cta-title">
-          Ready to Start Your English Learning Journey?
+          {title}
         </h2>
         <p className={styles.registerCtaSubtitle} data-cy="register-cta-subtitle">
-          Join our community of learners and get access to all our premium
-          features.
+          {subtitle}
         </p>
         <Link
-          href="/Auth/register"
+          href={ctaHref}
           className={styles.registerCtaButton}
           data-cy="register-cta-button"
         >
-          Create Your Account
+          {ctaLabel}
         </Link>
       </div>
     </section>

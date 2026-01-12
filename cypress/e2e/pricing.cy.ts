@@ -14,7 +14,9 @@ describe("Pricing page", () => {
 
   it("renders three plans with buttons and features", () => {
     cy.getByCy("pricing-plans")
-      .find('[data-cy^="pricing-plan-"]')
+      .find(
+        '[data-cy="pricing-plan-basic"], [data-cy="pricing-plan-premium"], [data-cy="pricing-plan-enterprise"]'
+      )
       .should("have.length", 3);
 
     cy.getByCy("pricing-plan-basic").within(() => {
