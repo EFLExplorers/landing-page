@@ -4,7 +4,7 @@ import styles from "./Navbar.module.css";
 
 export const Navbar = () => {
   return (
-    <nav>
+    <nav data-cy="navbar">
       <Image
         src={ASSETS.logo.default}
         alt="Site Logo"
@@ -12,6 +12,7 @@ export const Navbar = () => {
         height={50}
         className={styles.logo}
         priority
+        data-cy="navbar-logo"
       />
     </nav>
   );

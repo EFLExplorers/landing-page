@@ -6,7 +6,7 @@ export const AboutUsSection = () => {
       name: "Shinade Groves",
       role: "Chief Executive Officer",
       title: "CEO & Founder",
-      image: "/src/assets/images/characters/Emma.png",
+      image: "/assets/images/characters/Emma.png",
       bio: "Passionate about revolutionizing ESL education through innovative technology and engaging content.",
       expertise: ["Leadership", "Education Strategy", "Product Vision"]
     },
@@ -14,7 +14,7 @@ export const AboutUsSection = () => {
       name: "Bobby Brown",
       role: "Lead Developer",
       title: "Technical Lead",
-      image: "/src/assets/images/characters/Luke.png",
+      image: "/assets/images/characters/Luke.png",
       bio: "Full-stack developer dedicated to creating seamless learning experiences through cutting-edge technology.",
       expertise: ["Full-Stack Development", "UI/UX", "System Architecture"]
     },
@@ -23,7 +23,7 @@ export const AboutUsSection = () => {
       name: "Nathan Van Der Watt",
       role: "Senior Designer",
       title: "Creative Lead",
-      image: "/src/assets/images/characters/Riley.png",
+      image: "/assets/images/characters/Riley.png",
       bio: "Creative visionary focused on designing beautiful, intuitive interfaces that enhance the learning experience.",
       expertise: ["Visual Design", "User Experience", "Brand Identity"]
     },
@@ -37,25 +37,25 @@ export const AboutUsSection = () => {
   ];
 
   return (
-    <section className={styles.aboutUs}>
+    <section className={styles.aboutUs} data-cy="about-page">
       <div className={styles.container}>
         <div className={styles.heroSection}>
-          <h1 className={styles.title}>About ESL Explorers</h1>
-          <div className={styles.subtitle}>
+          <h1 className={styles.title} data-cy="about-title">About ESL Explorers</h1>
+          <div className={styles.subtitle} data-cy="about-subtitle">
             Pioneering the future of English language learning
           </div>
         </div>
 
-        <div className={styles.description}>
+        <div className={styles.description} data-cy="about-description">
           <p>
             We&apos;re a passionate team of educators, developers, and designers 
             committed to making English language learning an exciting adventure. 
             Our mission is to break down language barriers and create a world 
             where everyone can communicate confidently in English.
           </p>
-          <div className={styles.statsGrid}>
+          <div className={styles.statsGrid} data-cy="about-stats">
             {stats.map((stat, index) => (
-              <div key={index} className={styles.statItem}>
+              <div key={index} className={styles.statItem} data-cy="about-stat">
                 <div className={styles.statNumber}>{stat.number}</div>
                 <div className={styles.statLabel}>{stat.label}</div>
               </div>
@@ -63,14 +63,14 @@ export const AboutUsSection = () => {
           </div>
         </div>
 
-        <div className={styles.tagline}>
+        <div className={styles.tagline} data-cy="about-tagline">
           <span className={styles.quoteMark}>"</span>
           Adventure awaits - learn English with ESL Explorers
           <span className={styles.quoteMark}>"</span>
         </div>
 
         <div className={styles.infoSections}>
-          <div className={styles.mission}>
+          <div className={styles.mission} data-cy="about-mission">
             <div className={styles.sectionHeader}>
               <div className={styles.iconContainer}>
                 <span className={styles.icon}>🎯</span>
@@ -92,7 +92,7 @@ export const AboutUsSection = () => {
             </div>
           </div>
 
-          <div className={styles.vision}>
+          <div className={styles.vision} data-cy="about-vision">
             <div className={styles.sectionHeader}>
               <div className={styles.iconContainer}>
                 <span className={styles.icon}>🔮</span>
@@ -115,7 +115,7 @@ export const AboutUsSection = () => {
             </div>
           </div>
 
-          <div className={styles.team}>
+          <div className={styles.team} data-cy="about-team">
             <div className={styles.sectionHeader}>
               <div className={styles.iconContainer}>
                 <span className={styles.icon}>👥</span>
@@ -126,9 +126,9 @@ export const AboutUsSection = () => {
               Our diverse team brings together expertise in education, technology, 
               design, and content creation to deliver an exceptional learning experience.
             </p>
-            <div className={styles.teamGrid}>
+            <div className={styles.teamGrid} data-cy="about-team-grid">
               {teamMembers.map((member, index) => (
-                <div key={member.name} className={styles.teamMember}>
+                <div key={member.name} className={styles.teamMember} data-cy="about-team-member">
                   <div className={styles.memberImage}>
                     <img 
                       src={member.image} 
@@ -162,25 +162,25 @@ export const AboutUsSection = () => {
           </div>
         </div>
 
-        <div className={styles.values}>
+        <div className={styles.values} data-cy="about-values">
           <h2>Our Core Values</h2>
-          <div className={styles.valuesGrid}>
-            <div className={styles.value}>
+          <div className={styles.valuesGrid} data-cy="about-values-grid">
+            <div className={styles.value} data-cy="about-value">
               <div className={styles.valueIcon}>🎓</div>
               <h3>Excellence</h3>
               <p>We strive for the highest quality in everything we create</p>
             </div>
-            <div className={styles.value}>
+            <div className={styles.value} data-cy="about-value">
               <div className={styles.valueIcon}>🤝</div>
               <h3>Community</h3>
               <p>Building connections and fostering a supportive learning environment</p>
             </div>
-            <div className={styles.value}>
+            <div className={styles.value} data-cy="about-value">
               <div className={styles.valueIcon}>💡</div>
               <h3>Innovation</h3>
               <p>Continuously evolving and improving our learning methods</p>
             </div>
-            <div className={styles.value}>
+            <div className={styles.value} data-cy="about-value">
               <div className={styles.valueIcon}>🌍</div>
               <h3>Accessibility</h3>
               <p>Making quality education available to everyone, everywhere</p>

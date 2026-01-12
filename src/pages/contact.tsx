@@ -31,8 +31,6 @@ export const ContactPage: NextPage = () => {
         <ContactHeroSection />
         <ContactFormSection />
         <ContactFAQSection />
-    
-        <ContactSection />
       </PageLayout>
     </>
   );

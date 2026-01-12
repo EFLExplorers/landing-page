@@ -10,7 +10,7 @@ export const Logo = () => {
   const width = Math.round(height * aspectRatio); // Maintain aspect ratio
 
   return (
-    <Link href="/" className={styles.logoLink}>
+    <Link href="/" className={styles.logoLink} data-cy="logo-link">
       <div className={styles.logoContainer}>
         <Image
           src={logoPath}
@@ -19,6 +19,7 @@ export const Logo = () => {
           height={height}
           priority
           className={styles.logoImage}
+          data-cy="logo-image"
         />
       </div>
     </Link>

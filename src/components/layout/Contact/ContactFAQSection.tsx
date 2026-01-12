@@ -57,16 +57,19 @@ export const ContactFAQSection = () => {
   };
 
   return (
-    <section className={styles.section}>
+    <section className={styles.section} data-cy="contact-faq-section">
       <div className={styles.content}>
         <div className={styles.header}>
-          <h2 className={styles.title}>Frequently Asked Questions</h2>
-          <p className={styles.subtitle}>
-            Find answers to common questions about our English learning programs and services
+          <h2 className={styles.title} data-cy="contact-faq-title">
+            Frequently Asked Questions
+          </h2>
+          <p className={styles.subtitle} data-cy="contact-faq-subtitle">
+            Find answers to common questions about our English learning programs
+            and services
           </p>
         </div>
 
-        <div className={styles.faqGrid}>
+        <div className={styles.faqGrid} data-cy="contact-faq-grid">
           {faqs.map((faq, index) => (
             <div
               key={index}
@@ -74,6 +77,7 @@ export const ContactFAQSection = () => {
                 activeQuestion === index ? styles.active : ""
               }`}
               onClick={() => toggleQuestion(index)}
+              data-cy="contact-faq-item"
             >
               <div className={styles.faqQuestion}>
                 <span className={styles.questionText}>{faq.question}</span>
@@ -92,4 +96,4 @@ export const ContactFAQSection = () => {
       </div>
     </section>
   );
-}; 
+};

@@ -10,11 +10,15 @@ export const ContactFormSection = () => {
     message: "",
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -25,13 +29,16 @@ export const ContactFormSection = () => {
   };
 
   return (
-    <section className={styles.section}>
+    <section className={styles.section} data-cy="contact-form-section">
       <div className={styles.content}>
         <div className={styles.header}>
-          <h2 className={styles.title}>Send us a Message</h2>
-          <p className={styles.subtitle}>
-            Fill out the form below and we'll get back to you as soon as possible. 
-            We're here to help with any questions about our English learning programs.
+          <h2 className={styles.title} data-cy="contact-form-title">
+            Send us a Message
+          </h2>
+          <p className={styles.subtitle} data-cy="contact-form-subtitle">
+            Fill out the form below and we'll get back to you as soon as
+            possible. We're here to help with any questions about our English
+            learning programs.
           </p>
         </div>
 
@@ -39,7 +46,9 @@ export const ContactFormSection = () => {
           <form onSubmit={handleSubmit} className={styles.form}>
             <div className={styles.formRow}>
               <div className={styles.formGroup}>
-                <label htmlFor="firstName" className={styles.label}>First Name</label>
+                <label htmlFor="firstName" className={styles.label}>
+                  First Name
+                </label>
                 <input
                   type="text"
                   id="firstName"
@@ -48,10 +57,13 @@ export const ContactFormSection = () => {
                   onChange={handleInputChange}
                   className={styles.input}
                   required
+                  data-cy="contact-first-name"
                 />
               </div>
               <div className={styles.formGroup}>
-                <label htmlFor="lastName" className={styles.label}>Last Name</label>
+                <label htmlFor="lastName" className={styles.label}>
+                  Last Name
+                </label>
                 <input
                   type="text"
                   id="lastName"
@@ -60,12 +72,15 @@ export const ContactFormSection = () => {
                   onChange={handleInputChange}
                   className={styles.input}
                   required
+                  data-cy="contact-last-name"
                 />
               </div>
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="email" className={styles.label}>Email</label>
+              <label htmlFor="email" className={styles.label}>
+                Email
+              </label>
               <input
                 type="email"
                 id="email"
@@ -74,11 +89,14 @@ export const ContactFormSection = () => {
                 onChange={handleInputChange}
                 className={styles.input}
                 required
+                data-cy="contact-email-input"
               />
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="subject" className={styles.label}>Subject</label>
+              <label htmlFor="subject" className={styles.label}>
+                Subject
+              </label>
               <select
                 id="subject"
                 name="subject"
@@ -86,6 +104,7 @@ export const ContactFormSection = () => {
                 onChange={handleInputChange}
                 className={styles.select}
                 required
+                data-cy="contact-subject"
               >
                 <option value="">Select a subject</option>
                 <option value="general">General Inquiry</option>
@@ -97,7 +116,9 @@ export const ContactFormSection = () => {
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="message" className={styles.label}>Message</label>
+              <label htmlFor="message" className={styles.label}>
+                Message
+              </label>
               <textarea
                 id="message"
                 name="message"
@@ -106,10 +127,15 @@ export const ContactFormSection = () => {
                 rows={5}
                 className={styles.textarea}
                 required
+                data-cy="contact-message"
               ></textarea>
             </div>
 
-            <button type="submit" className={styles.submitBtn}>
+            <button
+              type="submit"
+              className={styles.submitBtn}
+              data-cy="contact-submit"
+            >
               Send Message
             </button>
           </form>
@@ -117,4 +143,4 @@ export const ContactFormSection = () => {
       </div>
     </section>
   );
-}; 
+};

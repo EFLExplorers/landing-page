@@ -47,17 +47,23 @@ export const ServicesSection = () => {
   ];
 
   return (
-    <section className={styles.services}>
+    <section className={styles.services} data-cy="services-section">
       <div className={styles.content}>
-        <h2 className={styles.title}>Our Services</h2>
-        <p className={styles.subtitle}>
+        <h2 className={styles.title} data-cy="services-title">
+          Our Services
+        </h2>
+        <p className={styles.subtitle} data-cy="services-subtitle">
           Discover how we make learning English an exciting journey for both
           students and teachers
         </p>
 
-        <div className={styles.servicesGrid}>
+        <div className={styles.servicesGrid} data-cy="services-grid">
           {services.map((service, index) => (
-            <div key={index} className={styles.serviceCard}>
+            <div
+              key={index}
+              className={styles.serviceCard}
+              data-cy="service-card"
+            >
               {service.backgroundIcons.map((bgIcon, bgIndex) => (
                 <div key={bgIndex} className={`${styles.backgroundIcon} ${styles[`backgroundIcon${bgIndex + 1}`]}`}>
                   {bgIcon}
@@ -66,7 +72,9 @@ export const ServicesSection = () => {
               <div className={styles.serviceIcon}>{service.icon}</div>
               <h3 className={styles.serviceTitle}>{service.title}</h3>
               <p className={styles.serviceDescription}>{service.description}</p>
-              <button className={styles.learnMore}>Learn More</button>
+              <button className={styles.learnMore} data-cy="service-learn-more">
+                Learn More
+              </button>
             </div>
           ))}
         </div>

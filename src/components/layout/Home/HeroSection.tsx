@@ -5,14 +5,16 @@ export const HeroSection = () => {
   const router = useRouter();
 
   const handlePlatformSelect = (platform: "student" | "teacher") => {
-    router.push(`/register/${platform}`);
+    router.push(`/Auth/register/${platform}`);
   };
 
   return (
-    <section className={styles.hero}>
+    <section className={styles.hero} data-cy="hero-section">
       <div className={styles.content}>
-        <h1 className={styles.title}>Start your learning journey today!</h1>
-        <p className={styles.subtitle}>
+        <h1 className={styles.title} data-cy="hero-title">
+          Start your learning journey today!
+        </h1>
+        <p className={styles.subtitle} data-cy="hero-subtitle">
           We&apos;re so happy you&apos;re here! However, you will need to
           register to get started.
         </p>
@@ -20,12 +22,14 @@ export const HeroSection = () => {
           <button
             onClick={() => handlePlatformSelect("student")}
             className={styles.button}
+            data-cy="hero-register-student"
           >
             Register Student
           </button>
           <button
             onClick={() => handlePlatformSelect("teacher")}
             className={styles.button}
+            data-cy="hero-register-teacher"
           >
             Register Teacher
           </button>

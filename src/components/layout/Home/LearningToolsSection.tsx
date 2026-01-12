@@ -41,17 +41,23 @@ export const LearningToolsSection = () => {
   ];
 
   return (
-    <section className={styles.tools}>
+    <section className={styles.tools} data-cy="learning-tools-section">
       <div className={styles.content}>
-        <h2 className={styles.title}>Learning Tools</h2>
-        <p className={styles.subtitle}>
+        <h2 className={styles.title} data-cy="learning-tools-title">
+          Learning Tools
+        </h2>
+        <p className={styles.subtitle} data-cy="learning-tools-subtitle">
           Discover our comprehensive suite of tools designed to make learning
           English engaging and effective
         </p>
 
-        <div className={styles.toolsGrid}>
+        <div className={styles.toolsGrid} data-cy="learning-tools-grid">
           {tools.map((tool, index) => (
-            <div key={index} className={styles.toolCard}>
+            <div
+              key={index}
+              className={styles.toolCard}
+              data-cy="learning-tool-card"
+            >
               <div className={styles.toolIcon}>{tool.icon}</div>
               <h3 className={styles.toolTitle}>{tool.title}</h3>
               <p className={styles.toolDescription}>{tool.description}</p>

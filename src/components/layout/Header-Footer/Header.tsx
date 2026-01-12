@@ -8,8 +8,8 @@ import styles from "./Header.module.css";
 
 export const Header = () => {
   return (
-    <header className={styles.header}>
-      <div className={styles.container}>
+    <header className={styles.header} data-cy="site-header">
+      <div className={styles.container} data-cy="site-header-container">
         <Logo />
         <Navbar />
         <AuthButtons />

@@ -6,11 +6,19 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 const AuthButtonsContent = () => {
   return (
-    <div className={styles.authButtons}>
-      <Link href="/Auth/login" className={styles.loginButton}>
+    <div className={styles.authButtons} data-cy="auth-buttons">
+      <Link
+        href="/Auth/login"
+        className={styles.loginButton}
+        data-cy="auth-login-link"
+      >
         Login
       </Link>
-      <Link href="/Auth/register" className={styles.registerButton}>
+      <Link
+        href="/Auth/register"
+        className={styles.registerButton}
+        data-cy="auth-register-link"
+      >
         Get Started
       </Link>
     </div>

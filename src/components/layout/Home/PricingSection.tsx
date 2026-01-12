@@ -40,13 +40,21 @@ export const PricingSection = () => {
   ];
 
   return (
-    <section className={styles.pricing}>
-      <h2 className={styles.title}>Pricing</h2>
-      <p className={styles.subtitle}>Choose the plan that is right for you</p>
+    <section className={styles.pricing} data-cy="pricing-section">
+      <h2 className={styles.title} data-cy="pricing-title">
+        Pricing
+      </h2>
+      <p className={styles.subtitle} data-cy="pricing-subtitle">
+        Choose the plan that is right for you
+      </p>
 
-      <div className={styles.pricingGrid}>
+      <div className={styles.pricingGrid} data-cy="pricing-grid">
         {pricingTiers.map((tier) => (
-          <div key={tier.name} className={styles.pricingCard}>
+          <div
+            key={tier.name}
+            className={styles.pricingCard}
+            data-cy="pricing-card"
+          >
             <h3 className={styles.tierName}>{tier.name}</h3>
             <div className={styles.priceContainer}>
               <span className={styles.price}>{tier.price}</span>
@@ -55,7 +63,9 @@ export const PricingSection = () => {
               )}
             </div>
             <p className={styles.description}>{tier.description}</p>
-            <button className={styles.getStarted}>Get started</button>
+            <button className={styles.getStarted} data-cy="pricing-cta">
+              Get started
+            </button>
           </div>
         ))}
       </div>

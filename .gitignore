@@ -22,3 +22,13 @@ pnpm-debug.log*
 Thumbs.db
 .idea
 .vscode
+
+.cypress/screenshots/
+.cypress/videos/
+.cypress/downloads/
+.cypress/logs/
+.cypress/reports/
+.cypress/screenshots/
+.cypress/videos/
+.cypress/downloads/
+.cypress/logs/

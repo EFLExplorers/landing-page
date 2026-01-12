@@ -1,73 +1,89 @@
 import styles from "./TeachingToolsSection.module.css";
-import Image from "next/image";
 
 const teachingTools = [
   {
     name: "Lesson Planner",
-    description: "Create and customize engaging lesson plans with our comprehensive toolkit",
+    description:
+      "Create and customize engaging lesson plans with templates, timing, and objectives.",
     icon: "📝",
-    image: "/assets/images/characters/Luke.png",
   },
   {
     name: "Student Analytics",
-    description: "Track student progress with detailed reports and performance insights",
-    icon: "📊",
-    image: "/assets/images/characters/Cassidy.png",
+    description:
+      "Track student progress with dashboards, trends, and per-learner insights.",
+    icon: "📈",
   },
   {
     name: "Interactive Resources",
-    description: "Access a library of multimedia materials, games, and activities",
+    description:
+      "Use games, multimedia, and activities to keep every lesson lively and fun.",
     icon: "🎮",
-    image: "/assets/images/characters/Riley.png",
   },
   {
     name: "Assessment Tools",
-    description: "Create quizzes, tests, and assignments with automated grading",
+    description:
+      "Build quizzes, tests, and assignments with automated grading and feedback.",
     icon: "✅",
-    image: "/assets/images/characters/Emma.png",
+  },
+  {
+    name: "Progress Tracking",
+    description:
+      "Monitor mastery, gaps, and pacing with detailed reports and alerts.",
+    icon: "📊",
+  },
+  {
+    name: "Resource Library",
+    description:
+      "Browse ready-to-use slides, worksheets, and multimedia assets for any level.",
+    icon: "📚",
   },
 ];
 
 export const TeachingToolsSection = () => {
   return (
-    <section className={styles.characters}>
-      <div className={styles.characterContent}>
-        <div className={styles.characterGridContainer}>
-          <p className={styles.characterText}>
-            Everything you need to create engaging ESL lessons is at your fingertips. 
-            Our platform provides comprehensive tools designed specifically for English language teachers, 
-            allowing you to focus on what you do best - inspiring students to learn.
-          </p>
-          <div className={styles.characterGrid}>
-            {teachingTools.map((tool, index) => (
-              <div key={index} className={styles.characterCircle}>
-                <div className={styles.toolImage}>
-                  <Image
-                    src={tool.image}
-                    alt={tool.name}
-                    width={80}
-                    height={80}
-                    className={styles.characterImage}
-                  />
-                </div>
-                <div className={styles.toolInfo}>
-                  <h4>{tool.name}</h4>
-                  <p>{tool.description}</p>
-                </div>
-              </div>
-            ))}
+    <section className={styles.section} data-cy="teaching-tools-section">
+      <div className={styles.card} data-cy="teaching-tools-card">
+        <header className={styles.cardHeader}>
+          <div>
+            <p className={styles.kicker}>Tools for teachers</p>
+            <h3 className={styles.cardTitle}>
+              Everything you need, in one hub
+            </h3>
+            <p className={styles.cardSubtitle} data-cy="teaching-tools-intro">
+              Plan faster, teach with confidence, and keep every student on
+              track with our integrated toolkit.
+            </p>
           </div>
+          <div className={styles.badge} aria-hidden="true">
+            ⚡️
+          </div>
+        </header>
+
+        <div className={styles.toolGrid} data-cy="teaching-tools-grid">
+          {teachingTools.map((tool) => (
+            <article
+              key={tool.name}
+              className={styles.toolCard}
+              data-cy="teaching-tool-card"
+              data-tool-name={tool.name}
+            >
+              <div className={styles.toolIcon} aria-hidden="true">
+                {tool.icon}
+              </div>
+              <div className={styles.toolContent}>
+                <h4>{tool.name}</h4>
+                <p>{tool.description}</p>
+              </div>
+            </article>
+          ))}
         </div>
-        <div className={styles.featureText}>
-          <p>
-            With pre-designed lesson plans for every proficiency level, you can spend less time 
-            preparing materials and more time connecting with your students. Our platform includes 
-            interactive activities, assessment tools, and progress tracking that help you deliver 
-            effective, engaging lessons while monitoring student development. Join thousands of 
-            teachers who are already transforming their ESL classrooms with our innovative platform.
-          </p>
+
+        <div className={styles.footerNote} data-cy="teaching-tools-outro">
+          Pre-designed lesson plans for every level, interactive activities,
+          grading, and analytics—so you can spend less time preparing and more
+          time teaching.
         </div>
       </div>
     </section>
   );
-}; 
+};
