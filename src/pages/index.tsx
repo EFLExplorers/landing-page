@@ -1,22 +1,129 @@
+import { GetStaticProps } from "next";
 import { PageLayout } from "../components/layout/PageLayout";
-import HeroSection from "../components/layout/Home/HeroSection";
-import TaglineSection from "../components/layout/Home/TaglineSection";
-import LearningToolsSection from "../components/layout/Home/LearningToolsSection";
-import ServicesSection from "../components/layout/Home/ServicesSection";
-import { PricingSection } from "../components/layout/Home/PricingSection";
-import { RegisterCTASection } from "../components/layout/Home/RegisterCTASection";
+import HeroSection, { HeroSectionProps } from "../components/layout/Home/HeroSection";
+import TaglineSection, { TaglineSectionProps } from "../components/layout/Home/TaglineSection";
+import LearningToolsSection, { LearningToolsSectionProps } from "../components/layout/Home/LearningToolsSection";
+import ServicesSection, { ServicesSectionProps } from "../components/layout/Home/ServicesSection";
+import { PricingSection, PricingSectionProps } from "../components/layout/Home/PricingSection";
+import { RegisterCTASection, RegisterCTASectionProps } from "../components/layout/Home/RegisterCTASection";
+import { ContentErrorBoundary } from "../components/common/ErrorBoundary";
+import { PageContent } from "./api/page-content";
+import { PricingTier, Service, LearningTool } from "./api/content";
 
-export const HomePage = () => {
+interface HomePageProps {
+  heroSection: PageContent['sections'][0] | null;
+  taglineSection: PageContent['sections'][0] | null;
+  registerCTASection: PageContent['sections'][0] | null;
+  pricingTiers: PricingTier[];
+  services: Service[];
+  learningTools: LearningTool[];
+}
+
+export const HomePage = ({
+  heroSection,
+  taglineSection,
+  registerCTASection,
+  pricingTiers,
+  services,
+  learningTools
+}: HomePageProps) => {
   return (
     <PageLayout>
-      <HeroSection />
-      <TaglineSection />
-      <LearningToolsSection />
-      <ServicesSection />
-      <PricingSection />
-      <RegisterCTASection />
+      <ContentErrorBoundary contentType="hero section">
+        <HeroSection section={heroSection} />
+      </ContentErrorBoundary>
+
+      <ContentErrorBoundary contentType="tagline section">
+        <TaglineSection section={taglineSection} />
+      </ContentErrorBoundary>
+
+      <ContentErrorBoundary contentType="learning tools">
+        <LearningToolsSection tools={learningTools} />
+      </ContentErrorBoundary>
+
+      <ContentErrorBoundary contentType="services">
+        <ServicesSection services={services} />
+      </ContentErrorBoundary>
+
+      <ContentErrorBoundary contentType="pricing">
+        <PricingSection pricingTiers={pricingTiers} />
+      </ContentErrorBoundary>
+
+      <ContentErrorBoundary contentType="register CTA">
+        <RegisterCTASection section={registerCTASection} />
+      </ContentErrorBoundary>
     </PageLayout>
   );
+};
+
+export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
+  try {
+    // During build time, use direct API calls instead of fetch
+    const { supabase } = await import("../utils/supabaseClient");
+
+    // Fetch page content
+    const { data: pageData } = await supabase
+      .from("pages")
+      .select("*")
+      .eq("route", "/")
+      .single();
+
+    const { data: sectionsData } = await supabase
+      .from("page_sections")
+      .select("*")
+      .eq("page_id", pageData?.id || '')
+      .eq("active", true)
+      .order("sort_order", { ascending: true });
+
+    const pageContent: PageContent = pageData ? {
+      id: pageData.id,
+      route: pageData.route,
+      title: pageData.title,
+      meta_description: pageData.meta_description,
+      sections: sectionsData || [],
+    } : { id: '', route: '/', sections: [] };
+
+    // Find specific sections
+    const heroSection = pageContent.sections.find(s => s.section_key === 'hero');
+    const taglineSection = pageContent.sections.find(s => s.section_key === 'tagline');
+    const registerCTASection = pageContent.sections.find(s => s.section_key === 'register-cta');
+
+    // Fetch content types from the unified content_items table
+    const [pricingData, servicesData, toolsData] = await Promise.all([
+      supabase.from("content_items").select("*").eq("content_type", "pricing").eq("active", true).order("sort_order", { ascending: true }),
+      supabase.from("content_items").select("*").eq("content_type", "service").eq("active", true).order("sort_order", { ascending: true }),
+      supabase.from("content_items").select("*").eq("content_type", "learning_tool").eq("active", true).order("sort_order", { ascending: true })
+    ]);
+
+    const pricingTiers: PricingTier[] = pricingData.data || [];
+    const services: Service[] = servicesData.data || [];
+    const learningTools: LearningTool[] = toolsData.data || [];
+
+    return {
+      props: {
+        heroSection: heroSection || null,
+        taglineSection: taglineSection || null,
+        registerCTASection: registerCTASection || null,
+        pricingTiers,
+        services,
+        learningTools,
+      },
+      revalidate: 300, // Revalidate every 5 minutes
+    };
+  } catch (error) {
+    console.error('Error fetching home page data:', error);
+    return {
+      props: {
+        heroSection: null,
+        taglineSection: null,
+        registerCTASection: null,
+        pricingTiers: [],
+        services: [],
+        learningTools: [],
+      },
+      revalidate: 300,
+    };
+  }
 };
 
 export default HomePage;

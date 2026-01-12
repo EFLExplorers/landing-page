@@ -1,13 +1,41 @@
+# ========================================
+# ESL Explorers Environment Configuration
+# ========================================
+
 # Supabase Configuration
-# Replace these values with your actual Supabase project credentials
-NEXT_PUBLIC_SUPABASE_URL=https://EFLExplorers's-ddvpckdfcfqwtjxdgvhb.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRkdnBja2RmY2Zxd3RqeGRndmhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE4MzQ2OTYsImV4cCI6MjA2NzQxMDY5Nn0.PPwtzGuizPNcROeoi5UOpwtRxGHV4vABIQ_7bvNuIFc
+# Get these from your Supabase project dashboard
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
+SUPABASE_URL=https://your-project-ref.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
 
-# Example format:
-# NEXT_PUBLIC_SUPABASE_URL=https://EFLExplorers's-ddvpckdfcfqwtjxdgvhb.supabase.co
-# NEXT_PUBLIC_SUPABASE_ANON_KEY=
+# Platform URLs
+# Update these with your actual deployed platform URLs
+NEXT_PUBLIC_STUDENT_URL=https://student.yourdomain.com
+NEXT_PUBLIC_TEACHER_URL=https://teacher.yourdomain.com
 
-# Instructions:
-# 1. Copy this content to a new file named .env.local
-# 2. Replace the placeholder values with your actual Supabase credentials
-# 3. Save the file in the root directory of your project 
+# Site URL (for GitHub Actions revalidation)
+# This should be your production URL (e.g., https://eflexplorers.com)
+NEXT_PUBLIC_SITE_URL=https://your-domain.com
+
+# ========================================
+# SETUP INSTRUCTIONS
+# ========================================
+
+# 1. Database Setup:
+#    - Apply db/content-schema.sql in Supabase SQL editor
+#    - Apply db/content-seed-simple.sql to populate initial content
+
+# 2. Environment File:
+#    - Copy this file to .env.local in project root
+#    - Replace placeholder values with actual Supabase credentials
+#    - Platform URLs should point to your deployed student/teacher apps
+
+# 3. Supabase Configuration:
+#    - Enable Row Level Security (RLS) on content tables if needed
+#    - Set up authentication providers if using social login
+
+# 4. Content Management:
+#    - Marketing content is now database-driven
+#    - Update content via Supabase dashboard or admin interface
+#    - Components include fallback to hardcoded content during development
