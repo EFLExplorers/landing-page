@@ -2,7 +2,28 @@ import Link from "next/link";
 import Logo from "./Logo";
 import styles from "./Footer.module.css";
 
-export const Footer = () => {
+export interface FooterLink {
+  label: string;
+  href: string;
+}
+
+export interface FooterColumn {
+  title: string;
+  links: FooterLink[];
+}
+
+export interface FooterContent {
+  columns: FooterColumn[];
+  bottomBar: string[];
+}
+
+export interface FooterProps {
+  content?: FooterContent | null;
+}
+
+export const Footer = ({ content }: FooterProps) => {
+  if (!content?.columns?.length && !content?.bottomBar?.length) return null;
+
   return (
     <footer className={styles.footer} data-cy="site-footer">
       <div className={styles.footerContent}>
@@ -11,54 +32,23 @@ export const Footer = () => {
         </div>
 
         <div className={styles.linksSection} data-cy="footer-links-section">
-          <div className={styles.column} data-cy="footer-socials-column">
-            <h3>Socials</h3>
-            <Link href="https://linkedin.com" data-cy="footer-linkedin-link">
-              LinkedIn
-            </Link>
-            <Link href="https://instagram.com" data-cy="footer-instagram-link">
-              Instagram
-            </Link>
-            <Link href="https://facebook.com" data-cy="footer-facebook-link">
-              Facebook
-            </Link>
-          </div>
-
-          <div className={styles.column} data-cy="footer-company-column">
-            <h3>Company</h3>
-            <Link href="/about" data-cy="footer-about-link">
-              About Us
-            </Link>
-            <Link href="/pricing" data-cy="footer-pricing-link">
-              Pricing
-            </Link>
-            <Link href="/Auth/register" data-cy="footer-register-link">
-              Register
-            </Link>
-          </div>
-
-          <div className={styles.column} data-cy="footer-support-column">
-            <h3>Support</h3>
-            <Link href="/contact" data-cy="footer-contact-link">
-              Contact Us
-            </Link>
-            <Link href="/faq" data-cy="footer-faq-link">
-              FAQ
-            </Link>
-            <Link href="/terms" data-cy="footer-terms-link">
-              Terms & Conditions
-            </Link>
-            <Link href="/privacy" data-cy="footer-privacy-link">
-              Cookie Policy
-            </Link>
-          </div>
+          {(content.columns || []).map((column) => (
+            <div className={styles.column} key={column.title}>
+              <h3>{column.title}</h3>
+              {column.links.map((link) => (
+                <Link href={link.href} key={link.href}>
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          ))}
         </div>
       </div>
 
       <div className={styles.bottomBar} data-cy="footer-bottom-bar">
-        <p>All rights reserved</p>
-        <p>Copyright 2026 | Privacy Policy</p>
-        <p>Powered by ESL Explorers</p>
+        {(content.bottomBar || []).map((text) => (
+          <p key={text}>{text}</p>
+        ))}
       </div>
     </footer>
   );

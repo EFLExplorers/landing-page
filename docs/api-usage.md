@@ -1,62 +1,46 @@
 # UI ↔ API / DB Usage
 
-Current state: the UI is static; components read in-component arrays (cards, pricing, modules, FAQs). There are no live API calls to a DB yet. This doc lists where data would be sourced once APIs exist.
+Current state: the app has Supabase-backed content APIs and some pages fetch directly from Supabase during `getStaticProps`.
 
-## Planned Data Dependencies (by page)
+- Page content: `pages` + `page_sections`
+- List content: `content_items`
+
+Note: `/` is strict (missing required Supabase env/seeded content fails build/SSG).
+
+## Current Data Dependencies (by page)
 
 - Home
-  - LearningTools cards
-  - Services cards
-  - Pricing teaser tiers
-  - Register CTA target URLs (role-aware)
+  - `pages` + `page_sections` for section copy and header/footer sections
+  - `content_items` for `pricing`, `service`, `learning_tool`
 - Pricing
-  - Plans (name, price, cadence, badge, description, features, CTA link)
+  - Static component content (not DB-driven yet)
 - About
-  - Stats (label/value)
-  - Team members (name, role, title, image, bio, expertise)
-  - Mission/Vision/Values copy blocks
+  - `pages` + `page_sections` for copy blocks
+  - `content_items` for `team_member`, `about_stat`, `core_value`
 - Contact
-  - Contact info (email, phone)
-  - FAQs list (question/answer)
+  - Static component content (not DB-driven yet)
 - Teacher platform
-  - Teaching tools list
-  - Lesson modules (name, description, lessons, duration, recommended class size, color/icon)
-  - Benefits list
+  - Static component content (not DB-driven yet)
 - Student platform
-  - Characters (name, image)
-  - Planets (name, color/icon)
+  - Static component content (not DB-driven yet)
 - Courses
   - Course catalog (placeholder today)
 - Auth/CTA
-  - Role-aware redirect rules; login/register endpoints; verification states
+  - Static routes; CTAs link to `/Auth/...`
 
-## Suggested Endpoint Shapes (examples)
+## Current API endpoints
 
-- `GET /api/content/home`
-  - `learningTools[]: { title, description, icon }`
-  - `services[]: { title, description, icon, backgroundIcons[] }`
-  - `pricingTeaser[]: { name, price, period, description, cta }`
-- `GET /api/content/pricing`
-  - `plans[]: { name, price, period, description, badge?, features[], cta }`
-- `GET /api/content/about`
-  - `stats[]: { label, value }`
-  - `team[]: { name, role, title, image, bio, expertise[] }`
-  - `values[]: { title, description, icon }`
-- `GET /api/content/contact`
-  - `contact: { email, phone }`
-  - `faqs[]: { question, answer }`
-- `GET /api/content/teacher-platform`
-  - `tools[]`, `modules[]`, `benefits[]`, `cta`
-- `GET /api/content/student-platform`
-  - `characters[]`, `planets[]`, `cta`
-- `GET /api/courses`
-  - `courses[]: { id, title, level, summary, image?, cta }`
-- Auth (future)
-  - `POST /api/auth/login`, `POST /api/auth/register`, `POST /api/auth/forgot-password`, `POST /api/auth/reset-password`
+- `GET /api/page-content?route=/about`
+  - Returns `{ id, route, title, meta_description, sections: PageSection[] }`
+  - Backed by `pages` + `page_sections`.
+
+- `GET /api/content?type=service`
+  - Returns `ContentItem[]` filtered by `content_type` (e.g. `pricing`, `service`, `learning_tool`).
+  - Backed by `content_items`.
 
 ## Client Integration Notes
 
 - Add loading/empty/error states to all dynamic sections.
-- Use a small fetch layer with caching (SWR/React Query) if you introduce client fetches; consider getStaticProps/getServerSideProps if you stay on Next pages router.
+- Prefer server-side fetching (`getStaticProps`) for marketing pages unless you intentionally need client-side updates.
 - Normalize CTA handling: central helper that resolves target based on role + auth state.
 - Keep `data-cy` hooks stable after data becomes dynamic.

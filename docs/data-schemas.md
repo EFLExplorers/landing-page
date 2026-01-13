@@ -1,77 +1,151 @@
-# Data Schemas (proposed)
+# Data Schemas (current)
 
-TypeScript-ish interfaces to align UI, APIs, and DB.
+This doc describes the shapes used by the current Supabase-backed content model.
+
+## Core tables
+
+### `pages`
 
 ```ts
-type CTA = {
-  label: string;
-  href: string;
-  targetRole?: "student" | "teacher" | "admin";
-};
-
-type PricingPlan = {
-  id: string;
-  name: string;
-  price: number | "free" | "custom";
-  period: "month" | "year" | "";
-  badge?: string;
-  description: string;
-  features: string[];
-  cta: CTA;
-};
-
-type Card = {
-  id: string;
-  page: string;
-  section: string;
-  title: string;
-  description: string;
-  icon?: string;
-  image?: string;
-  backgroundIcons?: string[];
-  cta?: CTA;
-};
-
-type FAQ = { id: string; page: string; question: string; answer: string };
-
-type Module = {
-  id: string;
-  name: string;
-  description: string;
-  lessons: string;
-  duration: string;
-  classSize: string;
-  color?: string;
-  icon?: string;
-};
-
-type Character = { id: string; name: string; image: string; role?: string };
-type Planet = {
-  id: string;
-  name: string;
-  color: string;
-  icon: string;
-  order: number;
-};
-
-type TeamMember = {
-  id: string;
-  name: string;
-  role: string;
-  title: string;
-  image: string;
-  bio: string;
-  expertise: string[];
-};
-
-type Stat = { label: string; value: string };
-
-type RouteRule = {
-  role: "student" | "teacher" | "admin";
-  unauthTarget: string;
-  authTarget: string;
-  verificationTarget?: string;
+type PageRow = {
+  id: string; // uuid
+  route: string; // e.g. "/", "/about"
+  title?: string | null;
+  meta_description?: string | null;
+  layout?: string | null;
 };
 ```
 
-Use these as a shared contract for DB tables/collections and API responses. Seed data can mirror these shapes for SSR/static usage.
+### `page_sections`
+
+```ts
+type PageSectionRow = {
+  id: string; // uuid
+  page_id: string; // uuid -> pages.id
+  section_key: string; // e.g. "hero", "footer"
+  section_type: string; // e.g. "hero", "cta", "footer"
+  sort_order: number;
+  active: boolean;
+  content: Record<string, any>; // JSONB
+};
+```
+
+### `content_items`
+
+```ts
+type ContentItemRow = {
+  id: string; // uuid
+  content_type: string; // e.g. "pricing", "service", "learning_tool"
+  slug?: string | null; // stable unique key (seed v2 uses this)
+  title?: string | null;
+  subtitle?: string | null;
+  description?: string | null;
+  content: Record<string, any>; // JSONB
+  metadata: Record<string, any>; // JSONB
+  sort_order: number;
+  active: boolean;
+};
+```
+
+## `page_sections.content` shapes (used today)
+
+### Home (`/`) sections
+
+#### `hero`
+
+```ts
+type HeroSectionContent = {
+  title: string;
+  subtitle: string;
+  buttons: Array<{ label: string; href: string }>;
+};
+```
+
+#### `tagline`
+
+```ts
+type TaglineSectionContent = {
+  title: string;
+  subtitle: string;
+};
+```
+
+#### `learning-tools`
+
+```ts
+type LearningToolsSectionContent = {
+  title: string;
+  subtitle: string;
+};
+```
+
+#### `how-we-teach`
+
+```ts
+type HowWeTeachSectionContent = {
+  title: string;
+  description: string;
+  tabs: Array<{ title: string; content: string; icon?: string }>;
+};
+```
+
+#### `services`
+
+```ts
+type ServicesSectionContent = {
+  title: string;
+  subtitle: string;
+};
+```
+
+#### `pricing`
+
+```ts
+type PricingSectionContent = {
+  title: string;
+  subtitle: string;
+};
+```
+
+#### `register-cta`
+
+```ts
+type RegisterCTASectionContent = {
+  title: string;
+  subtitle: string;
+  cta_label: string;
+  cta_href: string;
+};
+```
+
+### Global layout sections stored on `/` today
+
+#### `header`
+
+```ts
+type HeaderSectionContent = {
+  navbar: {
+    dropdown: {
+      label: string;
+      items: Array<{ label: string; href: string }>;
+    };
+    links: Array<{ label: string; href: string }>;
+  };
+  auth_buttons: {
+    login: { label: string; href: string };
+    register: { label: string; href: string };
+  };
+};
+```
+
+#### `footer`
+
+```ts
+type FooterSectionContent = {
+  columns: Array<{
+    title: string;
+    links: Array<{ label: string; href: string }>;
+  }>;
+  bottom_bar: string[];
+};
+```

@@ -1,7 +1,19 @@
 import { useState } from "react";
 import styles from "./ContactFormSection.module.css";
+import type { PageSection } from "../../../pages/api/page-content";
 
-export const ContactFormSection = () => {
+export interface ContactFormSectionProps {
+  section: PageSection | null;
+}
+
+export const ContactFormSection = ({ section }: ContactFormSectionProps) => {
+  if (!section) return null;
+
+  const title = (section.content as any)?.title ?? "";
+  const subtitle = (section.content as any)?.subtitle ?? "";
+  const subjectOptions =
+    ((section.content as any)?.subject_options as string[] | undefined) || [];
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -33,12 +45,10 @@ export const ContactFormSection = () => {
       <div className={styles.content}>
         <div className={styles.header}>
           <h2 className={styles.title} data-cy="contact-form-title">
-            Send us a Message
+            {title}
           </h2>
           <p className={styles.subtitle} data-cy="contact-form-subtitle">
-            Fill out the form below and we'll get back to you as soon as
-            possible. We're here to help with any questions about our English
-            learning programs.
+            {subtitle}
           </p>
         </div>
 
@@ -107,11 +117,14 @@ export const ContactFormSection = () => {
                 data-cy="contact-subject"
               >
                 <option value="">Select a subject</option>
-                <option value="general">General Inquiry</option>
-                <option value="courses">Course Information</option>
-                <option value="pricing">Pricing</option>
-                <option value="technical">Technical Support</option>
-                <option value="other">Other</option>
+                {subjectOptions.map((option) => (
+                  <option
+                    key={option}
+                    value={option.toLowerCase().replace(/\s+/g, "-")}
+                  >
+                    {option}
+                  </option>
+                ))}
               </select>
             </div>
 

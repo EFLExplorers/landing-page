@@ -1,16 +1,31 @@
 import { useEffect, useMemo, useState } from "react";
 import styles from "@/pages/platforms/student.module.css";
+import type { PageSection } from "@/pages/api/page-content";
 
-const planets = [
-  { name: "Earth", color: "var(--theme-muted)", icon: "🌍" },
-  { name: "Mars", color: "var(--accent)", icon: "🔴" },
-  { name: "Venus", color: "var(--text-secondary)", icon: "🟠" },
-  { name: "Jupiter", color: "var(--theme-foreground)", icon: "🪐" },
-  { name: "Saturn", color: "var(--theme-muted-foreground)", icon: "🪐" },
-  { name: "Neptune", color: "var(--primary-three)", icon: "🔵" },
-];
+export interface StudentPlanet {
+  slug: string;
+  name: string;
+  color: string;
+  icon: string;
+}
 
-export const StudentPlanetsSection = () => {
+export interface StudentPlanetsSectionProps {
+  section: PageSection | null;
+  planets: StudentPlanet[];
+}
+
+export const StudentPlanetsSection = ({
+  section,
+  planets,
+}: StudentPlanetsSectionProps) => {
+  if (!section) return null;
+  if (!planets?.length) return null;
+
+  const title = (section.content as any)?.title ?? "";
+  const toggleOnLabel = (section.content as any)?.toggle_on_label ?? "";
+  const toggleOffLabel = (section.content as any)?.toggle_off_label ?? "";
+  const autoplayMs = Number((section.content as any)?.autoplay_ms || 5000);
+
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isSpinning, setIsSpinning] = useState(true);
 
@@ -44,14 +59,14 @@ export const StudentPlanetsSection = () => {
 
   useEffect(() => {
     if (isSpinning) {
-      const timer = setInterval(nextSlide, 5000);
+      const timer = setInterval(nextSlide, autoplayMs);
       return () => clearInterval(timer);
     }
-  }, [isSpinning]);
+  }, [isSpinning, autoplayMs]);
 
   return (
     <section className={styles.planets} data-cy="student-planets-section">
-      <h2 data-cy="student-planets-title">Explore our planets</h2>
+      <h2 data-cy="student-planets-title">{title}</h2>
       <div className={styles.planetCarousel}>
         <button
           className={styles.carouselButton}
@@ -104,10 +119,8 @@ export const StudentPlanetsSection = () => {
         onClick={() => setIsSpinning(!isSpinning)}
         data-cy="student-planets-toggle"
       >
-        {isSpinning ? "Stop Rotation" : "Start Rotation"}
+        {isSpinning ? toggleOnLabel : toggleOffLabel}
       </button>
     </section>
   );
 };
-
-export default StudentPlanetsSection;

@@ -80,6 +80,7 @@ export const AboutUsSection = ({
     "";
 
   const descriptionText = getSectionText(descriptionSection, "body");
+
   const taglineText = getSectionText(taglineSection, "text");
 
   const missionTitle =

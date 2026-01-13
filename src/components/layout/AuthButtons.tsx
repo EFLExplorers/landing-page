@@ -4,31 +4,49 @@ import Link from "next/link";
 import styles from "./AuthButtons.module.css";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
-const AuthButtonsContent = () => {
+export interface AuthButtonsLink {
+  label: string;
+  href: string;
+}
+
+export interface AuthButtonsContent {
+  login: AuthButtonsLink;
+  register: AuthButtonsLink;
+}
+
+export interface AuthButtonsProps {
+  content?: AuthButtonsContent | null;
+}
+
+const AuthButtonsInner = ({ content }: AuthButtonsProps) => {
+  if (!content) return null;
+  const login = content.login;
+  const register = content.register;
+
   return (
     <div className={styles.authButtons} data-cy="auth-buttons">
       <Link
-        href="/Auth/login"
+        href={login.href}
         className={styles.loginButton}
         data-cy="auth-login-link"
       >
-        Login
+        {login.label}
       </Link>
       <Link
-        href="/Auth/register"
+        href={register.href}
         className={styles.registerButton}
         data-cy="auth-register-link"
       >
-        Get Started
+        {register.label}
       </Link>
     </div>
   );
 };
 
-export const AuthButtons = () => {
+export const AuthButtons = ({ content }: AuthButtonsProps) => {
   return (
     <ErrorBoundary>
-      <AuthButtonsContent />
+      <AuthButtonsInner content={content} />
     </ErrorBoundary>
   );
 };

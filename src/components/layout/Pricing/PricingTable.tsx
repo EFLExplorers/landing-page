@@ -1,179 +1,166 @@
 import Link from "next/link";
 import styles from "./PricingTable.module.css";
+import type { PageSection } from "../../../pages/api/page-content";
 
-export const PricingTable = () => {
+export interface PricingPlan {
+  slug: string;
+  title: string;
+  badge?: string | null;
+  description?: string | null;
+  content: Record<string, any>;
+}
+
+export interface PricingTableProps {
+  headerSection: PageSection | null;
+  footerSection: PageSection | null;
+  plans: PricingPlan[];
+}
+
+export const PricingTable = ({
+  headerSection,
+  footerSection,
+  plans,
+}: PricingTableProps) => {
+  if (!headerSection) return null;
+  if (!plans?.length) return null;
+
+  const headerBadge = (headerSection.content as any)?.badge ?? "";
+  const headerTitle = (headerSection.content as any)?.title ?? "";
+  const headerSubtitle = (headerSection.content as any)?.subtitle ?? "";
+
+  const footerNote = (footerSection?.content as any)?.note ?? "";
+  const footerHelpText = (footerSection?.content as any)?.help_text ?? "";
+  const footerHelpHref = (footerSection?.content as any)?.help_href ?? "";
+  const footerHelpLabel = (footerSection?.content as any)?.help_label ?? "";
+
   return (
     <section className={styles.pricing} data-cy="pricing-page">
       <div className={styles.header}>
         <div className={styles.badge} data-cy="pricing-badge">
-          Pricing Plans
+          {headerBadge}
         </div>
-        <h1 data-cy="pricing-title">Choose Your Perfect Plan</h1>
-        <p data-cy="pricing-subtitle">
-          Unlock endless possibilities with our flexible pricing options
-          designed for every learner
-        </p>
+        <h1 data-cy="pricing-title">{headerTitle}</h1>
+        <p data-cy="pricing-subtitle">{headerSubtitle}</p>
       </div>
 
       <div className={styles.plans} data-cy="pricing-plans">
-        <div
-          className={`${styles.plan} ${styles.basic}`}
-          data-cy="pricing-plan-basic"
-        >
-          <div className={styles.planBadge} data-cy="pricing-plan-badge-basic">
-            Free
-          </div>
-          <div className={styles.planHeader}>
-            <h3>Basic</h3>
-            <p className={styles.description}>
-              Perfect for individual use and exploration of ESL learning
-            </p>
-            <div className={styles.price}>
-              <span className={styles.currency}>$</span>
-              <span className={styles.amount}>0</span>
-              <span className={styles.period}>/month</span>
-            </div>
-            <Link
-              href="/Auth/register/student"
-              className={styles.button}
-              data-cy="pricing-button-basic"
-            >
-              Get Started Free
-            </Link>
-          </div>
-          <div className={styles.divider}></div>
-          <ul className={styles.features} data-cy="pricing-features-basic">
-            <li>
-              <span className={styles.checkmark}>✓</span>10 daily active users
-            </li>
-            <li>
-              <span className={styles.checkmark}>✓</span>Basic learning
-              resources access
-            </li>
-            <li>
-              <span className={styles.checkmark}>✓</span>Limited ESL exercises
-            </li>
-            <li>
-              <span className={styles.checkmark}>✓</span>Community support
-            </li>
-          </ul>
-        </div>
+        {plans.map((plan) => {
+          const variant = (plan.content as any)?.variant as
+            | "basic"
+            | "premium"
+            | "enterprise"
+            | undefined;
+          const featured = Boolean((plan.content as any)?.featured);
 
-        <div
-          className={`${styles.plan} ${styles.premium} ${styles.featured}`}
-          data-cy="pricing-plan-premium"
-        >
-          <div
-            className={styles.planBadge}
-            data-cy="pricing-plan-badge-premium"
-          >
-            Most Popular
-          </div>
-          <div className={styles.planHeader}>
-            <h3>Premium</h3>
-            <p className={styles.description}>
-              Perfect for serious learners who want more features
-            </p>
-            <div className={styles.price}>
-              <span className={styles.currency}>$</span>
-              <span className={styles.amount}>9.99</span>
-              <span className={styles.period}>/month</span>
-            </div>
-            <Link
-              href="/Auth/register/student"
-              className={`${styles.button} ${styles.buttonPrimary}`}
-              data-cy="pricing-button-premium"
-            >
-              Start Premium Trial
-            </Link>
-          </div>
-          <div className={styles.divider}></div>
-          <ul className={styles.features} data-cy="pricing-features-premium">
-            <li>
-              <span className={styles.checkmark}>✓</span>Unlimited active users
-            </li>
-            <li>
-              <span className={styles.checkmark}>✓</span>Full learning resources
-              access
-            </li>
-            <li>
-              <span className={styles.checkmark}>✓</span>Priority email support
-            </li>
-            <li>
-              <span className={styles.checkmark}>✓</span>Advanced ESL exercises
-            </li>
-            <li>
-              <span className={styles.checkmark}>✓</span>Progress tracking
-            </li>
-            <li>
-              <span className={styles.checkmark}>✓</span>Custom learning paths
-            </li>
-          </ul>
-        </div>
+          const price = (plan.content as any)?.price ?? "";
+          const currency = (plan.content as any)?.currency ?? "";
+          const period = (plan.content as any)?.period ?? "";
 
-        <div
-          className={`${styles.plan} ${styles.enterprise}`}
-          data-cy="pricing-plan-enterprise"
-        >
-          <div
-            className={styles.planBadge}
-            data-cy="pricing-plan-badge-enterprise"
-          >
-            Enterprise
-          </div>
-          <div className={styles.planHeader}>
-            <h3>Enterprise</h3>
-            <p className={styles.description}>
-              Perfect for schools and large organizations
-            </p>
-            <div className={styles.price}>
-              <span className={styles.amount}>Custom</span>
-            </div>
-            <Link
-              href="/contact"
-              className={`${styles.button} ${styles.buttonEnterprise}`}
-              data-cy="pricing-button-enterprise"
+          const buttonLabel = (plan.content as any)?.button?.label ?? "";
+          const buttonHref = (plan.content as any)?.button?.href ?? "";
+          const buttonStyle = (plan.content as any)?.button?.style as
+            | "default"
+            | "primary"
+            | "enterprise"
+            | undefined;
+
+          const features = ((plan.content as any)?.features as string[]) || [];
+
+          const planClassName = [
+            styles.plan,
+            variant === "basic"
+              ? styles.basic
+              : variant === "premium"
+              ? styles.premium
+              : variant === "enterprise"
+              ? styles.enterprise
+              : "",
+            featured ? styles.featured : "",
+          ]
+            .filter(Boolean)
+            .join(" ");
+
+          const buttonClassName = [
+            styles.button,
+            buttonStyle === "primary" ? styles.buttonPrimary : "",
+            buttonStyle === "enterprise" ? styles.buttonEnterprise : "",
+          ]
+            .filter(Boolean)
+            .join(" ");
+
+          return (
+            <div
+              key={plan.slug}
+              className={planClassName}
+              data-cy={`pricing-plan-${plan.slug}`}
             >
-              Contact Sales Team
-            </Link>
-          </div>
-          <div className={styles.divider}></div>
-          <ul className={styles.features} data-cy="pricing-features-enterprise">
-            <li>
-              <span className={styles.checkmark}>✓</span>Custom user management
-            </li>
-            <li>
-              <span className={styles.checkmark}>✓</span>Advanced analytics
-            </li>
-            <li>
-              <span className={styles.checkmark}>✓</span>24/7 phone support
-            </li>
-            <li>
-              <span className={styles.checkmark}>✓</span>Training workshops
-            </li>
-            <li>
-              <span className={styles.checkmark}>✓</span>Custom curriculum
-              development
-            </li>
-            <li>
-              <span className={styles.checkmark}>✓</span>Dedicated account
-              manager
-            </li>
-          </ul>
-        </div>
+              {plan.badge ? (
+                <div
+                  className={styles.planBadge}
+                  data-cy={`pricing-plan-badge-${plan.slug}`}
+                >
+                  {plan.badge}
+                </div>
+              ) : null}
+
+              <div className={styles.planHeader}>
+                <h3>{plan.title}</h3>
+                {plan.description ? (
+                  <p className={styles.description}>{plan.description}</p>
+                ) : null}
+
+                <div className={styles.price}>
+                  {currency ? (
+                    <span className={styles.currency}>{currency}</span>
+                  ) : null}
+                  <span className={styles.amount}>{price}</span>
+                  {period ? (
+                    <span className={styles.period}>{period}</span>
+                  ) : null}
+                </div>
+
+                {buttonLabel && buttonHref ? (
+                  <Link
+                    href={buttonHref}
+                    className={buttonClassName}
+                    data-cy={`pricing-button-${plan.slug}`}
+                  >
+                    {buttonLabel}
+                  </Link>
+                ) : null}
+              </div>
+
+              <div className={styles.divider}></div>
+
+              {features.length ? (
+                <ul
+                  className={styles.features}
+                  data-cy={`pricing-features-${plan.slug}`}
+                >
+                  {features.map((feature) => (
+                    <li key={feature}>
+                      <span className={styles.checkmark}>✓</span>
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
+          );
+        })}
       </div>
 
       <div className={styles.footer} data-cy="pricing-footer">
-        <p>All plans include a 14-day free trial. No credit card required.</p>
-        <p>
-          Need help choosing?{" "}
-          <Link href="/contact" data-cy="pricing-contact-link">
-            Contact our team
-          </Link>
-        </p>
+        {footerNote ? <p>{footerNote}</p> : null}
+        {footerHelpText && footerHelpHref && footerHelpLabel ? (
+          <p>
+            {footerHelpText}{" "}
+            <Link href={footerHelpHref} data-cy="pricing-contact-link">
+              {footerHelpLabel}
+            </Link>
+          </p>
+        ) : null}
       </div>
     </section>
   );
 };
-
-export default PricingTable;

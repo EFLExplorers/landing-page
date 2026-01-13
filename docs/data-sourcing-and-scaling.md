@@ -15,17 +15,23 @@ Goal: reduce duplicated/hardcoded text/objects, centralize data in DB/config, an
 
 ## Suggested Storage Model
 
-- Tables/collections:
-  - `pricing_plans` (name, price, period, badge, description, features[], cta_link)
-  - `content_blocks` (page, section, title, subtitle, body, media/icon)
-  - `cards` (page, section, title, description, icon/image, cta)
-  - `faqs` (page, question, answer)
-  - `modules` (name, description, lessons, duration, class_size, color/icon)
-  - `characters` (name, image, role)
-  - `planets` (name, color/icon, order)
-  - `team_members` (name, role, title, image, bio, expertise[])
-  - `routes` (role, unauth_target, auth_target, verification_target)
-- Keep a seed JSON/TS config to mirror DB schemas for local/dev and SSR.
+- Current tables (implemented):
+  - `pages` (one row per route, e.g. `/`, `/about`)
+  - `page_sections` (sections per page by `section_key`, with `content` JSON)
+  - `content_items` (typed list data: `pricing`, `service`, `learning_tool`, `team_member`, `about_stat`, `core_value`, etc.)
+- Seed (implemented):
+  - `db/content-seed-v2.sql` seeds routes, sections, and list content.
+  - Seed reruns are safe for `content_items` via stable `slug` + `ON CONFLICT (slug) DO UPDATE`.
+
+## What is DB-driven today
+
+- `/`:
+  - `pages` + `page_sections` for section copy and header/footer sections
+  - `content_items` for pricing tiers, services, learning tools
+  - strict mode: missing env/seeded content fails build/SSG
+- `/about`:
+  - `pages` + `page_sections` for copy blocks
+  - `content_items` for team members/stats/core values
 
 ## Cleanup & De-duplication
 
@@ -40,7 +46,7 @@ Goal: reduce duplicated/hardcoded text/objects, centralize data in DB/config, an
 
 ## Steps to Implement
 
-- Create shared data configs (or seed data) matching the tables above.
-- Swap component-local arrays to props fed from a loader (SSR/static fetch or client fetch).
+- Continue migrating remaining pages (pricing/contact/platforms) to DB-driven props.
+- Keep content contracts (section keys + JSON shapes) documented and versioned with the seed.
 - Add a CTA resolver utility with role + auth-state inputs.
 - Add tests to ensure sections render from provided data and handle empty/error cases.

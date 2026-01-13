@@ -15,7 +15,7 @@ ESL Explorers is a comprehensive English language learning platform with three i
 - **Responsive Design**: Mobile-first design with CSS Modules
 - **SEO Optimized**: Server-side rendering with Next.js for optimal performance
 - **Type-Safe**: Full TypeScript implementation with proper interfaces
-- **Error Boundaries**: Graceful content loading with fallback systems
+- **Error Boundaries**: Used around some UI sections/components
 - **Comprehensive Testing**: Built-in testing framework for validation
 
 ## Database Setup
@@ -29,7 +29,7 @@ Run the SQL files in your Supabase SQL editor:
 ```bash
 # Apply schema and seed data
 psql -f db/content-schema.sql
-psql -f db/content-seed-simple.sql
+psql -f db/content-seed-v2.sql
 ```
 
 ### 2. Environment Variables
@@ -53,13 +53,8 @@ NEXT_PUBLIC_TEACHER_URL=https://teacher.yourdomain.com
 The platform uses database-driven content for marketing pages. Content is managed through these tables:
 
 - `pages` & `page_sections` - Page content and metadata
-- `pricing_tiers` - Pricing plans
-- `services` - Service offerings
-- `learning_tools` - Learning tool descriptions
-- `faqs` - Frequently asked questions
-- `team_members` - Team profiles
-- `about_stats` - About page statistics
-- `core_values` - Company values
+- `content_items` - Unified typed content lists (pricing tiers, services, learning tools, team members, stats, values, etc.)
+- `faqs` - Legacy/supporting table (used by some seed flows)
 
 ## Getting Started
 
@@ -111,7 +106,7 @@ This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-appl
 │   └── utils/               # Utility functions
 ├── db/                      # Database schema and seed files
 │   ├── content-schema.sql   # Improved database schema
-│   └── content-seed-simple.sql # Working seed data
+│   └── content-seed-v2.sql   # DB-driven seed data (home/about/header/footer + content_items)
 ├── documents/               # Project documentation
 │   ├── CONTENT_MIGRATION.md # Migration guide
 │   ├── MIGRATION_INTEGRATION_GUIDE.md # Integration steps
@@ -126,11 +121,15 @@ This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-appl
 All marketing components now accept props from the database:
 
 - **Props-based architecture** instead of hardcoded content
-- **Fallback system** ensures components work without database
 - **Type-safe interfaces** for all content types
 - **Static generation** with `getStaticProps` for optimal performance
 - **Error boundaries** for graceful content loading failures
 - **Instant updates** via GitHub webhook triggers (no 5-minute delay)
+
+#### Strict mode (current)
+
+- The home page (`/`) is strict: missing Supabase env vars or missing required seeded content will fail build/SSG.
+- Header/Footer copy is not hardcoded; it is rendered only when DB-provided props are present.
 
 ### Instant Content Updates
 
@@ -149,7 +148,7 @@ The project includes comprehensive testing capabilities:
 
 - **API Testing**: Validate all content endpoints return correct data
 - **Page Testing**: Verify database content loads properly
-- **Error Testing**: Confirm fallback systems work when database fails
+- **Error Testing**: Confirm error boundaries and strict content expectations behave as expected
 - **Performance Testing**: Ensure optimal loading times
 
 See `TESTING_GUIDE.md` for complete testing instructions.

@@ -42,19 +42,6 @@ interface HomePageProps {
   learningTools: LearningTool[];
 }
 
-const emptyHomeProps: HomePageProps = {
-  heroSection: null,
-  taglineSection: null,
-  registerCTASection: null,
-  servicesSection: null,
-  pricingSection: null,
-  learningToolsSection: null,
-  howWeTeachSection: null,
-  pricingTiers: [],
-  services: [],
-  learningTools: [],
-};
-
 export const HomePage = ({
   heroSection,
   taglineSection,
@@ -136,117 +123,117 @@ export const HomePage = ({
 };
 
 export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
-  try {
-    // During build time, use direct API calls instead of fetch
-    const { supabase, isSupabaseConfigured } = await import(
-      "../utils/supabaseClient"
-    );
+  // During build time, use direct API calls instead of fetch
+  const { supabase, isSupabaseConfigured } = await import(
+    "../utils/supabaseClient"
+  );
 
-    if (!isSupabaseConfigured) {
-      console.warn(
-        "[Home] Supabase environment variables are missing; using empty content."
-      );
-      return {
-        props: emptyHomeProps,
-        revalidate: 300,
-      };
-    }
-
-    // Fetch page content
-    const { data: pageData } = await supabase
-      .from("pages")
-      .select("*")
-      .eq("route", "/")
-      .single();
-
-    const { data: sectionsData } = await supabase
-      .from("page_sections")
-      .select("*")
-      .eq("page_id", pageData?.id || "")
-      .eq("active", true)
-      .order("sort_order", { ascending: true });
-
-    const pageContent: PageContent = pageData
-      ? {
-          id: pageData.id,
-          route: pageData.route,
-          title: pageData.title,
-          meta_description: pageData.meta_description,
-          sections: sectionsData || [],
-        }
-      : { id: "", route: "/", sections: [] };
-
-    // Find specific sections
-    const heroSection = pageContent.sections.find(
-      (s) => s.section_key === "hero"
-    );
-    const taglineSection = pageContent.sections.find(
-      (s) => s.section_key === "tagline"
-    );
-    const registerCTASection = pageContent.sections.find(
-      (s) => s.section_key === "register-cta"
-    );
-    const servicesSection = pageContent.sections.find(
-      (s) => s.section_key === "services"
-    );
-    const pricingSection = pageContent.sections.find(
-      (s) => s.section_key === "pricing"
-    );
-    const learningToolsSection = pageContent.sections.find(
-      (s) => s.section_key === "learning-tools"
-    );
-    const howWeTeachSection = pageContent.sections.find(
-      (s) => s.section_key === "how-we-teach"
-    );
-
-    // Fetch content types from the unified content_items table
-    const [pricingData, servicesData, toolsData] = await Promise.all([
-      supabase
-        .from("content_items")
-        .select("*")
-        .eq("content_type", "pricing")
-        .eq("active", true)
-        .order("sort_order", { ascending: true }),
-      supabase
-        .from("content_items")
-        .select("*")
-        .eq("content_type", "service")
-        .eq("active", true)
-        .order("sort_order", { ascending: true }),
-      supabase
-        .from("content_items")
-        .select("*")
-        .eq("content_type", "learning_tool")
-        .eq("active", true)
-        .order("sort_order", { ascending: true }),
-    ]);
-
-    const pricingTiers: PricingTier[] = pricingData.data || [];
-    const services: Service[] = servicesData.data || [];
-    const learningTools: LearningTool[] = toolsData.data || [];
-
-    return {
-      props: {
-        heroSection: heroSection || null,
-        taglineSection: taglineSection || null,
-        registerCTASection: registerCTASection || null,
-        servicesSection: servicesSection || null,
-        pricingSection: pricingSection || null,
-        learningToolsSection: learningToolsSection || null,
-        howWeTeachSection: howWeTeachSection || null,
-        pricingTiers,
-        services,
-        learningTools,
-      },
-      revalidate: 300, // Revalidate every 5 minutes
-    };
-  } catch (error) {
-    console.error("Error fetching home page data:", error);
-    return {
-      props: emptyHomeProps,
-      revalidate: 300,
-    };
+  if (!isSupabaseConfigured) {
+    throw new Error("[Home] Supabase environment variables are missing.");
   }
+
+  // Fetch page content
+  const { data: pageData, error: pageError } = await supabase
+    .from("pages")
+    .select("*")
+    .eq("route", "/")
+    .single();
+
+  if (pageError || !pageData?.id) {
+    throw new Error(
+      `[Home] Missing pages row for route '/': ${pageError?.message || "no id"}`
+    );
+  }
+
+  const { data: sectionsData, error: sectionsError } = await supabase
+    .from("page_sections")
+    .select("*")
+    .eq("page_id", pageData.id)
+    .eq("active", true)
+    .order("sort_order", { ascending: true });
+
+  if (sectionsError || !sectionsData?.length) {
+    throw new Error(
+      `[Home] Missing page_sections for '/': ${sectionsError?.message || "none"}`
+    );
+  }
+
+  const pageContent: PageContent = {
+    id: pageData.id,
+    route: pageData.route,
+    title: pageData.title,
+    meta_description: pageData.meta_description,
+    sections: sectionsData,
+  };
+
+  // Find specific sections
+  const heroSection =
+    pageContent.sections.find((s) => s.section_key === "hero") || null;
+  const taglineSection =
+    pageContent.sections.find((s) => s.section_key === "tagline") || null;
+  const registerCTASection =
+    pageContent.sections.find((s) => s.section_key === "register-cta") || null;
+  const servicesSection =
+    pageContent.sections.find((s) => s.section_key === "services") || null;
+  const pricingSection =
+    pageContent.sections.find((s) => s.section_key === "pricing") || null;
+  const learningToolsSection =
+    pageContent.sections.find((s) => s.section_key === "learning-tools") || null;
+  const howWeTeachSection =
+    pageContent.sections.find((s) => s.section_key === "how-we-teach") || null;
+
+  // Fetch content types from the unified content_items table
+  const [pricingData, servicesData, toolsData] = await Promise.all([
+    supabase
+      .from("content_items")
+      .select("*")
+      .eq("page_id", pageData.id)
+      .eq("content_type", "pricing")
+      .eq("active", true)
+      .order("sort_order", { ascending: true }),
+    supabase
+      .from("content_items")
+      .select("*")
+      .eq("page_id", pageData.id)
+      .eq("content_type", "service")
+      .eq("active", true)
+      .order("sort_order", { ascending: true }),
+    supabase
+      .from("content_items")
+      .select("*")
+      .eq("page_id", pageData.id)
+      .eq("content_type", "learning_tool")
+      .eq("active", true)
+      .order("sort_order", { ascending: true }),
+  ]);
+
+  if (pricingData.error) throw new Error(pricingData.error.message);
+  if (servicesData.error) throw new Error(servicesData.error.message);
+  if (toolsData.error) throw new Error(toolsData.error.message);
+
+  const pricingTiers: PricingTier[] = pricingData.data || [];
+  const services: Service[] = servicesData.data || [];
+  const learningTools: LearningTool[] = toolsData.data || [];
+
+  if (!pricingTiers.length) throw new Error("[Home] Missing pricing tiers.");
+  if (!services.length) throw new Error("[Home] Missing services.");
+  if (!learningTools.length) throw new Error("[Home] Missing learning tools.");
+
+  return {
+    props: {
+      heroSection,
+      taglineSection,
+      registerCTASection,
+      servicesSection,
+      pricingSection,
+      learningToolsSection,
+      howWeTeachSection,
+      pricingTiers,
+      services,
+      learningTools,
+    },
+    revalidate: 300,
+  };
 };
 
 export default HomePage;

@@ -22,6 +22,8 @@ create table if not exists public.pages (
 -- ============================================
 create table if not exists public.content_items (
   id uuid primary key default gen_random_uuid(),
+  page_id uuid references public.pages(id) on delete cascade, -- route ownership (optional; helps visualizer + tracking)
+  section_key text, -- optional: which section this item belongs to (e.g. 'services', 'pricing')
   content_type text not null, -- 'pricing', 'service', 'faq', 'team_member', etc.
   slug text unique, -- for URL-friendly identifiers
   title text,
@@ -36,6 +38,12 @@ create table if not exists public.content_items (
 );
 
 -- Backfill columns on existing deployments
+alter table if exists public.content_items
+  add column if not exists page_id uuid references public.pages(id) on delete cascade;
+
+alter table if exists public.content_items
+  add column if not exists section_key text;
+
 alter table if exists public.content_items
   add column if not exists slug text unique;
 
@@ -71,6 +79,8 @@ drop index if exists idx_content_items_type_active;
 drop index if exists idx_content_items_slug;
 create index idx_content_items_type_active on content_items(content_type, active);
 create index idx_content_items_slug on content_items(slug);
+create index if not exists idx_content_items_page_type_active
+  on public.content_items(page_id, content_type, active, sort_order);
 
 -- ============================================
 -- 3. Page Sections (improved - more flexible)
@@ -89,6 +99,10 @@ create table if not exists public.page_sections (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- Needed for "ON CONFLICT (page_id, section_key)" upserts in seed scripts
+create unique index if not exists idx_page_sections_page_id_section_key_unique
+  on public.page_sections(page_id, section_key);
 
 -- Backfill columns for existing deployments
 alter table if exists public.page_sections
@@ -120,6 +134,57 @@ alter table if exists public.page_sections
 -- Add indexes
 create index idx_page_sections_page_key on page_sections(page_id, section_key);
 create index idx_page_sections_active on page_sections(active, sort_order);
+
+-- ============================================
+-- 3b. Site Sections (global - header/footer/etc)
+-- ============================================
+create table if not exists public.site_sections (
+  id uuid primary key default gen_random_uuid(),
+  section_key text not null unique, -- e.g. 'header', 'footer'
+  section_type text not null default 'content',
+  content jsonb not null default '{}'::jsonb,
+  settings jsonb not null default '{}'::jsonb,
+  sort_order integer not null default 0,
+  active boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists idx_site_sections_active on public.site_sections(active, sort_order);
+
+-- ============================================
+-- 3c. Route Section Inventory (tracking/migration)
+-- ============================================
+-- Purpose: explicitly list which sections belong to which route and
+-- what shape of JSON we expect in `page_sections.content`.
+-- This is a tracking layer (does not replace runtime `page_sections`).
+create table if not exists public.route_sections (
+  id uuid primary key default gen_random_uuid(),
+  page_id uuid not null references public.pages(id) on delete cascade,
+  section_key text not null, -- e.g. 'hero', 'pricing'
+  section_type text not null default 'content',
+  expected_content jsonb not null default '{}'::jsonb, -- example/contract
+  notes text,
+  sort_order integer not null default 0,
+  active boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (page_id, section_key)
+);
+
+create index if not exists idx_route_sections_page_id on public.route_sections(page_id);
+
+-- Convenience view: what content actually exists per route/section
+create or replace view public.route_section_content as
+select
+  p.route,
+  ps.section_key,
+  ps.section_type,
+  ps.sort_order,
+  ps.active,
+  ps.content
+from public.pages p
+join public.page_sections ps on ps.page_id = p.id;
 
 -- ============================================
 -- 4. Content Relationships (NEW - for complex relationships)

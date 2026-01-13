@@ -1,34 +1,34 @@
 import Image from "next/image";
 import styles from "@/pages/platforms/student.module.css";
+import type { PageSection } from "@/pages/api/page-content";
 
-const characters = [
-  {
-    name: "Cassidy",
-    imageUrl: "/assets/images/characters/Cassidy.png",
-  },
-  {
-    name: "Emma",
-    imageUrl: "/assets/images/characters/Emma.png",
-  },
-  {
-    name: "Luke",
-    imageUrl: "/assets/images/characters/Luke.png",
-  },
-  {
-    name: "Riley",
-    imageUrl: "/assets/images/characters/Riley.png",
-  },
-];
+export interface StudentCharacter {
+  slug: string;
+  name: string;
+  imageUrl: string;
+}
 
-export const StudentCharactersSection = () => {
+export interface StudentCharactersSectionProps {
+  section: PageSection | null;
+  characters: StudentCharacter[];
+}
+
+export const StudentCharactersSection = ({
+  section,
+  characters,
+}: StudentCharactersSectionProps) => {
+  if (!section) return null;
+  if (!characters?.length) return null;
+
+  const intro = (section.content as any)?.intro ?? "";
+  const outro = (section.content as any)?.outro ?? "";
+
   return (
     <section className={styles.characters} data-cy="student-characters-section">
       <div className={styles.characterContent}>
         <div className={styles.characterGridContainer}>
           <p className={styles.characterText} data-cy="student-characters-copy">
-            Help the gang unlock items by completing guided tasks. As you move
-            ahead, they stay around to guide you on the ESL Explorer, and give
-            rewards and English skills!
+            {intro}
           </p>
           <div
             className={styles.characterGrid}
@@ -36,7 +36,7 @@ export const StudentCharactersSection = () => {
           >
             {characters.map((character) => (
               <div
-                key={character.name}
+                key={character.slug}
                 className={styles.characterCircle}
                 data-cy="student-character-card"
               >
@@ -59,18 +59,9 @@ export const StudentCharactersSection = () => {
           </div>
         </div>
         <div className={styles.featureText} data-cy="student-characters-outro">
-          <p>
-            With 3D lessons per planet, equipping learners with a solid
-            foundation in English. Each lesson allows you to practice everyday
-            English. That&apos;s the lessons already prepared for teachers,
-            allowing them to focus on their main passion: teaching! Students can
-            track their progress and become masters of the English language.
-            Learning English has never been this easy!
-          </p>
+          <p>{outro}</p>
         </div>
       </div>
     </section>
   );
 };
-
-export default StudentCharactersSection;

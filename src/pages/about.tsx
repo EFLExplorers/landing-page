@@ -3,7 +3,6 @@ import Head from "next/head";
 import { GetStaticProps } from "next";
 import {
   AboutUsSection,
-  AboutUsSectionProps,
   TeamMember,
   AboutStat,
   CoreValue,
@@ -111,99 +110,125 @@ export const getStaticProps: GetStaticProps<AboutPageProps> = async () => {
       console.warn(
         "[About] Supabase environment variables are missing; using empty content."
       );
-      return {
-        props: emptyAboutProps,
-        revalidate: 300,
-      };
+      return { props: emptyAboutProps, revalidate: 300 };
     }
 
     // Fetch page content
-    const { data: pageData } = await supabase
+    const { data: pageData, error: pageError } = await supabase
       .from("pages")
       .select("*")
       .eq("route", "/about")
       .single();
 
+    if (pageError || !pageData?.id) {
+      throw new Error(
+        `[About] Missing pages row for route '/about': ${
+          pageError?.message || "no id"
+        }`
+      );
+    }
+
     const { data: sectionsData } = await supabase
       .from("page_sections")
       .select("*")
-      .eq("page_id", pageData?.id || "")
+      .eq("page_id", pageData.id)
       .eq("active", true)
       .order("sort_order", { ascending: true });
 
-    const pageContent: PageContent = pageData
-      ? {
-          id: pageData.id,
-          route: pageData.route,
-          title: pageData.title,
-          meta_description: pageData.meta_description,
-          sections: sectionsData || [],
-        }
-      : { id: "", route: "/about", sections: [] };
+    const pageContent: PageContent = {
+      id: pageData.id,
+      route: pageData.route,
+      title: pageData.title,
+      meta_description: pageData.meta_description,
+      sections: sectionsData || [],
+    };
 
-    // Fetch content types from the unified content_items table
+    // Find specific sections
+    const heroSection =
+      pageContent.sections.find((s) => s.section_key === "hero") || null;
+    const descriptionSection =
+      pageContent.sections.find((s) => s.section_key === "description") || null;
+    const taglineSection =
+      pageContent.sections.find((s) => s.section_key === "tagline") || null;
+    const missionSection =
+      pageContent.sections.find((s) => s.section_key === "mission") || null;
+    const visionSection =
+      pageContent.sections.find((s) => s.section_key === "vision") || null;
+    const teamIntroSection =
+      pageContent.sections.find((s) => s.section_key === "team-intro") || null;
+    const valuesHeaderSection =
+      pageContent.sections.find((s) => s.section_key === "values-header") ||
+      null;
+
+    // Fetch content types from the unified content_items table (scoped to /about)
     const [teamData, statsData, valuesData] = await Promise.all([
       supabase
         .from("content_items")
         .select("*")
+        .eq("page_id", pageData.id)
         .eq("content_type", "team_member")
         .eq("active", true)
         .order("sort_order", { ascending: true }),
       supabase
         .from("content_items")
         .select("*")
+        .eq("page_id", pageData.id)
         .eq("content_type", "about_stat")
         .eq("active", true)
         .order("sort_order", { ascending: true }),
       supabase
         .from("content_items")
         .select("*")
+        .eq("page_id", pageData.id)
         .eq("content_type", "core_value")
         .eq("active", true)
         .order("sort_order", { ascending: true }),
     ]);
 
-    const teamMembers: TeamMember[] = teamData.data || [];
-    const stats: AboutStat[] = statsData.data || [];
-    const coreValues: CoreValue[] = valuesData.data || [];
+    if (teamData.error) throw new Error(teamData.error.message);
+    if (statsData.error) throw new Error(statsData.error.message);
+    if (valuesData.error) throw new Error(valuesData.error.message);
 
-    // Find specific sections
-    const heroSection =
-      pageContent.sections?.find((s) => s.section_key === "hero") || null;
-    const descriptionSection =
-      pageContent.sections?.find((s) => s.section_key === "description") ||
-      null;
-    const taglineSection =
-      pageContent.sections?.find((s) => s.section_key === "tagline") || null;
-    const missionSection =
-      pageContent.sections?.find((s) => s.section_key === "mission") || null;
-    const visionSection =
-      pageContent.sections?.find((s) => s.section_key === "vision") || null;
-    const teamIntroSection =
-      pageContent.sections?.find((s) => s.section_key === "team-intro") || null;
-    const valuesHeaderSection =
-      pageContent.sections?.find((s) => s.section_key === "values-header") ||
-      null;
+    const teamMembers: TeamMember[] = (teamData.data || []).map((row: any) => ({
+      id: row.id,
+      name: row.title || "",
+      role: row.subtitle || "",
+      title: row.content?.role || "",
+      image: row.content?.image || "",
+      bio: row.description || "",
+      expertise: row.content?.expertise || [],
+    }));
 
-    const safePageData: PageContent = pageData
-      ? {
-          id: pageData.id,
-          route: pageData.route,
-          title: pageData.title || "",
-          meta_description: pageData.meta_description || "",
-          sections: sectionsData || [],
-        }
-      : {
-          id: "",
-          route: "/about",
-          title: "",
-          meta_description: "",
-          sections: [],
-        };
+    const stats: AboutStat[] = (statsData.data || []).map((row: any) => ({
+      id: row.id,
+      number: row.title || "",
+      label: row.description || "",
+    }));
+
+    const coreValues: CoreValue[] = (valuesData.data || []).map((row: any) => ({
+      id: row.id,
+      title: row.title || "",
+      description: row.description || "",
+      icon: row.content?.icon || "",
+    }));
+
+    if (!heroSection) throw new Error("[About] Missing hero section.");
+    if (!descriptionSection)
+      throw new Error("[About] Missing description section.");
+    if (!taglineSection) throw new Error("[About] Missing tagline section.");
+    if (!missionSection) throw new Error("[About] Missing mission section.");
+    if (!visionSection) throw new Error("[About] Missing vision section.");
+    if (!teamIntroSection)
+      throw new Error("[About] Missing team-intro section.");
+    if (!valuesHeaderSection)
+      throw new Error("[About] Missing values-header section.");
+    if (!teamMembers.length) throw new Error("[About] Missing team members.");
+    if (!stats.length) throw new Error("[About] Missing stats.");
+    if (!coreValues.length) throw new Error("[About] Missing core values.");
 
     return {
       props: {
-        pageData: safePageData,
+        pageData: pageContent,
         teamMembers,
         stats,
         coreValues,
@@ -218,11 +243,10 @@ export const getStaticProps: GetStaticProps<AboutPageProps> = async () => {
       revalidate: 300, // Revalidate every 5 minutes
     };
   } catch (error) {
-    console.error("Error fetching about page data:", error);
-    return {
-      props: emptyAboutProps,
-      revalidate: 300,
-    };
+    console.warn("[About] Failed to load DB content; using empty content.", {
+      error,
+    });
+    return { props: emptyAboutProps, revalidate: 300 };
   }
 };
 
