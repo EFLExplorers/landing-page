@@ -18,5 +18,5 @@ const createFallbackClient = (): SupabaseClient =>
   ) as SupabaseClient;
 
 export const supabase = isSupabaseConfigured
-  ? createClient(supabaseUrl, supabaseAnonKey)
+  ? createClient(supabaseUrl!, supabaseAnonKey!)
   : createFallbackClient();
