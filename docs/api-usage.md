@@ -1,6 +1,6 @@
 # UI ↔ API / DB Usage
 
-Current state: the app has Supabase-backed content APIs and some pages fetch directly from Supabase during `getStaticProps`.
+Current state: the app has Supabase-backed content APIs and key pages fetch directly from Supabase during `getStaticProps` (or `getServerSideProps` for `/contact`).
 
 - Page content: `pages` + `page_sections`
 - List content: `content_items`
@@ -10,19 +10,22 @@ Note: `/` is strict (missing required Supabase env/seeded content fails build/SS
 ## Current Data Dependencies (by page)
 
 - Home
-  - `pages` + `page_sections` for section copy and header/footer sections
+  - `pages` + `page_sections` for section copy
   - `content_items` for `pricing`, `service`, `learning_tool`
 - Pricing
-  - Static component content (not DB-driven yet)
+  - `pages` + `page_sections` for header/footer copy blocks
+  - `content_items` for `pricing_plan`
 - About
   - `pages` + `page_sections` for copy blocks
   - `content_items` for `team_member`, `about_stat`, `core_value`
 - Contact
-  - Static component content (not DB-driven yet)
+  - `pages` + `page_sections` for hero/form/faq header copy
+  - `content_items` for `faq` (question/answer)
 - Teacher platform
   - Static component content (not DB-driven yet)
 - Student platform
-  - Static component content (not DB-driven yet)
+  - `pages` + `page_sections` for hero/characters/planets/cta copy
+  - `content_items` for `student_character`, `student_planet`
 - Courses
   - Course catalog (placeholder today)
 - Auth/CTA
@@ -41,6 +44,6 @@ Note: `/` is strict (missing required Supabase env/seeded content fails build/SS
 ## Client Integration Notes
 
 - Add loading/empty/error states to all dynamic sections.
-- Prefer server-side fetching (`getStaticProps`) for marketing pages unless you intentionally need client-side updates.
+- Prefer server-side fetching (`getStaticProps`) for marketing pages unless you intentionally need runtime updates.
 - Normalize CTA handling: central helper that resolves target based on role + auth state.
 - Keep `data-cy` hooks stable after data becomes dynamic.

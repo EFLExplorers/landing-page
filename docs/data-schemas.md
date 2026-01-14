@@ -118,7 +118,7 @@ type RegisterCTASectionContent = {
 };
 ```
 
-### Global layout sections stored on `/` today
+### Global layout sections (`site_sections.content`)
 
 #### `header`
 
@@ -147,5 +147,196 @@ type FooterSectionContent = {
     links: Array<{ label: string; href: string }>;
   }>;
   bottom_bar: string[];
+};
+```
+
+### About (`/about`) sections
+
+#### `/about`: `hero`
+
+```ts
+type AboutHeroSectionContent = {
+  title: string;
+  subtitle: string;
+};
+```
+
+#### `/about`: `description`
+
+```ts
+type AboutDescriptionSectionContent = {
+  body: string;
+};
+```
+
+#### `/about`: `tagline`
+
+```ts
+type AboutTaglineSectionContent = {
+  text: string;
+};
+```
+
+#### `/about`: `mission`
+
+```ts
+type AboutMissionSectionContent = {
+  title: string;
+  body: string;
+  points: string[];
+};
+```
+
+#### `/about`: `vision`
+
+```ts
+type AboutVisionSectionContent = {
+  title: string;
+  body: string;
+  goals: string[];
+};
+```
+
+#### `/about`: `team-intro`
+
+```ts
+type AboutTeamIntroSectionContent = {
+  title: string;
+  body: string;
+};
+```
+
+#### `/about`: `values-header`
+
+```ts
+type AboutValuesHeaderSectionContent = {
+  title: string;
+};
+```
+
+### Contact (`/contact`) sections
+
+#### `/contact`: `hero`
+
+```ts
+type ContactHeroSectionContent = {
+  title: string;
+  subtitle: string;
+  contact_methods: Array<{ icon: string; href: string; text: string }>;
+};
+```
+
+#### `/contact`: `form`
+
+```ts
+type ContactFormSectionContent = {
+  title: string;
+  subtitle: string;
+  subject_options: string[];
+};
+```
+
+#### `/contact`: `faq`
+
+```ts
+type ContactFAQSectionContent = {
+  title: string;
+  subtitle: string;
+};
+```
+
+### Pricing (`/pricing`) sections + items
+
+#### `/pricing`: `pricing-header`
+
+```ts
+type PricingHeaderSectionContent = {
+  badge: string;
+  title: string;
+  subtitle: string;
+};
+```
+
+#### `/pricing`: `pricing-footer`
+
+```ts
+type PricingFooterSectionContent = {
+  note: string;
+  help_text: string;
+  help_href: string;
+  help_label: string;
+};
+```
+
+#### `/pricing`: `content_items` (`pricing_plan`)
+
+```ts
+type PricingPlanItemContent = {
+  variant: "basic" | "premium" | "enterprise";
+  featured?: boolean;
+  price: string; // e.g. "0", "9.99", "Custom"
+  currency?: string; // e.g. "$"
+  period?: string; // e.g. "/month"
+  button: { label: string; href: string; style?: "default" | "primary" | "enterprise" };
+  features: string[];
+};
+```
+
+### Student platform (`/platforms/student`) sections + items
+
+#### `/platforms/student`: `hero`
+
+```ts
+type StudentPlatformHeroSectionContent = {
+  title: string;
+  subtitle: string;
+  cta: { label: string; href: string };
+  image: { src: string; alt: string; width: number; height: number };
+};
+```
+
+#### `/platforms/student`: `characters`
+
+```ts
+type StudentPlatformCharactersSectionContent = {
+  intro: string;
+  outro: string;
+};
+```
+
+#### `/platforms/student`: `planets`
+
+```ts
+type StudentPlatformPlanetsSectionContent = {
+  title: string;
+  toggle_on_label: string;
+  toggle_off_label: string;
+  autoplay_ms: number;
+};
+```
+
+#### `/platforms/student`: `cta`
+
+```ts
+type StudentPlatformCTASectionContent = {
+  title: string;
+  button: { label: string; href: string };
+};
+```
+
+#### `/platforms/student`: `content_items` (`student_character`)
+
+```ts
+type StudentCharacterItemContent = {
+  imageUrl: string;
+};
+```
+
+#### `/platforms/student`: `content_items` (`student_planet`)
+
+```ts
+type StudentPlanetItemContent = {
+  color: string; // css var string
+  icon: string; // emoji
 };
 ```

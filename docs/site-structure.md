@@ -5,7 +5,10 @@ This is a page-by-page text tree of the current landing site. It mirrors the str
 - Shared layout
   - `_app.tsx` wraps everything in `Layout`
   - `Layout`: `Header` + `main` + `Footer`
-  - `Header`: built from `Header` → `Navbar` + `AuthButtons`.\n+    - Data: optional `headerContent` props (DB-driven when provided; no hardcoded fallback copy).\n+  - `Footer`: built from `Footer`.\n+    - Data: optional `footerContent` props (DB-driven when provided; no hardcoded fallback copy).
+  - `Header`: built from `Header` → `Navbar` + `AuthButtons`.
+    - Data: fetched globally from `site_sections` (client-side in `Layout`).
+  - `Footer`: built from `Footer`.
+    - Data: fetched globally from `site_sections` (client-side in `Layout`).
 
 - `/` (home)
   - `PageLayout` wrapper
@@ -15,13 +18,19 @@ This is a page-by-page text tree of the current landing site. It mirrors the str
   - `ServicesSection`: cards for Student Portal, Teacher Resources, Interactive Learning, Progress Tracking, Assessment Tools, Communication Hub
   - `PricingSection`: tiers (Free Access, Individual, Teacher, School) with CTA per card
   - `RegisterCTASection`: CTA → `/Auth/register`
-  - Data sources (current):\n+    - `pages` + `page_sections` (section copy, header/footer sections)\n+    - `content_items` (pricing tiers, services, learning tools)\n+  - Notes:\n+    - Home is strict: missing required Supabase env/seeded content causes SSG/build to fail.
+  - Data sources (current):
+    - `pages` + `page_sections` (section copy)
+    - `content_items` (pricing tiers, services, learning tools)
+  - Notes:
+    - Home is strict: missing required Supabase env/seeded content causes SSG/build to fail.
 
 - `/pricing`
   - `PricingTable`: header badge + title/subtitle
   - Plans: Basic (Free) → `/Auth/register/student`; Premium (Most Popular) → `/Auth/register/student`; Enterprise → `/contact`
   - Footer note: 14-day trial + link to contact
-  - Data sources (current): static component content (not DB-driven yet)
+  - Data sources (current):
+    - `pages` + `page_sections` (`pricing-header`, `pricing-footer`)
+    - `content_items` (`pricing_plan`)
 
 - `/about`
   - `AboutUsSection`
@@ -31,14 +40,20 @@ This is a page-by-page text tree of the current landing site. It mirrors the str
     - Vision block (copy + 3 goals)
     - Team grid (Shinade Groves, Bobby Brown, Nathan Van Der Watt)
     - Values grid (Excellence, Community, Innovation, Accessibility)
-  - Data sources (current):\n+    - `pages` + `page_sections` (copy blocks)\n+    - `content_items` (`team_member`, `about_stat`, `core_value`)\n+    - Footer content is passed as `footerContent` props (from DB)
+  - Data sources (current):
+    - `pages` + `page_sections` (copy blocks)
+    - `content_items` (`team_member`, `about_stat`, `core_value`)
 
 - `/contact`
   - `PageLayout` wrapper
   - `ContactHeroSection`: title/subtitle + email + phone
   - `ContactFormSection`: fields first/last/email/subject/message + submit
   - `ContactFAQSection`: accordion list of FAQs
-  - Data sources (current): static component content (not DB-driven yet)
+  - Data sources (current):
+    - `pages` + `page_sections` (`hero`, `form`, `faq`)
+    - `content_items` (`faq`)
+  - Notes:
+    - `/contact` uses `getServerSideProps` (SSR).
 
 - `/platforms/teacher`
   - `TeacherHeroSection`: headline, CTA → `/Auth/register/teacher`, hero image
@@ -53,7 +68,9 @@ This is a page-by-page text tree of the current landing site. It mirrors the str
   - `StudentCharactersSection`: character cards (Cassidy, Emma, Luke, Riley) + copy
   - `StudentPlanetsSection`: rotating planets carousel with start/stop controls
   - `StudentCTASection`: CTA → `/Auth/register/student`
-  - Data sources (current): static component content (not DB-driven yet)
+  - Data sources (current):
+    - `pages` + `page_sections` (hero/characters/planets/cta copy)
+    - `content_items` (`student_character`, `student_planet`)
 
 - `/courses`
   - Placeholder page with title and empty course grid

@@ -32,6 +32,16 @@ Goal: reduce duplicated/hardcoded text/objects, centralize data in DB/config, an
 - `/about`:
   - `pages` + `page_sections` for copy blocks
   - `content_items` for team members/stats/core values
+- `/contact`:
+  - `pages` + `page_sections` for hero/form/faq header copy
+  - `content_items` for FAQs
+  - SSR: uses `getServerSideProps`
+- `/pricing`:
+  - `pages` + `page_sections` for `pricing-header` / `pricing-footer`
+  - `content_items` for `pricing_plan`
+- `/platforms/student`:
+  - `pages` + `page_sections` for hero/characters/planets/cta
+  - `content_items` for `student_character` / `student_planet`
 
 ## Cleanup & De-duplication
 
@@ -46,7 +56,7 @@ Goal: reduce duplicated/hardcoded text/objects, centralize data in DB/config, an
 
 ## Steps to Implement
 
-- Continue migrating remaining pages (pricing/contact/platforms) to DB-driven props.
+- Continue migrating remaining pages (teacher platform, courses, auth pages) to DB-driven props (if desired).
 - Keep content contracts (section keys + JSON shapes) documented and versioned with the seed.
 - Add a CTA resolver utility with role + auth-state inputs.
 - Add tests to ensure sections render from provided data and handle empty/error cases.
