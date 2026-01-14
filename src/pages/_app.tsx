@@ -4,6 +4,7 @@ import Head from "next/head";
 import { Layout } from "../components/layout/Layout";
 import type { HeaderContent } from "../components/layout/Header-Footer/Header";
 import type { FooterContent } from "../components/layout/Header-Footer/Footer";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 type AppPageProps = {
   headerContent?: HeaderContent | null;
@@ -24,6 +25,7 @@ function App({ Component, pageProps }: AppProps<AppPageProps>) {
         footerContent={pageProps.footerContent ?? null}
       >
         <Component {...pageProps} />
+        <SpeedInsights />
       </Layout>
     </>
   );
