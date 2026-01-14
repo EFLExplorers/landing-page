@@ -9,11 +9,11 @@ export interface ContentItem {
   subtitle?: string;
   description?: string;
   content: Record<string, any>;
-  metadata: Record<string, any>;
+  metadata?: Record<string, any>;
   sort_order: number;
   active: boolean;
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 // Backward compatibility interfaces
@@ -73,7 +73,9 @@ export default async function handler(
   try {
     let query = supabase
       .from("content_items")
-      .select("*")
+      .select(
+        "id, content_type, slug, title, subtitle, description, content, sort_order, active"
+      )
       .eq("content_type", type)
       .eq("active", true)
       .order("sort_order", { ascending: true });

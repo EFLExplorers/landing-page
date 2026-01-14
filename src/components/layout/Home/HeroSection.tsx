@@ -44,17 +44,17 @@ export const HeroSection = ({ section }: HeroSectionProps) => {
         {normalizedButtons.length ? (
           <div className={styles.buttonGroup}>
             {normalizedButtons.map((button) => (
-              <Link key={button.href} href={button.href} legacyBehavior>
-                <a
-                  className={styles.button}
-                  data-cy={
-                    button.href.includes("/student")
-                      ? "hero-register-student"
-                      : "hero-register-teacher"
-                  }
-                >
-                  {button.label}
-                </a>
+              <Link
+                key={button.href}
+                href={button.href}
+                className={styles.button}
+                data-cy={
+                  button.href.includes("/student")
+                    ? "hero-register-student"
+                    : "hero-register-teacher"
+                }
+              >
+                {button.label}
               </Link>
             ))}
           </div>

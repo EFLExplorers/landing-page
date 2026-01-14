@@ -72,7 +72,7 @@ export const getServerSideProps: GetServerSideProps<ContactPageProps> = async ()
 
   const { data: pageData, error: pageError } = await supabase
     .from("pages")
-    .select("*")
+    .select("id, route, title, meta_description")
     .eq("route", "/contact")
     .single();
 
@@ -86,7 +86,9 @@ export const getServerSideProps: GetServerSideProps<ContactPageProps> = async ()
 
   const { data: sectionsData, error: sectionsError } = await supabase
     .from("page_sections")
-    .select("*")
+    .select(
+      "id, section_key, section_type, title, subtitle, heading, subheading, body, cta_label, cta_href, content, data, settings, sort_order, active"
+    )
     .eq("page_id", pageData.id)
     .eq("active", true)
     .order("sort_order", { ascending: true });
@@ -120,7 +122,7 @@ export const getServerSideProps: GetServerSideProps<ContactPageProps> = async ()
 
   const { data: faqItems, error: faqError } = await supabase
     .from("content_items")
-    .select("*")
+    .select("title, description, content, sort_order, active")
     .eq("page_id", pageData.id)
     .eq("content_type", "faq")
     .eq("active", true)

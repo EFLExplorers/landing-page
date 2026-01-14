@@ -76,13 +76,15 @@ export const getStaticProps: GetStaticProps<
 
     const { data: pageData } = await supabase
       .from("pages")
-      .select("*")
+      .select("id, route, title, meta_description")
       .eq("route", "/platforms/student")
       .single();
 
     const { data: sectionsData } = await supabase
       .from("page_sections")
-      .select("*")
+      .select(
+        "id, section_key, section_type, title, subtitle, heading, subheading, body, cta_label, cta_href, content, data, settings, sort_order, active"
+      )
       .eq("page_id", pageData?.id || "")
       .eq("active", true)
       .order("sort_order", { ascending: true });
@@ -108,7 +110,7 @@ export const getStaticProps: GetStaticProps<
 
     const { data: characterItems } = await supabase
       .from("content_items")
-      .select("*")
+      .select("slug, title, content, sort_order, active")
       .eq("page_id", pageData?.id || "")
       .eq("content_type", "student_character")
       .eq("active", true)
@@ -116,7 +118,7 @@ export const getStaticProps: GetStaticProps<
 
     const { data: planetItems } = await supabase
       .from("content_items")
-      .select("*")
+      .select("slug, title, content, sort_order, active")
       .eq("page_id", pageData?.id || "")
       .eq("content_type", "student_planet")
       .eq("active", true)

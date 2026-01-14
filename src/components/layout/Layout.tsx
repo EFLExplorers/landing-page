@@ -21,7 +21,7 @@ export const Layout = ({
     const fetchGlobalSections = async () => {
       const { data, error } = await supabase
         .from("site_sections")
-        .select("*")
+        .select("section_key, content, active")
         .in("section_key", ["header", "footer"])
         .eq("active", true);
 

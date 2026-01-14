@@ -135,7 +135,7 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
   // Fetch page content
   const { data: pageData, error: pageError } = await supabase
     .from("pages")
-    .select("*")
+    .select("id, route, title, meta_description")
     .eq("route", "/")
     .single();
 
@@ -147,7 +147,9 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
 
   const { data: sectionsData, error: sectionsError } = await supabase
     .from("page_sections")
-    .select("*")
+    .select(
+      "id, section_key, section_type, title, subtitle, heading, subheading, body, cta_label, cta_href, content, data, settings, sort_order, active"
+    )
     .eq("page_id", pageData.id)
     .eq("active", true)
     .order("sort_order", { ascending: true });
@@ -186,21 +188,27 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
   const [pricingData, servicesData, toolsData] = await Promise.all([
     supabase
       .from("content_items")
-      .select("*")
+      .select(
+        "id, content_type, title, subtitle, description, content, sort_order, active"
+      )
       .eq("page_id", pageData.id)
       .eq("content_type", "pricing")
       .eq("active", true)
       .order("sort_order", { ascending: true }),
     supabase
       .from("content_items")
-      .select("*")
+      .select(
+        "id, content_type, title, subtitle, description, content, sort_order, active"
+      )
       .eq("page_id", pageData.id)
       .eq("content_type", "service")
       .eq("active", true)
       .order("sort_order", { ascending: true }),
     supabase
       .from("content_items")
-      .select("*")
+      .select(
+        "id, content_type, title, subtitle, description, content, sort_order, active"
+      )
       .eq("page_id", pageData.id)
       .eq("content_type", "learning_tool")
       .eq("active", true)

@@ -71,13 +71,15 @@ export const getStaticProps: GetStaticProps<PricingPageProps> = async () => {
 
     const { data: pageData } = await supabase
       .from("pages")
-      .select("*")
+      .select("id, route, title, meta_description")
       .eq("route", "/pricing")
       .single();
 
     const { data: sectionsData } = await supabase
       .from("page_sections")
-      .select("*")
+      .select(
+        "id, section_key, section_type, title, subtitle, heading, subheading, body, cta_label, cta_href, content, data, settings, sort_order, active"
+      )
       .eq("page_id", pageData?.id || "")
       .eq("active", true)
       .order("sort_order", { ascending: true });
@@ -101,7 +103,7 @@ export const getStaticProps: GetStaticProps<PricingPageProps> = async () => {
 
     const { data: planItems } = await supabase
       .from("content_items")
-      .select("*")
+      .select("slug, title, subtitle, description, content, sort_order, active")
       .eq("page_id", pageData?.id || "")
       .eq("content_type", "pricing_plan")
       .eq("active", true)

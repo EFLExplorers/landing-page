@@ -45,7 +45,7 @@ export default async function handler(
     // Fetch page data
     const { data: pageData, error: pageError } = await supabase
       .from("pages")
-      .select("*")
+      .select("id, route, title, meta_description")
       .eq("route", route)
       .single();
 
@@ -57,7 +57,9 @@ export default async function handler(
     // Fetch page sections
     const { data: sectionsData, error: sectionsError } = await supabase
       .from("page_sections")
-      .select("*")
+      .select(
+        "id, section_key, section_type, title, subtitle, heading, subheading, body, cta_label, cta_href, content, data, settings, sort_order, active"
+      )
       .eq("page_id", pageData.id)
       .eq("active", true)
       .order("sort_order", { ascending: true });
