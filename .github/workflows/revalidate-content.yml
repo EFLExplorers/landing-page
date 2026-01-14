@@ -2,7 +2,7 @@ name: Revalidate Content
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
   workflow_dispatch: # Allow manual triggering
 
 jobs:
@@ -12,8 +12,15 @@ jobs:
       - name: Trigger Content Revalidation
         run: |
           echo "🔄 Triggering content revalidation..."
+          SITE_URL="${{ secrets.NEXT_PUBLIC_SITE_URL || vars.NEXT_PUBLIC_SITE_URL }}"
+          if [ -z "$SITE_URL" ]; then
+            echo "❌ Missing NEXT_PUBLIC_SITE_URL. Add it as a GitHub Actions Repository secret or variable (must include https://)."
+            exit 1
+          fi
+          # Normalize trailing slash so we don't end up with double slashes
+          SITE_URL="${SITE_URL%/}"
           curl -X POST \
-            ${{ secrets.NEXT_PUBLIC_SITE_URL }}/api/revalidate \
+            "$SITE_URL/api/revalidate" \
             -H "Content-Type: application/json" \
             -H "User-Agent: GitHub-Actions-Revalidation" \
             --max-time 30 \
