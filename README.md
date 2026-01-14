@@ -29,8 +29,10 @@ Run the SQL files in your Supabase SQL editor:
 ```bash
 # Apply schema and seed data
 psql -f db/content-schema.sql
-psql -f db/content-seed-v2.sql
+psql -f db/content-seed-v3.sql
 ```
+
+> Note: `db/content-seed-v3.sql` is currently a snapshot of v2 (safe to re-run via upserts).
 
 ### 2. Environment Variables
 
@@ -130,6 +132,22 @@ All marketing components now accept props from the database:
 
 - The home page (`/`) is strict: missing Supabase env vars or missing required seeded content will fail build/SSG.
 - Header/Footer copy is not hardcoded; it is rendered only when DB-provided props are present.
+
+## Performance & Observability
+
+### Query + payload optimizations (current)
+
+- Supabase queries now avoid `select("*")` and instead select only required columns.
+- Pages pass smaller DTOs to components (reduces `__NEXT_DATA__` size and improves hydration cost).
+
+### Global header/footer (current)
+
+- Header/Footer content is primarily provided server-side via `site_sections` so it renders immediately.
+- Some Auth routes under `src/pages/Auth/**/page.tsx` fall back to a client fetch (these files follow App Router naming and do not support `getStaticProps`).
+
+### Speed Insights
+
+Vercel Speed Insights is enabled via `@vercel/speed-insights` in `src/pages/_app.tsx`.
 
 ### Instant Content Updates
 

@@ -2,11 +2,16 @@
 
 Document env vars and deployment steps as they become defined.
 
-## Env Vars (to confirm)
+## Env Vars
 
-- `NEXT_PUBLIC_API_BASE` (future)
-- Auth-related: e.g., `NEXT_PUBLIC_AUTH_BASE`, `AUTH_CLIENT_ID` (if used)
-- Analytics (if added later)
+- **Supabase (required)**
+  - `NEXT_PUBLIC_SUPABASE_URL`
+  - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- **Platform URLs**
+  - `NEXT_PUBLIC_STUDENT_URL`
+  - `NEXT_PUBLIC_TEACHER_URL`
+- **Revalidation**
+  - `NEXT_PUBLIC_SITE_URL` (used by GitHub Action to call `/api/revalidate`)
 
 ## Local
 
@@ -19,6 +24,23 @@ Document env vars and deployment steps as they become defined.
 - Build: `npm run build`
 - Start: `npm start` (if used)
 - Hosting: (fill in) Vercel/other; include any required secrets
+
+### Windows PowerShell note
+
+Some PowerShell versions don't support `&&` as a command separator. Use:
+
+```powershell
+npm run build; if ($LASTEXITCODE -eq 0) { npm start }
+```
+
+## Database seeding (Supabase)
+
+For a new or empty Supabase project, run these in the Supabase SQL editor:
+
+1. `db/content-schema.sql`
+2. `db/content-seed-v3.sql` (safe to re-run; uses upserts)
+
+> Note: the home page (`/`) is strict and will fail SSG/build if required seeded rows are missing.
 
 ## Notes
 

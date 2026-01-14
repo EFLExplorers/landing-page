@@ -11,7 +11,7 @@
 
 - Supabase is the source of truth for marketing content.
   - Schema: `db/content-schema.sql`
-  - Seed: `db/content-seed-v2.sql`
+  - Seed: `db/content-seed-v3.sql` (currently a snapshot copy of v2)
 - Core tables:
   - `pages`: one row per route (e.g. `/`, `/about`, `/pricing`, `/platforms/student`)
   - `page_sections`: sections per page (by `section_key`) with `content` JSON
@@ -21,11 +21,21 @@
   - SSG via `getStaticProps`: `/`, `/about`, `/pricing`, `/platforms/student`
   - SSR via `getServerSideProps`: `/contact`
 
+### Global layout (header/footer) behavior (current)
+
+- Primary path: pages provide `headerContent` / `footerContent` via props (server-fetched from `site_sections`).
+- Fallback: if a page does not provide global content (notably some Auth routes using `.../page.tsx` naming), `Layout` fetches from `site_sections` on the client.
+
 ### Strict content policy (current)
 
 - `/` is strict: missing Supabase env or missing required seeded content causes SSG/build to fail.
 - Header/Footer copy is no longer hardcoded; these components render only when content is loaded from `site_sections`.
 - Home "How We Teach" has no fallback cards; `page_sections.content.tabs` must be seeded.
+
+## Performance notes (current)
+
+- Supabase queries avoid `select("*")` to reduce payload size.
+- Pages/components pass smaller, UI-focused DTOs instead of large DB row objects where possible.
 
 ## Auth/CTA Flow (current)
 
