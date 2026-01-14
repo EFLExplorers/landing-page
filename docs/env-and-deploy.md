@@ -12,6 +12,8 @@ Document env vars and deployment steps as they become defined.
   - `NEXT_PUBLIC_TEACHER_URL`
 - **Revalidation**
   - `NEXT_PUBLIC_SITE_URL` (used by GitHub Action to call `/api/revalidate`)
+    - Must be set as a **GitHub Actions repository secret** named `NEXT_PUBLIC_SITE_URL`
+    - Value must include protocol, e.g. `https://your-project.vercel.app`
 
 ## Local
 

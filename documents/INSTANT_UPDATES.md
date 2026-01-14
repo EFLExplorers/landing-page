@@ -49,6 +49,17 @@ Add to your `.env.local` and production environment:
 NEXT_PUBLIC_SITE_URL=https://your-domain.com
 ```
 
+### 1b. GitHub Actions secret (required for the workflow)
+
+The workflow uses **GitHub Actions secrets** (not Vercel env vars) to call the revalidation endpoint.
+
+- **Where**: GitHub repo → Settings → Secrets and variables → Actions → **Repository secrets**
+- **Name**: `NEXT_PUBLIC_SITE_URL`
+- **Value**: `https://<your-vercel-domain-or-custom-domain>` (must include `https://`)
+
+If this secret is missing or does not include a protocol, the workflow will fail with:
+`curl: (3) URL rejected: No host part in the URL`
+
 ### 2. GitHub Repository
 The workflow file is already created at `.github/workflows/revalidate-content.yml`
 
