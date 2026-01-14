@@ -1,11 +1,20 @@
 import React, { useState } from "react";
 import Link from "next/link";
+import type { GetStaticProps } from "next";
 import { supabase } from "../../../utils/supabaseClient";
 import { FormInput } from "../../../components/auth/shared/FormInput";
 import { AuthContainer } from "../../../components/auth/layout/AuthContainer";
 import sharedStyles from "../../../components/auth/styles/shared.module.css";
+import type { HeaderContent } from "@/components/layout/Header-Footer/Header";
+import type { FooterContent } from "@/components/layout/Header-Footer/Footer";
+import { getGlobalLayoutContent } from "@/utils/globalSections";
 
-export const ForgotPasswordPage = () => {
+interface ForgotPasswordPageProps {
+  headerContent: HeaderContent | null;
+  footerContent: FooterContent | null;
+}
+
+export const ForgotPasswordPage = (_props: ForgotPasswordPageProps) => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -20,7 +29,7 @@ export const ForgotPasswordPage = () => {
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(
         email,
         {
-          redirectTo: `${window.location.origin}/auth/reset-password`,
+          redirectTo: `${window.location.origin}/Auth/reset-password`,
         }
       );
 
@@ -79,7 +88,11 @@ export const ForgotPasswordPage = () => {
           disabled={loading}
         />
 
-        <button type="submit" className={sharedStyles.button} disabled={loading}>
+        <button
+          type="submit"
+          className={sharedStyles.button}
+          disabled={loading}
+        >
           {loading ? "Sending..." : "Send Reset Link"}
         </button>
 
@@ -93,4 +106,24 @@ export const ForgotPasswordPage = () => {
   );
 };
 
-export default ForgotPasswordPage; 
+export default ForgotPasswordPage;
+
+export const getStaticProps: GetStaticProps<ForgotPasswordPageProps> =
+  async () => {
+    const { supabase, isSupabaseConfigured } = await import(
+      "@/utils/supabaseClient"
+    );
+
+    if (!isSupabaseConfigured) {
+      return {
+        props: { headerContent: null, footerContent: null },
+        revalidate: 300,
+      };
+    }
+
+    const { headerContent, footerContent } = await getGlobalLayoutContent(
+      supabase
+    );
+    return { props: { headerContent, footerContent }, revalidate: 300 };
+  };
+

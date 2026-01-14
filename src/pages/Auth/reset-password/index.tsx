@@ -1,12 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import type { GetStaticProps } from "next";
 import { supabase } from "../../../utils/supabaseClient";
 import { PasswordInput } from "../../../components/auth/shared/PasswordInput";
 import { AuthContainer } from "../../../components/auth/layout/AuthContainer";
 import sharedStyles from "../../../components/auth/styles/shared.module.css";
+import type { HeaderContent } from "@/components/layout/Header-Footer/Header";
+import type { FooterContent } from "@/components/layout/Header-Footer/Footer";
+import { getGlobalLayoutContent } from "@/utils/globalSections";
 
-export const ResetPasswordPage = () => {
+interface ResetPasswordPageProps {
+  headerContent: HeaderContent | null;
+  footerContent: FooterContent | null;
+}
+
+export const ResetPasswordPage = (_props: ResetPasswordPageProps) => {
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -17,9 +26,11 @@ export const ResetPasswordPage = () => {
   useEffect(() => {
     // Check if user is authenticated and has a valid session
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session) {
-        router.push("/auth/login");
+        router.push("/Auth/login");
       }
     };
     checkSession();
@@ -80,10 +91,7 @@ export const ResetPasswordPage = () => {
   }
 
   return (
-    <AuthContainer
-      title="Reset Password"
-      subtitle="Enter your new password"
-    >
+    <AuthContainer title="Reset Password" subtitle="Enter your new password">
       <form onSubmit={handleSubmit} className={sharedStyles.form}>
         {error && <div className={sharedStyles.error}>{error}</div>}
 
@@ -108,7 +116,11 @@ export const ResetPasswordPage = () => {
           disabled={loading}
         />
 
-        <button type="submit" className={sharedStyles.button} disabled={loading}>
+        <button
+          type="submit"
+          className={sharedStyles.button}
+          disabled={loading}
+        >
           {loading ? "Updating..." : "Update Password"}
         </button>
 
@@ -122,4 +134,24 @@ export const ResetPasswordPage = () => {
   );
 };
 
-export default ResetPasswordPage; 
+export default ResetPasswordPage;
+
+export const getStaticProps: GetStaticProps<ResetPasswordPageProps> =
+  async () => {
+    const { supabase, isSupabaseConfigured } = await import(
+      "@/utils/supabaseClient"
+    );
+
+    if (!isSupabaseConfigured) {
+      return {
+        props: { headerContent: null, footerContent: null },
+        revalidate: 300,
+      };
+    }
+
+    const { headerContent, footerContent } = await getGlobalLayoutContent(
+      supabase
+    );
+    return { props: { headerContent, footerContent }, revalidate: 300 };
+  };
+

@@ -26,6 +26,12 @@ export const Layout = ({
     useState<FooterContent | null>(footerContent);
 
   useEffect(() => {
+    // Gate client fallback fetch. For performance, we want ALL pages to provide
+    // header/footer via server props, so we disable browser→DB calls by default.
+    const enableClientGlobalSectionsFetch =
+      process.env.NEXT_PUBLIC_ENABLE_CLIENT_GLOBAL_SECTIONS_FETCH === "true";
+    if (!enableClientGlobalSectionsFetch) return;
+
     // If a page didn't (or couldn't) provide global content at build time,
     // fall back to fetching it client-side.
     if (resolvedHeaderContent || resolvedFooterContent) return;
