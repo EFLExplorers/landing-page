@@ -1,88 +1,71 @@
 import styles from "./TeachingToolsSection.module.css";
+import type { PageSection } from "@/pages/api/page-content";
 
-const teachingTools = [
-  {
-    name: "Lesson Planner",
-    description:
-      "Create and customize engaging lesson plans with templates, timing, and objectives.",
-    icon: "📝",
-  },
-  {
-    name: "Student Analytics",
-    description:
-      "Track student progress with dashboards, trends, and per-learner insights.",
-    icon: "📈",
-  },
-  {
-    name: "Interactive Resources",
-    description:
-      "Use games, multimedia, and activities to keep every lesson lively and fun.",
-    icon: "🎮",
-  },
-  {
-    name: "Assessment Tools",
-    description:
-      "Build quizzes, tests, and assignments with automated grading and feedback.",
-    icon: "✅",
-  },
-  {
-    name: "Progress Tracking",
-    description:
-      "Monitor mastery, gaps, and pacing with detailed reports and alerts.",
-    icon: "📊",
-  },
-  {
-    name: "Resource Library",
-    description:
-      "Browse ready-to-use slides, worksheets, and multimedia assets for any level.",
-    icon: "📚",
-  },
-];
+export interface TeachingToolLite {
+  id: string;
+  title: string;
+  description: string;
+  icon?: string;
+}
 
-export const TeachingToolsSection = () => {
+export interface TeachingToolsSectionProps {
+  section: PageSection | null;
+  tools: TeachingToolLite[];
+}
+
+export const TeachingToolsSection = ({
+  section,
+  tools,
+}: TeachingToolsSectionProps) => {
+  if (!section) return null;
+  if (!tools?.length) return null;
+
+  const kicker = (section.content as any)?.kicker ?? "Tools for teachers";
+  const title = (section.content as any)?.title ?? "Everything you need, in one hub";
+  const intro = (section.content as any)?.intro ?? "";
+  const outro = (section.content as any)?.outro ?? "";
+  const badge = (section.content as any)?.badge ?? "⚡️";
+
   return (
     <section className={styles.section} data-cy="teaching-tools-section">
       <div className={styles.card} data-cy="teaching-tools-card">
         <header className={styles.cardHeader}>
           <div>
-            <p className={styles.kicker}>Tools for teachers</p>
-            <h3 className={styles.cardTitle}>
-              Everything you need, in one hub
-            </h3>
+            <p className={styles.kicker}>{kicker}</p>
+            <h3 className={styles.cardTitle}>{title}</h3>
             <p className={styles.cardSubtitle} data-cy="teaching-tools-intro">
-              Plan faster, teach with confidence, and keep every student on
-              track with our integrated toolkit.
+              {intro}
             </p>
           </div>
           <div className={styles.badge} aria-hidden="true">
-            ⚡️
+            {badge}
           </div>
         </header>
 
         <div className={styles.toolGrid} data-cy="teaching-tools-grid">
-          {teachingTools.map((tool) => (
+          {tools.map((tool) => (
             <article
-              key={tool.name}
+              key={tool.id}
               className={styles.toolCard}
               data-cy="teaching-tool-card"
-              data-tool-name={tool.name}
+              data-tool-name={tool.title}
             >
               <div className={styles.toolIcon} aria-hidden="true">
-                {tool.icon}
+                {tool.icon || ""}
               </div>
               <div className={styles.toolContent}>
-                <h4>{tool.name}</h4>
+                <h4>{tool.title}</h4>
                 <p>{tool.description}</p>
               </div>
             </article>
           ))}
         </div>
 
-        <div className={styles.footerNote} data-cy="teaching-tools-outro">
-          Pre-designed lesson plans for every level, interactive activities,
-          grading, and analytics—so you can spend less time preparing and more
-          time teaching.
-        </div>
+        {outro ? (
+          <div className={styles.footerNote} data-cy="teaching-tools-outro">
+            {outro}
+          </div>
+        ) : null}
       </div>
     </section>
   );

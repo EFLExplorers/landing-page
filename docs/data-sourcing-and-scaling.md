@@ -20,7 +20,7 @@ Goal: reduce duplicated/hardcoded text/objects, centralize data in DB/config, an
   - `page_sections` (sections per page by `section_key`, with `content` JSON)
   - `content_items` (typed list data: `pricing`, `service`, `learning_tool`, `team_member`, `about_stat`, `core_value`, etc.)
 - Seed (implemented):
-  - `db/content-seed-v2.sql` seeds routes, sections, and list content.
+  - `db/content-seed-v3.sql` seeds routes, sections, and list content.
   - Seed reruns are safe for `content_items` via stable `slug` + `ON CONFLICT (slug) DO UPDATE`.
 
 ## What is DB-driven today

@@ -48,7 +48,21 @@ export interface FAQ extends ContentItem {
   };
 }
 
-type ContentType = "pricing" | "service" | "learning_tool" | "faq" | "team_member" | "about_stat" | "core_value" | "lesson_module" | "teacher_benefit" | "testimonial";
+type ContentType =
+  | "pricing"
+  | "pricing_plan"
+  | "service"
+  | "learning_tool"
+  | "faq"
+  | "team_member"
+  | "about_stat"
+  | "core_value"
+  | "student_character"
+  | "student_planet"
+  | "teaching_tool"
+  | "lesson_module"
+  | "teacher_benefit"
+  | "testimonial";
 
 export default async function handler(
   req: NextApiRequest,

@@ -40,11 +40,12 @@
 }
 
 .moduleCard {
+  --module-color: var(--accent);
   background: rgba(139, 92, 246, 0.08);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(139, 92, 246, 0.15);
-  border-left: 4px solid;
+  border-left: 4px solid var(--module-color);
   border-radius: var(--radius-xl);
   padding: var(--spacing-2xl);
   cursor: pointer;
@@ -87,6 +88,47 @@
   font-size: var(--font-sm);
   font-weight: var(--font-semibold);
   color: white;
+  background: var(--module-color);
+}
+
+.colorMuted {
+  --module-color: var(--theme-muted);
+}
+
+.colorAccent {
+  --module-color: var(--accent);
+}
+
+.colorTextSecondary {
+  --module-color: var(--text-secondary);
+}
+
+.colorForeground {
+  --module-color: var(--theme-foreground);
+}
+
+.colorMutedForeground {
+  --module-color: var(--theme-muted-foreground);
+}
+
+.colorPrimaryThree {
+  --module-color: var(--primary-three);
+}
+
+.colorSecondaryHover {
+  --module-color: var(--secondary-hover);
+}
+
+.colorPrimaryTwo {
+  --module-color: var(--primary-two);
+}
+
+.colorSecondary {
+  --module-color: var(--secondary);
+}
+
+.colorTextMuted {
+  --module-color: var(--text-muted);
 }
 
 .moduleDescription {

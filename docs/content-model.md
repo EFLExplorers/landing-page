@@ -1,7 +1,8 @@
 # Content Model (current)
 
 This doc is the working contract between:
-- DB seed files (e.g. `db/content-seed-v2.sql`)
+
+- DB seed files (e.g. `db/content-seed-v3.sql`)
 - Supabase tables (`pages`, `page_sections`, `content_items`)
 - Page loaders (`getStaticProps`)
 - UI components (props-driven rendering)
@@ -9,15 +10,18 @@ This doc is the working contract between:
 ## 1) Page content (route-scoped)
 
 ### Tables
+
 - `pages`: one row per route (`/`, `/about`, etc.)
 - `page_sections`: many rows per page, keyed by `section_key`
 
 ### Flow
+
 `pages.route` → `pages.id` → `page_sections.page_id` → `page_sections.content (jsonb)` → component props
 
 ### Section keys (implemented)
 
 #### `/` (home)
+
 - `hero`
 - `tagline`
 - `learning-tools`
@@ -29,6 +33,7 @@ This doc is the working contract between:
 - `footer`
 
 #### `/about`
+
 - `hero`
 - `description`
 - `tagline`
@@ -37,27 +42,51 @@ This doc is the working contract between:
 - `team-intro`
 - `values-header`
 
+#### `/platforms/student`
+
+- `hero`
+- `characters`
+- `planets`
+- `cta`
+
+#### `/platforms/teacher`
+
+- `hero`
+- `tools`
+- `lesson-modules`
+- `benefits`
+- `cta`
+
 ## 2) List content (typed collections)
 
 ### Table
+
 - `content_items`: list-style content, scoped by `content_type`
 
 ### Content types used today
+
 - `pricing`
+- `pricing_plan`
 - `service`
 - `learning_tool`
+- `student_character`
+- `student_planet`
+- `teaching_tool`
 - `team_member`
 - `about_stat`
 - `core_value`
+- `lesson_module`
+- `teacher_benefit`
 
 ### Important seed rule
-`content_items.slug` should be stable and unique; `db/content-seed-v2.sql` uses `ON CONFLICT (slug) DO UPDATE` so reruns update in place.
+
+`content_items.slug` should be stable and unique; the seed uses `ON CONFLICT (slug) DO UPDATE` so reruns update in place.
 
 ## 3) Header/Footer (current implementation)
 
 Today, `header`/`footer` are stored as `page_sections` on `/` and mapped into `headerContent` / `footerContent` props for the shared `Layout`.
 
 Notes:
+
 - Header/Footer have no hardcoded copy fallbacks.
 - If no props are provided, those elements render nothing.
-

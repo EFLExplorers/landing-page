@@ -1,193 +1,131 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+## ESL Explorers — Landing Page (Next.js)
 
-## ESL Explorers - Multi-Platform Learning Platform
+Marketing site for the ESL Explorers / EFL ecosystem. This repo serves the public landing site and routes users into the Student and Teacher platforms.
 
-ESL Explorers is a comprehensive English language learning platform with three interconnected applications:
+### Tech stack
 
-- **Landing Page** (this app) - Marketing/marketing site with database-driven content
-- **Student Portal** - Interactive learning environment for students
-- **Teacher Platform** - Content management and class administration for educators
+- **Next.js (Pages Router)** + **React** + **TypeScript**
+- **Supabase** (Postgres + Auth) for content + user management
+- **CSS Modules** for styling (no Tailwind usage in UI)
+- **Radix UI** (some primitives), **Vercel Speed Insights**, **Cypress** for e2e
 
-### Key Features
+### Quick start (local)
 
-- **Database-Driven Content**: Marketing content stored in Supabase for easy updates
-- **Multi-Role Authentication**: Student, teacher, and admin user management
-- **Responsive Design**: Mobile-first design with CSS Modules
-- **SEO Optimized**: Server-side rendering with Next.js for optimal performance
-- **Type-Safe**: Full TypeScript implementation with proper interfaces
-- **Error Boundaries**: Used around some UI sections/components
-- **Comprehensive Testing**: Built-in testing framework for validation
+**Prereqs**: Node.js 18+ (recommended), Supabase project
 
-## Database Setup
-
-This project uses Supabase for content management and user authentication. To set up the database:
-
-### 1. Apply Database Schema
-
-Run the SQL files in your Supabase SQL editor:
+1. Install deps:
 
 ```bash
-# Apply schema and seed data
-psql -f db/content-schema.sql
-psql -f db/content-seed-v3.sql
+npm install
 ```
 
-> Note: `db/content-seed-v3.sql` is currently a snapshot of v2 (safe to re-run via upserts).
+2. Create `.env.local`:
 
-### 2. Environment Variables
+- Copy `env-template.txt` → `.env.local`
+- Fill in your Supabase keys + URLs
 
-Create a `.env.local` file in the project root:
+3. Set up Supabase schema + seed:
 
-```bash
-# Supabase Configuration
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-SUPABASE_URL=your_supabase_project_url
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+- In Supabase → **SQL Editor**, run:
+  - `db/content-schema.sql`
+  - then **one** seed file:
+    - `db/content-seed-v3.sql` (full seed; safe to re-run via upserts), or
+    - `db/content-seed-simple.sql` (minimal seed)
 
-# Platform URLs
-NEXT_PUBLIC_STUDENT_URL=https://student.yourdomain.com
-NEXT_PUBLIC_TEACHER_URL=https://teacher.yourdomain.com
-```
-
-### 3. Content Management
-
-The platform uses database-driven content for marketing pages. Content is managed through these tables:
-
-- `pages` & `page_sections` - Page content and metadata
-- `content_items` - Unified typed content lists (pricing tiers, services, learning tools, team members, stats, values, etc.)
-- `faqs` - Legacy/supporting table (used by some seed flows)
-
-## Getting Started
-
-First, run the development server:
+4. Run dev server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+### Environment variables
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+Use `env-template.txt` as the source-of-truth. Key vars:
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+- **Supabase (required for DB-driven pages)**
+  - `NEXT_PUBLIC_SUPABASE_URL`
+  - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- **Admin API (server-only; only needed if you use `/api/admin`)**
+  - `SUPABASE_URL` (same project URL)
+  - `SUPABASE_SERVICE_ROLE_KEY` (**never** expose to the client)
+- **Platform URLs (used by auth/CTAs)**
+  - `NEXT_PUBLIC_STUDENT_URL`
+  - `NEXT_PUBLIC_TEACHER_URL`
+- **Content revalidation (GitHub Actions)**
+  - `NEXT_PUBLIC_SITE_URL` (must include protocol, e.g. `https://your-site.vercel.app`)
+  - Also set this as a GitHub Actions **repository secret or variable** named `NEXT_PUBLIC_SITE_URL`
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Database-driven content model (Supabase)
 
-## Project Structure
+Content is stored in:
 
+- `pages`: one row per route (SEO + metadata)
+- `page_sections`: structured blocks per page (`section_key` + JSON `content`)
+- `content_items`: typed list data (pricing tiers, services, tools, modules, etc.)
+- `site_sections`: global layout blocks (currently `header` / `footer`)
+
+Docs:
+
+- `docs/content-model.md` (section keys + content types)
+- `docs/data-schemas.md` (JSON shapes for content)
+
+### Which pages are DB-driven?
+
+- **SSG (build-time fetch + ISR)**:
+  - `/` (home) — **strict**: missing Supabase env or required seeded rows will fail build/SSG
+  - `/about`
+  - `/pricing`
+  - `/platforms/student`
+  - `/platforms/teacher`
+- **SSR**:
+  - `/contact` (still strict about Supabase env, but doesn’t block build since it’s SSR)
+
+### Global header/footer behavior
+
+- Preferred: pages fetch `header`/`footer` from `site_sections` on the server and pass them into `Layout`.
+- Fallback: if a page doesn’t provide them (some Auth routes), `Layout` fetches `site_sections` client-side.
+
+### API routes
+
+- `GET /api/page-content?route=/about` — fetch `pages` + `page_sections`
+- `GET /api/content?type=service` — fetch `content_items` by type
+- `POST /api/revalidate` — revalidate key DB-driven pages (used by GitHub Actions)
+- `POST /api/admin` — admin actions (requires service-role env vars)
+
+More: `docs/api-usage.md`
+
+### Scripts
+
+```bash
+npm run dev       # start dev server
+npm run build     # production build
+npm run start     # start production server
+npm run lint      # Next.js lint
+npm run cy:open   # open Cypress UI
+npm run test:e2e  # run Cypress headless
 ```
-├── src/
-│   ├── components/           # Reusable UI components
-│   │   ├── auth/            # Authentication components
-│   │   ├── common/          # Shared components (ErrorBoundary, etc.)
-│   │   ├── layout/          # Page layout components
-│   │   │   ├── Home/        # Home page sections
-│   │   │   ├── About/       # About page sections
-│   │   │   └── Contact/     # Contact page sections
-│   │   └── ui/              # Base UI components
-│   ├── contexts/            # React contexts (auth, etc.)
-│   ├── pages/               # Next.js pages and API routes
-│   │   ├── api/             # API endpoints
-│   │   │   ├── admin.ts     # Admin functionality
-│   │   │   ├── content.ts   # Content management API
-│   │   │   └── page-content.ts # Page content API
-│   │   ├── Auth/            # Authentication pages
-│   │   ├── _app.tsx         # App wrapper
-│   │   ├── index.tsx        # Home page
-│   │   ├── about.tsx        # About page
-│   │   └── contact.tsx      # Contact page
-│   └── utils/               # Utility functions
-├── db/                      # Database schema and seed files
-│   ├── content-schema.sql   # Improved database schema
-│   └── content-seed-v2.sql   # DB-driven seed data (home/about/header/footer + content_items)
-├── documents/               # Project documentation
-│   ├── CONTENT_MIGRATION.md # Migration guide
-│   ├── MIGRATION_INTEGRATION_GUIDE.md # Integration steps
-│   └── TESTING_GUIDE.md     # Testing instructions
-└── public/                  # Static assets
-```
 
-## Content Management
+### Instant content updates (GitHub Actions → revalidate)
 
-### Database-Driven Components
+This repo includes a workflow that calls `POST /api/revalidate` on every push to `main` / `master`:
 
-All marketing components now accept props from the database:
+- Workflow: `.github/workflows/revalidate-content.yml`
+- Setup guide: `documents/INSTANT_UPDATES.md`
 
-- **Props-based architecture** instead of hardcoded content
-- **Type-safe interfaces** for all content types
-- **Static generation** with `getStaticProps` for optimal performance
-- **Error boundaries** for graceful content loading failures
-- **Instant updates** via GitHub webhook triggers (no 5-minute delay)
+### Deployment notes
 
-#### Strict mode (current)
+Deploy anywhere that supports Next.js (Vercel recommended). Ensure production env vars match `.env.local`, and that GitHub Actions has `NEXT_PUBLIC_SITE_URL` configured to your deployed URL.
 
-- The home page (`/`) is strict: missing Supabase env vars or missing required seeded content will fail build/SSG.
-- Header/Footer copy is not hardcoded; it is rendered only when DB-provided props are present.
+### Project docs
 
-## Performance & Observability
+- `docs/site-structure.md` (page tree)
+- `docs/env-and-deploy.md` (env/deploy notes)
+- `documents/supabase-integration.md` (auth + admin API details)
+- `TESTING_GUIDE.md` (testing checklist)
 
-### Query + payload optimizations (current)
+### Contributing conventions
 
-- Supabase queries now avoid `select("*")` and instead select only required columns.
-- Pages pass smaller DTOs to components (reduces `__NEXT_DATA__` size and improves hydration cost).
-
-### Global header/footer (current)
-
-- Header/Footer content is primarily provided server-side via `site_sections` so it renders immediately.
-- Some Auth routes under `src/pages/Auth/**/page.tsx` fall back to a client fetch (these files follow App Router naming and do not support `getStaticProps`).
-
-### Speed Insights
-
-Vercel Speed Insights is enabled via `@vercel/speed-insights` in `src/pages/_app.tsx`.
-
-### Instant Content Updates
-
-Content updates are now **instant** instead of waiting 5 minutes:
-
-- **Trigger**: GitHub repository push to main branch
-- **Action**: GitHub Actions automatically calls revalidation endpoint
-- **Result**: Content appears live within seconds
-- **Workflow**: See `.github/workflows/revalidate-content.yml`
-
-See `documents/INSTANT_UPDATES.md` for complete setup and usage details.
-
-### Testing Framework
-
-The project includes comprehensive testing capabilities:
-
-- **API Testing**: Validate all content endpoints return correct data
-- **Page Testing**: Verify database content loads properly
-- **Error Testing**: Confirm error boundaries and strict content expectations behave as expected
-- **Performance Testing**: Ensure optimal loading times
-
-See `TESTING_GUIDE.md` for complete testing instructions.
-
-### API Endpoints
-
-- `GET /api/page-content?route=/page` - Fetch page sections
-- `GET /api/content?type=contentType` - Fetch structured content
-- `POST /api/admin` - Admin functionality
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+- **Use named exports** for components/utilities (Next.js `pages` still require a default export).
+- **Use CSS Modules** (`*.module.css`) for styling.

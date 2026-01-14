@@ -1,14 +1,10 @@
--- Seed 3.0: snapshot of v2 for source control
--- NOTE: This file is an exact copy of db/content-seed-v2.sql at the time v3 was created.
--- Safe to rerun; uses upserts by route/section/content_type
--- Run AFTER content-schema.sql
-
--- Seed 2.0: fully DB-driven landing/about content
--- Safe to rerun; uses upserts by route/section/content_type
--- Run AFTER content-schema.sql
+-- Seed 4.0: top-down ordered seed script
+-- Goal: make the seed easier to reason about and run top-to-bottom.
+-- Safe to rerun; uses upserts by route/section/content_type/slug.
+-- Run AFTER db/content-schema.sql
 
 -- ============================================
--- Pages
+-- 1) Pages (routes)
 -- ============================================
 INSERT INTO public.pages (route, title, meta_description)
 VALUES
@@ -23,158 +19,7 @@ ON CONFLICT (route) DO UPDATE SET
   meta_description = EXCLUDED.meta_description;
 
 -- ============================================
--- Route section inventory (tracking)
--- ============================================
--- This does NOT power rendering directly; it's a "what belongs where" registry.
-INSERT INTO public.route_sections (page_id, section_key, section_type, expected_content, sort_order, active)
-SELECT p.id, v.section_key, v.section_type, v.expected_content::jsonb, v.sort_order, true
-FROM public.pages p
-JOIN (
-  VALUES
-    -- Home (/)
-    ('/', 'hero', 'hero', '{"title":"","subtitle":"","buttons":[{"label":"","href":""}]}'::text, 10),
-    ('/', 'tagline', 'content', '{"title":"","subtitle":""}'::text, 20),
-    ('/', 'learning-tools', 'content', '{"title":"","subtitle":""}'::text, 30),
-    ('/', 'how-we-teach', 'tabs', '{"title":"","description":"","tabs":[{"title":"","content":"","icon":""}]}'::text, 40),
-    ('/', 'services', 'content', '{"title":"","subtitle":""}'::text, 50),
-    ('/', 'pricing', 'content', '{"title":"","subtitle":""}'::text, 60),
-    ('/', 'register-cta', 'cta', '{"title":"","subtitle":"","cta_label":"","cta_href":""}'::text, 100),
-
-    -- About (/about)
-    ('/about', 'hero', 'hero', '{"title":"","subtitle":""}'::text, 10),
-    ('/about', 'description', 'content', '{"body":""}'::text, 20),
-    ('/about', 'tagline', 'content', '{"text":""}'::text, 30),
-    ('/about', 'mission', 'content', '{"title":"","body":"","points":[""]}'::text, 40),
-    ('/about', 'vision', 'content', '{"title":"","body":"","goals":[""]}'::text, 50),
-    ('/about', 'team-intro', 'content', '{"title":"","body":""}'::text, 60),
-    ('/about', 'values-header', 'content', '{"title":""}'::text, 70),
-
-    -- Contact (/contact)
-    ('/contact', 'hero', 'content', '{"title":"","subtitle":"","contact_methods":[{"icon":"","href":"","text":""}]}'::text, 10),
-    ('/contact', 'form', 'content', '{"title":"","subtitle":"","subject_options":[""]}'::text, 20),
-    ('/contact', 'faq', 'content', '{"title":"","subtitle":""}'::text, 30),
-
-    -- Pricing (/pricing)
-    ('/pricing', 'pricing-header', 'content', '{"badge":"","title":"","subtitle":""}'::text, 10),
-    ('/pricing', 'pricing-footer', 'content', '{"note":"","help_text":"","help_href":"","help_label":""}'::text, 30),
-
-    -- Student platform (/platforms/student)
-    ('/platforms/student', 'hero', 'content', '{"title":"","subtitle":"","cta":{"label":"","href":""},"image":{"src":"","alt":"","width":0,"height":0}}'::text, 10),
-    ('/platforms/student', 'characters', 'content', '{"intro":"","outro":""}'::text, 20),
-    ('/platforms/student', 'planets', 'content', '{"title":"","toggle_on_label":"","toggle_off_label":"","autoplay_ms":0}'::text, 30),
-    ('/platforms/student', 'cta', 'content', '{"title":"","button":{"label":"","href":""}}'::text, 40),
-
-    -- Teacher platform (/platforms/teacher)
-    ('/platforms/teacher', 'hero', 'content', '{"title":"","subtitle":"","cta":{"label":"","href":""},"image":{"src":"","alt":"","width":0,"height":0}}'::text, 10),
-    ('/platforms/teacher', 'tools', 'content', '{"kicker":"","title":"","intro":"","outro":"","badge":""}'::text, 20),
-    ('/platforms/teacher', 'lesson-modules', 'content', '{"title":"","subtitle":""}'::text, 30),
-    ('/platforms/teacher', 'benefits', 'content', '{"title":""}'::text, 40),
-    ('/platforms/teacher', 'cta', 'content', '{"title":"","subtitle":"","button":{"label":"","href":""}}'::text, 50)
-) AS v(route, section_key, section_type, expected_content, sort_order)
-  ON v.route = p.route
-ON CONFLICT (page_id, section_key) DO UPDATE SET
-  section_type = EXCLUDED.section_type,
-  expected_content = EXCLUDED.expected_content,
-  sort_order = EXCLUDED.sort_order,
-  active = EXCLUDED.active,
-  updated_at = now();
-
--- ============================================
--- Home page sections
--- ============================================
--- Hero
-INSERT INTO public.page_sections (page_id, section_key, section_type, content, sort_order, active)
-SELECT p.id, 'hero', 'hero',
-  '{
-    "title": "Start your learning journey today!",
-    "subtitle": "We''re so happy you''re here! However, you will need to register to get started.",
-    "buttons": [
-      { "label": "Register Student", "href": "/Auth/register/student" },
-      { "label": "Register Teacher", "href": "/Auth/register/teacher" }
-    ]
-  }'::jsonb,
-  10, true
-FROM public.pages p WHERE p.route = '/'
-ON CONFLICT (page_id, section_key) DO UPDATE SET content = EXCLUDED.content, active = true, sort_order = EXCLUDED.sort_order;
-
--- Tagline
-INSERT INTO public.page_sections (page_id, section_key, section_type, content, sort_order, active)
-SELECT p.id, 'tagline', 'content',
-  '{
-    "title": "Explore the universe of language!",
-    "subtitle": "We provide teachers with stellar EFL resources and guide students on an exciting journey to English mastery!"
-  }'::jsonb,
-  20, true
-FROM public.pages p WHERE p.route = '/'
-ON CONFLICT (page_id, section_key) DO UPDATE SET content = EXCLUDED.content, active = true, sort_order = EXCLUDED.sort_order;
-
--- Learning tools section copy
-INSERT INTO public.page_sections (page_id, section_key, section_type, content, sort_order, active)
-SELECT p.id, 'learning-tools', 'content',
-  '{
-    "title": "Learning Tools",
-    "subtitle": "Discover our comprehensive suite of tools designed to make learning English engaging and effective"
-  }'::jsonb,
-  30, true
-FROM public.pages p WHERE p.route = '/'
-ON CONFLICT (page_id, section_key) DO UPDATE SET content = EXCLUDED.content, active = true, sort_order = EXCLUDED.sort_order;
-
--- How we teach (tabs - all provided to avoid fallbacks)
-INSERT INTO public.page_sections (page_id, section_key, section_type, content, sort_order, active)
-SELECT p.id, 'how-we-teach', 'tabs',
-  '{
-    "title": "How We Teach",
-    "description": "Our comprehensive approach to education combines various learning methods to ensure maximum engagement and retention.",
-    "tabs": [
-      { "title": "Lessons", "content": "Interactive lessons designed by experts to help you master new concepts quickly and effectively.", "icon": "📘" },
-      { "title": "Activities", "content": "Hands-on activities that reinforce learning through practical application of concepts.", "icon": "🧩" },
-      { "title": "Minigames", "content": "Fun and engaging minigames that make learning enjoyable while testing your knowledge.", "icon": "🎮" },
-      { "title": "Assessments", "content": "Comprehensive assessments to track your progress and identify areas for improvement.", "icon": "🧠" },
-      { "title": "Projects", "content": "Collaborative projects that let learners build, present, and get feedback on real-world tasks.", "icon": "🛠️" },
-      { "title": "Coaching", "content": "Guided coaching and feedback loops to reinforce strengths and close learning gaps quickly.", "icon": "🎯" }
-    ]
-  }'::jsonb,
-  40, true
-FROM public.pages p WHERE p.route = '/'
-ON CONFLICT (page_id, section_key) DO UPDATE SET content = EXCLUDED.content, active = true, sort_order = EXCLUDED.sort_order;
-
--- Services section copy
-INSERT INTO public.page_sections (page_id, section_key, section_type, content, sort_order, active)
-SELECT p.id, 'services', 'content',
-  '{
-    "title": "Our Services",
-    "subtitle": "Discover how we make learning English an exciting journey for both students and teachers"
-  }'::jsonb,
-  50, true
-FROM public.pages p WHERE p.route = '/'
-ON CONFLICT (page_id, section_key) DO UPDATE SET content = EXCLUDED.content, active = true, sort_order = EXCLUDED.sort_order;
-
--- Pricing section copy
-INSERT INTO public.page_sections (page_id, section_key, section_type, content, sort_order, active)
-SELECT p.id, 'pricing', 'content',
-  '{
-    "title": "Pricing",
-    "subtitle": "Flexible plans for students, teachers, and schools"
-  }'::jsonb,
-  60, true
-FROM public.pages p WHERE p.route = '/'
-ON CONFLICT (page_id, section_key) DO UPDATE SET content = EXCLUDED.content, active = true, sort_order = EXCLUDED.sort_order;
-
--- Register CTA
-INSERT INTO public.page_sections (page_id, section_key, section_type, content, sort_order, active)
-SELECT p.id, 'register-cta', 'cta',
-  '{
-    "title": "Ready to Start Learning?",
-    "subtitle": "Join thousands of students already improving their English",
-    "cta_label": "Get Started",
-    "cta_href": "/Auth/register"
-  }'::jsonb,
-  100, true
-FROM public.pages p WHERE p.route = '/'
-ON CONFLICT (page_id, section_key) DO UPDATE SET content = EXCLUDED.content, active = true, sort_order = EXCLUDED.sort_order;
-
--- ============================================
--- Global site sections (header/footer)
+-- 2) Global site sections (header/footer)
 -- ============================================
 INSERT INTO public.site_sections (section_key, section_type, content, sort_order, active)
 VALUES
@@ -253,8 +98,152 @@ ON CONFLICT (section_key) DO UPDATE SET
   updated_at = now();
 
 -- ============================================
--- About page sections
+-- 3) Route section inventory (tracking)
 -- ============================================
+-- This does NOT power rendering directly; it's a "what belongs where" registry.
+INSERT INTO public.route_sections (page_id, section_key, section_type, expected_content, sort_order, active)
+SELECT p.id, v.section_key, v.section_type, v.expected_content::jsonb, v.sort_order, true
+FROM public.pages p
+JOIN (
+  VALUES
+    -- Home (/)
+    ('/', 'hero', 'hero', '{"title":"","subtitle":"","buttons":[{"label":"","href":""}]}'::text, 10),
+    ('/', 'tagline', 'content', '{"title":"","subtitle":""}'::text, 20),
+    ('/', 'learning-tools', 'content', '{"title":"","subtitle":""}'::text, 30),
+    ('/', 'how-we-teach', 'tabs', '{"title":"","description":"","tabs":[{"title":"","content":"","icon":""}]}'::text, 40),
+    ('/', 'services', 'content', '{"title":"","subtitle":""}'::text, 50),
+    ('/', 'pricing', 'content', '{"title":"","subtitle":""}'::text, 60),
+    ('/', 'register-cta', 'cta', '{"title":"","subtitle":"","cta_label":"","cta_href":""}'::text, 100),
+
+    -- About (/about)
+    ('/about', 'hero', 'hero', '{"title":"","subtitle":""}'::text, 10),
+    ('/about', 'description', 'content', '{"body":""}'::text, 20),
+    ('/about', 'tagline', 'content', '{"text":""}'::text, 30),
+    ('/about', 'mission', 'content', '{"title":"","body":"","points":[""]}'::text, 40),
+    ('/about', 'vision', 'content', '{"title":"","body":"","goals":[""]}'::text, 50),
+    ('/about', 'team-intro', 'content', '{"title":"","body":""}'::text, 60),
+    ('/about', 'values-header', 'content', '{"title":""}'::text, 70),
+
+    -- Contact (/contact)
+    ('/contact', 'hero', 'content', '{"title":"","subtitle":"","contact_methods":[{"icon":"","href":"","text":""}]}'::text, 10),
+    ('/contact', 'form', 'content', '{"title":"","subtitle":"","subject_options":[""]}'::text, 20),
+    ('/contact', 'faq', 'content', '{"title":"","subtitle":""}'::text, 30),
+
+    -- Pricing (/pricing)
+    ('/pricing', 'pricing-header', 'content', '{"badge":"","title":"","subtitle":""}'::text, 10),
+    ('/pricing', 'pricing-footer', 'content', '{"note":"","help_text":"","help_href":"","help_label":""}'::text, 30),
+
+    -- Student platform (/platforms/student)
+    ('/platforms/student', 'hero', 'content', '{"title":"","subtitle":"","cta":{"label":"","href":""},"image":{"src":"","alt":"","width":0,"height":0}}'::text, 10),
+    ('/platforms/student', 'characters', 'content', '{"intro":"","outro":""}'::text, 20),
+    ('/platforms/student', 'planets', 'content', '{"title":"","toggle_on_label":"","toggle_off_label":"","autoplay_ms":0}'::text, 30),
+    ('/platforms/student', 'cta', 'content', '{"title":"","button":{"label":"","href":""}}'::text, 40),
+
+    -- Teacher platform (/platforms/teacher)
+    ('/platforms/teacher', 'hero', 'content', '{"title":"","subtitle":"","cta":{"label":"","href":""},"image":{"src":"","alt":"","width":0,"height":0}}'::text, 10),
+    ('/platforms/teacher', 'tools', 'content', '{"kicker":"","title":"","intro":"","outro":"","badge":""}'::text, 20),
+    ('/platforms/teacher', 'lesson-modules', 'content', '{"title":"","subtitle":""}'::text, 30),
+    ('/platforms/teacher', 'benefits', 'content', '{"title":""}'::text, 40),
+    ('/platforms/teacher', 'cta', 'content', '{"title":"","subtitle":"","button":{"label":"","href":""}}'::text, 50)
+) AS v(route, section_key, section_type, expected_content, sort_order)
+  ON v.route = p.route
+ON CONFLICT (page_id, section_key) DO UPDATE SET
+  section_type = EXCLUDED.section_type,
+  expected_content = EXCLUDED.expected_content,
+  sort_order = EXCLUDED.sort_order,
+  active = EXCLUDED.active,
+  updated_at = now();
+
+-- ============================================
+-- 4) Page sections (per route)
+-- ============================================
+
+-- ---------- Home (/)
+INSERT INTO public.page_sections (page_id, section_key, section_type, content, sort_order, active)
+SELECT p.id, 'hero', 'hero',
+  '{
+    "title": "Start your learning journey today!",
+    "subtitle": "We''re so happy you''re here! However, you will need to register to get started.",
+    "buttons": [
+      { "label": "Register Student", "href": "/Auth/register/student" },
+      { "label": "Register Teacher", "href": "/Auth/register/teacher" }
+    ]
+  }'::jsonb,
+  10, true
+FROM public.pages p WHERE p.route = '/'
+ON CONFLICT (page_id, section_key) DO UPDATE SET content = EXCLUDED.content, active = true, sort_order = EXCLUDED.sort_order;
+
+INSERT INTO public.page_sections (page_id, section_key, section_type, content, sort_order, active)
+SELECT p.id, 'tagline', 'content',
+  '{
+    "title": "Explore the universe of language!",
+    "subtitle": "We provide teachers with stellar EFL resources and guide students on an exciting journey to English mastery!"
+  }'::jsonb,
+  20, true
+FROM public.pages p WHERE p.route = '/'
+ON CONFLICT (page_id, section_key) DO UPDATE SET content = EXCLUDED.content, active = true, sort_order = EXCLUDED.sort_order;
+
+INSERT INTO public.page_sections (page_id, section_key, section_type, content, sort_order, active)
+SELECT p.id, 'learning-tools', 'content',
+  '{
+    "title": "Learning Tools",
+    "subtitle": "Discover our comprehensive suite of tools designed to make learning English engaging and effective"
+  }'::jsonb,
+  30, true
+FROM public.pages p WHERE p.route = '/'
+ON CONFLICT (page_id, section_key) DO UPDATE SET content = EXCLUDED.content, active = true, sort_order = EXCLUDED.sort_order;
+
+INSERT INTO public.page_sections (page_id, section_key, section_type, content, sort_order, active)
+SELECT p.id, 'how-we-teach', 'tabs',
+  '{
+    "title": "How We Teach",
+    "description": "Our comprehensive approach to education combines various learning methods to ensure maximum engagement and retention.",
+    "tabs": [
+      { "title": "Lessons", "content": "Interactive lessons designed by experts to help you master new concepts quickly and effectively.", "icon": "📘" },
+      { "title": "Activities", "content": "Hands-on activities that reinforce learning through practical application of concepts.", "icon": "🧩" },
+      { "title": "Minigames", "content": "Fun and engaging minigames that make learning enjoyable while testing your knowledge.", "icon": "🎮" },
+      { "title": "Assessments", "content": "Comprehensive assessments to track your progress and identify areas for improvement.", "icon": "🧠" },
+      { "title": "Projects", "content": "Collaborative projects that let learners build, present, and get feedback on real-world tasks.", "icon": "🛠️" },
+      { "title": "Coaching", "content": "Guided coaching and feedback loops to reinforce strengths and close learning gaps quickly.", "icon": "🎯" }
+    ]
+  }'::jsonb,
+  40, true
+FROM public.pages p WHERE p.route = '/'
+ON CONFLICT (page_id, section_key) DO UPDATE SET content = EXCLUDED.content, active = true, sort_order = EXCLUDED.sort_order;
+
+INSERT INTO public.page_sections (page_id, section_key, section_type, content, sort_order, active)
+SELECT p.id, 'services', 'content',
+  '{
+    "title": "Our Services",
+    "subtitle": "Discover how we make learning English an exciting journey for both students and teachers"
+  }'::jsonb,
+  50, true
+FROM public.pages p WHERE p.route = '/'
+ON CONFLICT (page_id, section_key) DO UPDATE SET content = EXCLUDED.content, active = true, sort_order = EXCLUDED.sort_order;
+
+INSERT INTO public.page_sections (page_id, section_key, section_type, content, sort_order, active)
+SELECT p.id, 'pricing', 'content',
+  '{
+    "title": "Pricing",
+    "subtitle": "Flexible plans for students, teachers, and schools"
+  }'::jsonb,
+  60, true
+FROM public.pages p WHERE p.route = '/'
+ON CONFLICT (page_id, section_key) DO UPDATE SET content = EXCLUDED.content, active = true, sort_order = EXCLUDED.sort_order;
+
+INSERT INTO public.page_sections (page_id, section_key, section_type, content, sort_order, active)
+SELECT p.id, 'register-cta', 'cta',
+  '{
+    "title": "Ready to Start Learning?",
+    "subtitle": "Join thousands of students already improving their English",
+    "cta_label": "Get Started",
+    "cta_href": "/Auth/register"
+  }'::jsonb,
+  100, true
+FROM public.pages p WHERE p.route = '/'
+ON CONFLICT (page_id, section_key) DO UPDATE SET content = EXCLUDED.content, active = true, sort_order = EXCLUDED.sort_order;
+
+-- ---------- About (/about)
 INSERT INTO public.page_sections (page_id, section_key, section_type, content, sort_order, active)
 SELECT p.id, 'hero', 'hero',
   '{
@@ -332,9 +321,7 @@ SELECT p.id, 'values-header', 'content',
 FROM public.pages p WHERE p.route = '/about'
 ON CONFLICT (page_id, section_key) DO UPDATE SET content = EXCLUDED.content, active = true, sort_order = EXCLUDED.sort_order;
 
--- ============================================
--- Contact page sections
--- ============================================
+-- ---------- Contact (/contact)
 INSERT INTO public.page_sections (page_id, section_key, section_type, content, sort_order, active)
 SELECT p.id, 'hero', 'content',
   '{
@@ -370,9 +357,7 @@ SELECT p.id, 'faq', 'content',
 FROM public.pages p WHERE p.route = '/contact'
 ON CONFLICT (page_id, section_key) DO UPDATE SET content = EXCLUDED.content, active = true, sort_order = EXCLUDED.sort_order;
 
--- ============================================
--- Pricing page sections
--- ============================================
+-- ---------- Pricing (/pricing)
 INSERT INTO public.page_sections (page_id, section_key, section_type, content, sort_order, active)
 SELECT p.id, 'pricing-header', 'content',
   '{
@@ -384,9 +369,19 @@ SELECT p.id, 'pricing-header', 'content',
 FROM public.pages p WHERE p.route = '/pricing'
 ON CONFLICT (page_id, section_key) DO UPDATE SET content = EXCLUDED.content, active = true, sort_order = EXCLUDED.sort_order;
 
--- ============================================
--- Student platform (/platforms/student) sections
--- ============================================
+INSERT INTO public.page_sections (page_id, section_key, section_type, content, sort_order, active)
+SELECT p.id, 'pricing-footer', 'content',
+  '{
+    "note": "All plans include a 14-day free trial. No credit card required.",
+    "help_text": "Need help choosing?",
+    "help_href": "/contact",
+    "help_label": "Contact our team"
+  }'::jsonb,
+  30, true
+FROM public.pages p WHERE p.route = '/pricing'
+ON CONFLICT (page_id, section_key) DO UPDATE SET content = EXCLUDED.content, active = true, sort_order = EXCLUDED.sort_order;
+
+-- ---------- Student platform (/platforms/student)
 INSERT INTO public.page_sections (page_id, section_key, section_type, content, sort_order, active)
 SELECT p.id, 'hero', 'content',
   '{
@@ -431,9 +426,7 @@ SELECT p.id, 'cta', 'content',
 FROM public.pages p WHERE p.route = '/platforms/student'
 ON CONFLICT (page_id, section_key) DO UPDATE SET content = EXCLUDED.content, active = true, sort_order = EXCLUDED.sort_order;
 
--- ============================================
--- Teacher platform (/platforms/teacher) sections
--- ============================================
+-- ---------- Teacher platform (/platforms/teacher)
 INSERT INTO public.page_sections (page_id, section_key, section_type, content, sort_order, active)
 SELECT p.id, 'hero', 'content',
   '{
@@ -489,22 +482,11 @@ SELECT p.id, 'cta', 'content',
 FROM public.pages p WHERE p.route = '/platforms/teacher'
 ON CONFLICT (page_id, section_key) DO UPDATE SET content = EXCLUDED.content, active = true, sort_order = EXCLUDED.sort_order;
 
-INSERT INTO public.page_sections (page_id, section_key, section_type, content, sort_order, active)
-SELECT p.id, 'pricing-footer', 'content',
-  '{
-    "note": "All plans include a 14-day free trial. No credit card required.",
-    "help_text": "Need help choosing?",
-    "help_href": "/contact",
-    "help_label": "Contact our team"
-  }'::jsonb,
-  30, true
-FROM public.pages p WHERE p.route = '/pricing'
-ON CONFLICT (page_id, section_key) DO UPDATE SET content = EXCLUDED.content, active = true, sort_order = EXCLUDED.sort_order;
+-- ============================================
+-- 5) Content items (per route/section)
+-- ============================================
 
--- ============================================
--- Content items
--- ============================================
--- Pricing tiers
+-- ---------- Home (/): pricing tiers
 INSERT INTO public.content_items (page_id, section_key, content_type, slug, title, content, sort_order, active)
 SELECT p.id, 'pricing', v.content_type, v.slug, v.title, v.content::jsonb, v.sort_order, v.active
 FROM public.pages p
@@ -530,7 +512,7 @@ ON CONFLICT (slug) DO UPDATE SET
   active = EXCLUDED.active,
   updated_at = now();
 
--- Services
+-- ---------- Home (/): services
 INSERT INTO public.content_items (page_id, section_key, content_type, slug, title, description, content, sort_order, active)
 SELECT p.id, 'services', v.content_type, v.slug, v.title, v.description, v.content::jsonb, v.sort_order, v.active
 FROM public.pages p
@@ -558,7 +540,7 @@ ON CONFLICT (slug) DO UPDATE SET
   active = EXCLUDED.active,
   updated_at = now();
 
--- Learning tools
+-- ---------- Home (/): learning tools
 INSERT INTO public.content_items (page_id, section_key, content_type, slug, title, description, content, sort_order, active)
 SELECT p.id, 'learning-tools', v.content_type, v.slug, v.title, v.description, v.content::jsonb, v.sort_order, v.active
 FROM public.pages p
@@ -586,7 +568,7 @@ ON CONFLICT (slug) DO UPDATE SET
   active = EXCLUDED.active,
   updated_at = now();
 
--- About: team members
+-- ---------- About (/about): team members
 INSERT INTO public.content_items (page_id, section_key, content_type, slug, title, subtitle, description, content, sort_order, active)
 SELECT p.id, 'team', v.content_type, v.slug, v.title, v.subtitle, v.description, v.content::jsonb, v.sort_order, v.active
 FROM public.pages p
@@ -611,7 +593,7 @@ ON CONFLICT (slug) DO UPDATE SET
   active = EXCLUDED.active,
   updated_at = now();
 
--- About: stats
+-- ---------- About (/about): stats
 INSERT INTO public.content_items (page_id, section_key, content_type, slug, title, description, sort_order, active)
 SELECT p.id, 'stats', v.content_type, v.slug, v.title, v.description, v.sort_order, v.active
 FROM public.pages p
@@ -637,7 +619,7 @@ ON CONFLICT (slug) DO UPDATE SET
   active = EXCLUDED.active,
   updated_at = now();
 
--- About: core values
+-- ---------- About (/about): core values
 INSERT INTO public.content_items (page_id, section_key, content_type, slug, title, description, content, sort_order, active)
 SELECT p.id, 'values', v.content_type, v.slug, v.title, v.description, v.content::jsonb, v.sort_order, v.active
 FROM public.pages p
@@ -663,7 +645,7 @@ ON CONFLICT (slug) DO UPDATE SET
   active = EXCLUDED.active,
   updated_at = now();
 
--- Contact: FAQs (stored as content_items scoped to /contact)
+-- ---------- Contact (/contact): FAQs
 INSERT INTO public.content_items (page_id, section_key, content_type, slug, title, description, content, sort_order, active)
 SELECT p.id, 'faq', 'faq', v.slug, v.question, v.answer, '{"category":"contact"}'::jsonb, v.sort_order, true
 FROM public.pages p
@@ -693,7 +675,7 @@ ON CONFLICT (slug) DO UPDATE SET
   active = EXCLUDED.active,
   updated_at = now();
 
--- Pricing: plans (stored as content_items scoped to /pricing)
+-- ---------- Pricing (/pricing): plans
 INSERT INTO public.content_items (page_id, section_key, content_type, slug, title, subtitle, description, content, sort_order, active)
 SELECT p.id, 'pricing-plans', 'pricing_plan', v.slug, v.title, v.badge, v.description, v.content::jsonb, v.sort_order, true
 FROM public.pages p
@@ -778,7 +760,7 @@ ON CONFLICT (slug) DO UPDATE SET
   active = EXCLUDED.active,
   updated_at = now();
 
--- Student platform: characters (stored as content_items scoped to /platforms/student)
+-- ---------- Student platform (/platforms/student): characters
 INSERT INTO public.content_items (page_id, section_key, content_type, slug, title, content, sort_order, active)
 SELECT p.id, 'characters', 'student_character', v.slug, v.name, v.content::jsonb, v.sort_order, true
 FROM public.pages p
@@ -804,7 +786,7 @@ ON CONFLICT (slug) DO UPDATE SET
   active = EXCLUDED.active,
   updated_at = now();
 
--- Student platform: planets (stored as content_items scoped to /platforms/student)
+-- ---------- Student platform (/platforms/student): planets
 INSERT INTO public.content_items (page_id, section_key, content_type, slug, title, content, sort_order, active)
 SELECT p.id, 'planets', 'student_planet', v.slug, v.name, v.content::jsonb, v.sort_order, true
 FROM public.pages p
@@ -832,7 +814,7 @@ ON CONFLICT (slug) DO UPDATE SET
   active = EXCLUDED.active,
   updated_at = now();
 
--- Teacher platform: teaching tools (stored as content_items scoped to /platforms/teacher)
+-- ---------- Teacher platform (/platforms/teacher): teaching tools
 INSERT INTO public.content_items (page_id, section_key, content_type, slug, title, description, content, sort_order, active)
 SELECT p.id, 'tools', 'teaching_tool', v.slug, v.title, v.description, v.content::jsonb, v.sort_order, true
 FROM public.pages p
@@ -860,7 +842,7 @@ ON CONFLICT (slug) DO UPDATE SET
   active = EXCLUDED.active,
   updated_at = now();
 
--- Teacher platform: lesson modules (stored as content_items scoped to /platforms/teacher)
+-- ---------- Teacher platform (/platforms/teacher): lesson modules
 INSERT INTO public.content_items (page_id, section_key, content_type, slug, title, description, content, sort_order, active)
 SELECT p.id, 'lesson-modules', 'lesson_module', v.slug, v.title, v.description, v.content::jsonb, v.sort_order, true
 FROM public.pages p
@@ -892,7 +874,7 @@ ON CONFLICT (slug) DO UPDATE SET
   active = EXCLUDED.active,
   updated_at = now();
 
--- Teacher platform: benefits (stored as content_items scoped to /platforms/teacher)
+-- ---------- Teacher platform (/platforms/teacher): benefits
 INSERT INTO public.content_items (page_id, section_key, content_type, slug, title, description, sort_order, active)
 SELECT p.id, 'benefits', 'teacher_benefit', v.slug, v.title, v.description, v.sort_order, true
 FROM public.pages p
@@ -918,8 +900,11 @@ ON CONFLICT (slug) DO UPDATE SET
   active = EXCLUDED.active,
   updated_at = now();
 
--- Contact FAQ (optional; kept for compatibility)
+-- ============================================
+-- 6) Legacy / compatibility seeds
+-- ============================================
 INSERT INTO public.faqs (category, question, answer, sort_order, active)
 VALUES
   ('contact', 'How do I get started?', 'Fill out the contact form or reach out via email/phone. We''ll schedule a free consultation to assess your level and goals.', 10, true)
 ON CONFLICT DO NOTHING;
+
