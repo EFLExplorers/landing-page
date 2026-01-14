@@ -1,7 +1,16 @@
 import Link from "next/link";
 import styles from "@/styles/Auth.module.css";
+import type { GetStaticProps } from "next";
+import type { HeaderContent } from "@/components/layout/Header-Footer/Header";
+import type { FooterContent } from "@/components/layout/Header-Footer/Footer";
+import { getGlobalLayoutContent } from "@/utils/globalSections";
 
-export const TeacherPendingPage = () => {
+interface TeacherPendingPageProps {
+  headerContent: HeaderContent | null;
+  footerContent: FooterContent | null;
+}
+
+export const TeacherPendingPage = (_props: TeacherPendingPageProps) => {
   return (
     <div className={styles.container}>
       <div className={styles.formContainer}>
@@ -29,3 +38,16 @@ export const TeacherPendingPage = () => {
 };
 
 export default TeacherPendingPage;
+
+export const getStaticProps: GetStaticProps<TeacherPendingPageProps> = async () => {
+  const { supabase, isSupabaseConfigured } = await import(
+    "@/utils/supabaseClient"
+  );
+
+  if (!isSupabaseConfigured) {
+    return { props: { headerContent: null, footerContent: null }, revalidate: 300 };
+  }
+
+  const { headerContent, footerContent } = await getGlobalLayoutContent(supabase);
+  return { props: { headerContent, footerContent }, revalidate: 300 };
+};

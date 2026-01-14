@@ -1,9 +1,15 @@
-import { LearningTool } from "../../../pages/api/content";
 import { PageSection } from "../../../pages/api/page-content";
 import styles from "./LearningToolsSection.module.css";
 
+export interface LearningToolLite {
+  id: string;
+  title?: string;
+  description?: string;
+  content: Record<string, any>;
+}
+
 export interface LearningToolsSectionProps {
-  tools: LearningTool[];
+  tools: LearningToolLite[];
   section?: PageSection | null;
 }
 

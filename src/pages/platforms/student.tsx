@@ -6,12 +6,16 @@ import {
 } from "@/components/layout/StudentPlatform";
 import styles from "./student.module.css";
 import type { GetStaticProps } from "next";
-import type { PageContent, PageSection } from "@/pages/api/page-content";
+import type { PageSection } from "@/pages/api/page-content";
 import type { StudentCharacter } from "@/components/layout/StudentPlatform/sections/CharactersSection";
 import type { StudentPlanet } from "@/components/layout/StudentPlatform/sections/PlanetsSection";
+import type { HeaderContent } from "@/components/layout/Header-Footer/Header";
+import type { FooterContent } from "@/components/layout/Header-Footer/Footer";
+import { getGlobalLayoutContent } from "@/utils/globalSections";
 
 interface StudentPlatformPageProps {
-  pageData: PageContent;
+  headerContent: HeaderContent | null;
+  footerContent: FooterContent | null;
   heroSection: PageSection | null;
   charactersSection: PageSection | null;
   planetsSection: PageSection | null;
@@ -21,13 +25,8 @@ interface StudentPlatformPageProps {
 }
 
 const emptyStudentPlatformProps: StudentPlatformPageProps = {
-  pageData: {
-    id: "",
-    route: "/platforms/student",
-    title: "",
-    meta_description: "",
-    sections: [],
-  },
+  headerContent: null,
+  footerContent: null,
   heroSection: null,
   charactersSection: null,
   planetsSection: null,
@@ -74,6 +73,10 @@ export const getStaticProps: GetStaticProps<
       return { props: emptyStudentPlatformProps, revalidate: 300 };
     }
 
+    const { headerContent, footerContent } = await getGlobalLayoutContent(
+      supabase
+    );
+
     const { data: pageData } = await supabase
       .from("pages")
       .select("id, route, title, meta_description")
@@ -89,24 +92,14 @@ export const getStaticProps: GetStaticProps<
       .eq("active", true)
       .order("sort_order", { ascending: true });
 
-    const pageContent: PageContent = pageData
-      ? {
-          id: pageData.id,
-          route: pageData.route,
-          title: pageData.title,
-          meta_description: pageData.meta_description,
-          sections: sectionsData || [],
-        }
-      : { id: "", route: "/platforms/student", sections: [] };
+    const sections = sectionsData || [];
 
-    const heroSection =
-      pageContent.sections.find((s) => s.section_key === "hero") || null;
+    const heroSection = sections.find((s) => s.section_key === "hero") || null;
     const charactersSection =
-      pageContent.sections.find((s) => s.section_key === "characters") || null;
+      sections.find((s) => s.section_key === "characters") || null;
     const planetsSection =
-      pageContent.sections.find((s) => s.section_key === "planets") || null;
-    const ctaSection =
-      pageContent.sections.find((s) => s.section_key === "cta") || null;
+      sections.find((s) => s.section_key === "planets") || null;
+    const ctaSection = sections.find((s) => s.section_key === "cta") || null;
 
     const { data: characterItems } = await supabase
       .from("content_items")
@@ -143,7 +136,8 @@ export const getStaticProps: GetStaticProps<
 
     return {
       props: {
-        pageData: pageContent,
+        headerContent,
+        footerContent,
         heroSection,
         charactersSection,
         planetsSection,

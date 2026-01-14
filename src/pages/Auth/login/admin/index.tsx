@@ -3,8 +3,17 @@ import { useState } from "react";
 import { useRouter } from "next/router";
 import { supabase } from "../../../../utils/supabaseClient";
 import styles from "@/styles/Auth.module.css";
+import type { GetStaticProps } from "next";
+import type { HeaderContent } from "@/components/layout/Header-Footer/Header";
+import type { FooterContent } from "@/components/layout/Header-Footer/Footer";
+import { getGlobalLayoutContent } from "@/utils/globalSections";
 
-export const AdminLoginPage = () => {
+interface AdminLoginPageProps {
+  headerContent: HeaderContent | null;
+  footerContent: FooterContent | null;
+}
+
+export const AdminLoginPage = (_props: AdminLoginPageProps) => {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -77,3 +86,16 @@ export const AdminLoginPage = () => {
 };
 
 export default AdminLoginPage;
+
+export const getStaticProps: GetStaticProps<AdminLoginPageProps> = async () => {
+  const { supabase, isSupabaseConfigured } = await import(
+    "@/utils/supabaseClient"
+  );
+
+  if (!isSupabaseConfigured) {
+    return { props: { headerContent: null, footerContent: null }, revalidate: 300 };
+  }
+
+  const { headerContent, footerContent } = await getGlobalLayoutContent(supabase);
+  return { props: { headerContent, footerContent }, revalidate: 300 };
+};

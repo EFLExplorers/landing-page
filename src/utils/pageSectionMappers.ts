@@ -30,9 +30,10 @@ export const mapHeaderContentFromSection = (
 
   if (!navbar && !authButtons) return null;
 
+  // Avoid `undefined` values in Next.js props (not JSON-serializable)
   return {
-    navbar: navbar ?? undefined,
-    authButtons: authButtons ?? undefined,
-  };
+    ...(navbar ? { navbar } : {}),
+    ...(authButtons ? { authButtons } : {}),
+  } as HeaderContent;
 };
 

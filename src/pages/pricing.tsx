@@ -6,44 +6,48 @@ import {
   type PricingPlan,
 } from "../components/layout/Pricing/PricingTable";
 import { PageLayout } from "../components/layout/PageLayout";
-import type { PageContent, PageSection } from "./api/page-content";
+import type { PageSection } from "./api/page-content";
+import type { HeaderContent } from "../components/layout/Header-Footer/Header";
+import type { FooterContent } from "../components/layout/Header-Footer/Footer";
+import { getGlobalLayoutContent } from "../utils/globalSections";
 
 interface PricingPageProps {
-  pageData: PageContent;
+  headerContent: HeaderContent | null;
+  footerContent: FooterContent | null;
+  pageTitle: string;
+  pageDescription: string;
   headerSection: PageSection | null;
   footerSection: PageSection | null;
   plans: PricingPlan[];
 }
 
 const emptyPricingProps: PricingPageProps = {
-  pageData: {
-    id: "",
-    route: "/pricing",
-    title: "",
-    meta_description: "",
-    sections: [],
-  },
+  headerContent: null,
+  footerContent: null,
+  pageTitle: "",
+  pageDescription: "",
   headerSection: null,
   footerSection: null,
   plans: [],
 };
 
 export const Pricing: NextPage<PricingPageProps> = ({
-  pageData,
+  pageTitle,
+  pageDescription,
   headerSection,
   footerSection,
   plans,
 }) => {
-  const pageTitle = pageData?.title || "Pricing - ESL Explorers";
-  const pageDescription =
-    pageData?.meta_description ||
+  const safeTitle = pageTitle || "Pricing - ESL Explorers";
+  const safeDescription =
+    pageDescription ||
     "Choose the best plan to improve your English skills with ESL Explorers.";
 
   return (
     <>
       <Head>
-        <title>{pageTitle}</title>
-        <meta name="description" content={pageDescription} />
+        <title>{safeTitle}</title>
+        <meta name="description" content={safeDescription} />
       </Head>
       <PageLayout>
         <PricingTable
@@ -69,6 +73,10 @@ export const getStaticProps: GetStaticProps<PricingPageProps> = async () => {
       return { props: emptyPricingProps, revalidate: 300 };
     }
 
+    const { headerContent, footerContent } = await getGlobalLayoutContent(
+      supabase
+    );
+
     const { data: pageData } = await supabase
       .from("pages")
       .select("id, route, title, meta_description")
@@ -84,22 +92,14 @@ export const getStaticProps: GetStaticProps<PricingPageProps> = async () => {
       .eq("active", true)
       .order("sort_order", { ascending: true });
 
-    const pageContent: PageContent = pageData
-      ? {
-          id: pageData.id,
-          route: pageData.route,
-          title: pageData.title,
-          meta_description: pageData.meta_description,
-          sections: sectionsData || [],
-        }
-      : { id: "", route: "/pricing", sections: [] };
+    const sections = sectionsData || [];
+    const pageTitle = pageData?.title || "";
+    const pageDescription = pageData?.meta_description || "";
 
     const headerSection =
-      pageContent.sections.find((s) => s.section_key === "pricing-header") ||
-      null;
+      sections.find((s) => s.section_key === "pricing-header") || null;
     const footerSection =
-      pageContent.sections.find((s) => s.section_key === "pricing-footer") ||
-      null;
+      sections.find((s) => s.section_key === "pricing-footer") || null;
 
     const { data: planItems } = await supabase
       .from("content_items")
@@ -119,7 +119,10 @@ export const getStaticProps: GetStaticProps<PricingPageProps> = async () => {
 
     return {
       props: {
-        pageData: pageContent,
+        headerContent,
+        footerContent,
+        pageTitle,
+        pageDescription,
         headerSection,
         footerSection,
         plans,

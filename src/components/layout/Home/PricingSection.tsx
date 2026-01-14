@@ -1,9 +1,15 @@
-import { PricingTier } from "../../../pages/api/content";
 import { PageSection } from "../../../pages/api/page-content";
 import styles from "./PricingSection.module.css";
 
+export interface PricingTierLite {
+  id: string;
+  title?: string;
+  description?: string;
+  content: Record<string, any>;
+}
+
 export interface PricingSectionProps {
-  pricingTiers: PricingTier[];
+  pricingTiers: PricingTierLite[];
   section?: PageSection | null;
 }
 

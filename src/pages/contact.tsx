@@ -8,10 +8,16 @@ import {
   ContactFAQSection,
   type ContactFAQ,
 } from "../components/layout/Contact/ContactFAQSection";
-import type { PageContent, PageSection } from "./api/page-content";
+import type { PageSection } from "./api/page-content";
+import type { HeaderContent } from "../components/layout/Header-Footer/Header";
+import type { FooterContent } from "../components/layout/Header-Footer/Footer";
+import { getGlobalLayoutContent } from "../utils/globalSections";
 
 interface ContactPageProps {
-  pageData: PageContent;
+  headerContent: HeaderContent | null;
+  footerContent: FooterContent | null;
+  pageTitle: string;
+  pageDescription: string;
   heroSection: PageSection | null;
   formSection: PageSection | null;
   faqSection: PageSection | null;
@@ -19,7 +25,10 @@ interface ContactPageProps {
 }
 
 const emptyContactProps: ContactPageProps = {
-  pageData: { id: "", route: "/contact", title: "", meta_description: "", sections: [] },
+  headerContent: null,
+  footerContent: null,
+  pageTitle: "",
+  pageDescription: "",
   heroSection: null,
   formSection: null,
   faqSection: null,
@@ -27,28 +36,29 @@ const emptyContactProps: ContactPageProps = {
 };
 
 export const ContactPage: NextPage<ContactPageProps> = ({
-  pageData,
+  pageTitle,
+  pageDescription,
   heroSection,
   formSection,
   faqSection,
   faqs,
 }) => {
-  const pageTitle = pageData?.title || "Contact Us - ESL Explorers";
-  const pageDescription =
-    pageData?.meta_description ||
+  const safeTitle = pageTitle || "Contact Us - ESL Explorers";
+  const safeDescription =
+    pageDescription ||
     "Get in touch with ESL Explorers. We're here to help with your English learning journey through innovative education methods and dedicated support.";
 
   return (
     <>
       <Head>
-        <title>{pageTitle}</title>
-        <meta name="description" content={pageDescription} />
+        <title>{safeTitle}</title>
+        <meta name="description" content={safeDescription} />
         <meta
           name="keywords"
           content="ESL contact, English learning support, language education help, contact us"
         />
-        <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content={pageDescription} />
+        <meta property="og:title" content={safeTitle} />
+        <meta property="og:description" content={safeDescription} />
         <meta property="og:type" content="website" />
       </Head>
       <PageLayout>
@@ -60,7 +70,9 @@ export const ContactPage: NextPage<ContactPageProps> = ({
   );
 };
 
-export const getServerSideProps: GetServerSideProps<ContactPageProps> = async () => {
+export const getServerSideProps: GetServerSideProps<
+  ContactPageProps
+> = async () => {
   // strict: contact is DB-driven (SSR so build doesn't depend on seeded DB)
   const { supabase, isSupabaseConfigured } = await import(
     "../utils/supabaseClient"
@@ -69,6 +81,8 @@ export const getServerSideProps: GetServerSideProps<ContactPageProps> = async ()
   if (!isSupabaseConfigured) {
     throw new Error("[Contact] Supabase environment variables are missing.");
   }
+
+  const { headerContent, footerContent } = await getGlobalLayoutContent(supabase);
 
   const { data: pageData, error: pageError } = await supabase
     .from("pages")
@@ -101,20 +115,13 @@ export const getServerSideProps: GetServerSideProps<ContactPageProps> = async ()
     );
   }
 
-  const pageContent: PageContent = {
-    id: pageData.id,
-    route: pageData.route,
-    title: pageData.title,
-    meta_description: pageData.meta_description,
-    sections: sectionsData,
-  };
+  const pageTitle = pageData.title || "";
+  const pageDescription = pageData.meta_description || "";
 
-  const heroSection =
-    pageContent.sections.find((s) => s.section_key === "hero") || null;
-  const formSection =
-    pageContent.sections.find((s) => s.section_key === "form") || null;
-  const faqSection =
-    pageContent.sections.find((s) => s.section_key === "faq") || null;
+  const sections = sectionsData;
+  const heroSection = sections.find((s) => s.section_key === "hero") || null;
+  const formSection = sections.find((s) => s.section_key === "form") || null;
+  const faqSection = sections.find((s) => s.section_key === "faq") || null;
 
   if (!heroSection) throw new Error("[Contact] Missing hero section.");
   if (!formSection) throw new Error("[Contact] Missing form section.");
@@ -140,7 +147,16 @@ export const getServerSideProps: GetServerSideProps<ContactPageProps> = async ()
   if (!faqs.length) throw new Error("[Contact] Missing FAQ items.");
 
   return {
-    props: { pageData: pageContent, heroSection, formSection, faqSection, faqs },
+    props: {
+      headerContent,
+      footerContent,
+      pageTitle,
+      pageDescription,
+      heroSection,
+      formSection,
+      faqSection,
+      faqs,
+    },
   };
 };
 

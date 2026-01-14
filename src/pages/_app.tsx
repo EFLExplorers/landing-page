@@ -2,8 +2,16 @@ import "../styles/globals.css";
 import type { AppProps } from "next/app";
 import Head from "next/head";
 import { Layout } from "../components/layout/Layout";
+import type { HeaderContent } from "../components/layout/Header-Footer/Header";
+import type { FooterContent } from "../components/layout/Header-Footer/Footer";
 
-function App({ Component, pageProps }: AppProps) {
+type AppPageProps = {
+  headerContent?: HeaderContent | null;
+  footerContent?: FooterContent | null;
+  [key: string]: any;
+};
+
+function App({ Component, pageProps }: AppProps<AppPageProps>) {
   return (
     <>
       <Head>
@@ -11,7 +19,10 @@ function App({ Component, pageProps }: AppProps) {
         <meta name="description" content="ESL Explorers - Learning Platform" />
         <title>ESL Explorers</title>
       </Head>
-      <Layout>
+      <Layout
+        headerContent={pageProps.headerContent ?? null}
+        footerContent={pageProps.footerContent ?? null}
+      >
         <Component {...pageProps} />
       </Layout>
     </>

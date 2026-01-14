@@ -1,5 +1,4 @@
 import { GetStaticProps } from "next";
-import { useEffect } from "react";
 import { PageLayout } from "../components/layout/PageLayout";
 import HeroSection, {
   HeroSectionProps,
@@ -26,20 +25,27 @@ import {
   HowWeTeachSectionProps,
 } from "../components/layout/Home/HowWeTeachSection";
 import { ContentErrorBoundary } from "../components/common/ErrorBoundary";
-import { PageContent } from "./api/page-content";
-import { PricingTier, Service, LearningTool } from "./api/content";
+import type { PageSection } from "./api/page-content";
+import type { PricingTierLite } from "../components/layout/Home/PricingSection";
+import type { ServiceLite } from "../components/layout/Home/ServicesSection";
+import type { LearningToolLite } from "../components/layout/Home/LearningToolsSection";
+import type { HeaderContent } from "../components/layout/Header-Footer/Header";
+import type { FooterContent } from "../components/layout/Header-Footer/Footer";
+import { getGlobalLayoutContent } from "../utils/globalSections";
 
 interface HomePageProps {
-  heroSection: PageContent["sections"][0] | null;
-  taglineSection: PageContent["sections"][0] | null;
-  registerCTASection: PageContent["sections"][0] | null;
-  servicesSection: PageContent["sections"][0] | null;
-  pricingSection: PageContent["sections"][0] | null;
-  learningToolsSection: PageContent["sections"][0] | null;
-  howWeTeachSection: PageContent["sections"][0] | null;
-  pricingTiers: PricingTier[];
-  services: Service[];
-  learningTools: LearningTool[];
+  headerContent: HeaderContent | null;
+  footerContent: FooterContent | null;
+  heroSection: PageSection | null;
+  taglineSection: PageSection | null;
+  registerCTASection: PageSection | null;
+  servicesSection: PageSection | null;
+  pricingSection: PageSection | null;
+  learningToolsSection: PageSection | null;
+  howWeTeachSection: PageSection | null;
+  pricingTiers: PricingTierLite[];
+  services: ServiceLite[];
+  learningTools: LearningToolLite[];
 }
 
 export const HomePage = ({
@@ -54,38 +60,6 @@ export const HomePage = ({
   services,
   learningTools,
 }: HomePageProps) => {
-  useEffect(() => {
-    console.groupCollapsed("[Home] data snapshot");
-    console.log("Hero section:", heroSection?.id || "none");
-    console.log("Tagline section:", taglineSection?.id || "none");
-    console.log("Register CTA section:", registerCTASection?.id || "none");
-    console.log("How we teach section:", howWeTeachSection?.id || "none");
-    console.log(
-      "Pricing tiers count:",
-      pricingTiers.length,
-      pricingTiers.map((p) => p.id)
-    );
-    console.log(
-      "Services count:",
-      services.length,
-      services.map((s) => s.id)
-    );
-    console.log(
-      "Learning tools count:",
-      learningTools.length,
-      learningTools.map((t) => t.id)
-    );
-    console.groupEnd();
-  }, [
-    heroSection,
-    taglineSection,
-    registerCTASection,
-    howWeTeachSection,
-    pricingTiers,
-    services,
-    learningTools,
-  ]);
-
   return (
     <PageLayout>
       <ContentErrorBoundary contentType="hero section">
@@ -132,6 +106,8 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
     throw new Error("[Home] Supabase environment variables are missing.");
   }
 
+  const { headerContent, footerContent } = await getGlobalLayoutContent(supabase);
+
   // Fetch page content
   const { data: pageData, error: pageError } = await supabase
     .from("pages")
@@ -148,7 +124,7 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
   const { data: sectionsData, error: sectionsError } = await supabase
     .from("page_sections")
     .select(
-      "id, section_key, section_type, title, subtitle, heading, subheading, body, cta_label, cta_href, content, data, settings, sort_order, active"
+      "id, section_key, title, subtitle, heading, subheading, body, cta_label, cta_href, content, data"
     )
     .eq("page_id", pageData.id)
     .eq("active", true)
@@ -156,59 +132,70 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
 
   if (sectionsError || !sectionsData?.length) {
     throw new Error(
-      `[Home] Missing page_sections for '/': ${sectionsError?.message || "none"}`
+      `[Home] Missing page_sections for '/': ${
+        sectionsError?.message || "none"
+      }`
     );
   }
 
-  const pageContent: PageContent = {
-    id: pageData.id,
-    route: pageData.route,
-    title: pageData.title,
-    meta_description: pageData.meta_description,
-    sections: sectionsData,
-  };
+  // Only keep the fields the home UI actually reads (reduces __NEXT_DATA__ payload)
+  const sections: PageSection[] = (sectionsData || []).map((s: any) => {
+    const out: any = {
+      id: s.id,
+      section_key: s.section_key,
+      section_type: "",
+      content: s.content ?? {},
+      sort_order: 0,
+      active: true,
+    };
+
+    // Only add keys when present; avoid `undefined` in props (Next.js serialization)
+    if (s.title != null) out.title = s.title;
+    if (s.subtitle != null) out.subtitle = s.subtitle;
+    if (s.heading != null) out.heading = s.heading;
+    if (s.subheading != null) out.subheading = s.subheading;
+    if (s.body != null) out.body = s.body;
+    if (s.cta_label != null) out.cta_label = s.cta_label;
+    if (s.cta_href != null) out.cta_href = s.cta_href;
+    if (s.data != null) out.data = s.data;
+
+    return out as PageSection;
+  });
 
   // Find specific sections
-  const heroSection =
-    pageContent.sections.find((s) => s.section_key === "hero") || null;
+  const heroSection = sections.find((s) => s.section_key === "hero") || null;
   const taglineSection =
-    pageContent.sections.find((s) => s.section_key === "tagline") || null;
+    sections.find((s) => s.section_key === "tagline") || null;
   const registerCTASection =
-    pageContent.sections.find((s) => s.section_key === "register-cta") || null;
+    sections.find((s) => s.section_key === "register-cta") || null;
   const servicesSection =
-    pageContent.sections.find((s) => s.section_key === "services") || null;
+    sections.find((s) => s.section_key === "services") || null;
   const pricingSection =
-    pageContent.sections.find((s) => s.section_key === "pricing") || null;
+    sections.find((s) => s.section_key === "pricing") || null;
   const learningToolsSection =
-    pageContent.sections.find((s) => s.section_key === "learning-tools") || null;
+    sections.find((s) => s.section_key === "learning-tools") || null;
   const howWeTeachSection =
-    pageContent.sections.find((s) => s.section_key === "how-we-teach") || null;
+    sections.find((s) => s.section_key === "how-we-teach") || null;
 
   // Fetch content types from the unified content_items table
   const [pricingData, servicesData, toolsData] = await Promise.all([
     supabase
       .from("content_items")
-      .select(
-        "id, content_type, title, subtitle, description, content, sort_order, active"
-      )
+      .select("id, title, description, content")
       .eq("page_id", pageData.id)
       .eq("content_type", "pricing")
       .eq("active", true)
       .order("sort_order", { ascending: true }),
     supabase
       .from("content_items")
-      .select(
-        "id, content_type, title, subtitle, description, content, sort_order, active"
-      )
+      .select("id, title, description, content")
       .eq("page_id", pageData.id)
       .eq("content_type", "service")
       .eq("active", true)
       .order("sort_order", { ascending: true }),
     supabase
       .from("content_items")
-      .select(
-        "id, content_type, title, subtitle, description, content, sort_order, active"
-      )
+      .select("id, title, description, content")
       .eq("page_id", pageData.id)
       .eq("content_type", "learning_tool")
       .eq("active", true)
@@ -219,9 +206,28 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
   if (servicesData.error) throw new Error(servicesData.error.message);
   if (toolsData.error) throw new Error(toolsData.error.message);
 
-  const pricingTiers: PricingTier[] = pricingData.data || [];
-  const services: Service[] = servicesData.data || [];
-  const learningTools: LearningTool[] = toolsData.data || [];
+  const pricingTiers: PricingTierLite[] = (pricingData.data || []).map(
+    (row: any) => {
+      const out: any = { id: row.id, content: row.content ?? {} };
+      if (row.title != null) out.title = row.title;
+      if (row.description != null) out.description = row.description;
+      return out as PricingTierLite;
+    }
+  );
+  const services: ServiceLite[] = (servicesData.data || []).map((row: any) => {
+    const out: any = { id: row.id, content: row.content ?? {} };
+    if (row.title != null) out.title = row.title;
+    if (row.description != null) out.description = row.description;
+    return out as ServiceLite;
+  });
+  const learningTools: LearningToolLite[] = (toolsData.data || []).map(
+    (row: any) => {
+      const out: any = { id: row.id, content: row.content ?? {} };
+      if (row.title != null) out.title = row.title;
+      if (row.description != null) out.description = row.description;
+      return out as LearningToolLite;
+    }
+  );
 
   if (!pricingTiers.length) throw new Error("[Home] Missing pricing tiers.");
   if (!services.length) throw new Error("[Home] Missing services.");
@@ -229,6 +235,8 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
 
   return {
     props: {
+      headerContent,
+      footerContent,
       heroSection,
       taglineSection,
       registerCTASection,

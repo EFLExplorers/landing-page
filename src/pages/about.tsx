@@ -8,10 +8,16 @@ import {
   CoreValue,
 } from "../components/layout/About/AboutUsSection";
 import { ContentErrorBoundary } from "../components/common/ErrorBoundary";
-import { PageContent, PageSection } from "./api/page-content";
+import { PageSection } from "./api/page-content";
+import type { HeaderContent } from "../components/layout/Header-Footer/Header";
+import type { FooterContent } from "../components/layout/Header-Footer/Footer";
+import { getGlobalLayoutContent } from "../utils/globalSections";
 
 interface AboutPageProps {
-  pageData: PageContent;
+  headerContent: HeaderContent | null;
+  footerContent: FooterContent | null;
+  pageTitle: string;
+  pageDescription: string;
   teamMembers: TeamMember[];
   stats: AboutStat[];
   coreValues: CoreValue[];
@@ -25,13 +31,10 @@ interface AboutPageProps {
 }
 
 const emptyAboutProps: AboutPageProps = {
-  pageData: {
-    id: "",
-    route: "/about",
-    title: "",
-    meta_description: "",
-    sections: [],
-  },
+  headerContent: null,
+  footerContent: null,
+  pageTitle: "",
+  pageDescription: "",
   teamMembers: [],
   stats: [],
   coreValues: [],
@@ -45,7 +48,8 @@ const emptyAboutProps: AboutPageProps = {
 };
 
 export const AboutPage: NextPage<AboutPageProps> = ({
-  pageData,
+  pageTitle,
+  pageDescription,
   teamMembers,
   stats,
   coreValues,
@@ -57,27 +61,19 @@ export const AboutPage: NextPage<AboutPageProps> = ({
   teamIntroSection,
   valuesHeaderSection,
 }) => {
-  const safePageData: PageContent = pageData || {
-    id: "",
-    route: "/about",
-    title: "",
-    meta_description: "",
-    sections: [],
-  };
-
-  const pageTitle = safePageData.title || "";
-  const pageDescription = safePageData.meta_description || "";
+  const safeTitle = pageTitle || "";
+  const safeDescription = pageDescription || "";
 
   return (
     <>
       <Head>
-        <title>{pageTitle}</title>
-        {pageDescription ? (
-          <meta name="description" content={pageDescription} />
+        <title>{safeTitle}</title>
+        {safeDescription ? (
+          <meta name="description" content={safeDescription} />
         ) : null}
-        {pageTitle ? <meta property="og:title" content={pageTitle} /> : null}
-        {pageDescription ? (
-          <meta property="og:description" content={pageDescription} />
+        {safeTitle ? <meta property="og:title" content={safeTitle} /> : null}
+        {safeDescription ? (
+          <meta property="og:description" content={safeDescription} />
         ) : null}
         <meta property="og:type" content="website" />
       </Head>
@@ -113,6 +109,10 @@ export const getStaticProps: GetStaticProps<AboutPageProps> = async () => {
       return { props: emptyAboutProps, revalidate: 300 };
     }
 
+    const { headerContent, footerContent } = await getGlobalLayoutContent(
+      supabase
+    );
+
     // Fetch page content
     const { data: pageData, error: pageError } = await supabase
       .from("pages")
@@ -137,50 +137,50 @@ export const getStaticProps: GetStaticProps<AboutPageProps> = async () => {
       .eq("active", true)
       .order("sort_order", { ascending: true });
 
-    const pageContent: PageContent = {
-      id: pageData.id,
-      route: pageData.route,
-      title: pageData.title,
-      meta_description: pageData.meta_description,
-      sections: sectionsData || [],
-    };
+    const sections = sectionsData || [];
+    const pageTitle = pageData.title || "";
+    const pageDescription = pageData.meta_description || "";
 
     // Find specific sections
-    const heroSection =
-      pageContent.sections.find((s) => s.section_key === "hero") || null;
+    const heroSection = sections.find((s) => s.section_key === "hero") || null;
     const descriptionSection =
-      pageContent.sections.find((s) => s.section_key === "description") || null;
+      sections.find((s) => s.section_key === "description") || null;
     const taglineSection =
-      pageContent.sections.find((s) => s.section_key === "tagline") || null;
+      sections.find((s) => s.section_key === "tagline") || null;
     const missionSection =
-      pageContent.sections.find((s) => s.section_key === "mission") || null;
+      sections.find((s) => s.section_key === "mission") || null;
     const visionSection =
-      pageContent.sections.find((s) => s.section_key === "vision") || null;
+      sections.find((s) => s.section_key === "vision") || null;
     const teamIntroSection =
-      pageContent.sections.find((s) => s.section_key === "team-intro") || null;
+      sections.find((s) => s.section_key === "team-intro") || null;
     const valuesHeaderSection =
-      pageContent.sections.find((s) => s.section_key === "values-header") ||
-      null;
+      sections.find((s) => s.section_key === "values-header") || null;
 
     // Fetch content types from the unified content_items table (scoped to /about)
     const [teamData, statsData, valuesData] = await Promise.all([
       supabase
         .from("content_items")
-        .select("id, title, subtitle, description, content, slug, sort_order, active")
+        .select(
+          "id, title, subtitle, description, content, slug, sort_order, active"
+        )
         .eq("page_id", pageData.id)
         .eq("content_type", "team_member")
         .eq("active", true)
         .order("sort_order", { ascending: true }),
       supabase
         .from("content_items")
-        .select("id, title, subtitle, description, content, slug, sort_order, active")
+        .select(
+          "id, title, subtitle, description, content, slug, sort_order, active"
+        )
         .eq("page_id", pageData.id)
         .eq("content_type", "about_stat")
         .eq("active", true)
         .order("sort_order", { ascending: true }),
       supabase
         .from("content_items")
-        .select("id, title, subtitle, description, content, slug, sort_order, active")
+        .select(
+          "id, title, subtitle, description, content, slug, sort_order, active"
+        )
         .eq("page_id", pageData.id)
         .eq("content_type", "core_value")
         .eq("active", true)
@@ -230,7 +230,10 @@ export const getStaticProps: GetStaticProps<AboutPageProps> = async () => {
 
     return {
       props: {
-        pageData: pageContent,
+        headerContent,
+        footerContent,
+        pageTitle,
+        pageDescription,
         teamMembers,
         stats,
         coreValues,

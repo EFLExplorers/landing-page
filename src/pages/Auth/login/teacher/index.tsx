@@ -1,7 +1,16 @@
 import { AuthContainer } from "@/components/auth/layout";
 import { LoginForm } from "@/components/auth/forms";
+import type { GetStaticProps } from "next";
+import type { HeaderContent } from "@/components/layout/Header-Footer/Header";
+import type { FooterContent } from "@/components/layout/Header-Footer/Footer";
+import { getGlobalLayoutContent } from "@/utils/globalSections";
 
-export const TeacherLoginPage = () => {
+interface TeacherLoginPageProps {
+  headerContent: HeaderContent | null;
+  footerContent: FooterContent | null;
+}
+
+export const TeacherLoginPage = (_props: TeacherLoginPageProps) => {
   return (
     <AuthContainer
       title="Teacher Login"
@@ -13,3 +22,16 @@ export const TeacherLoginPage = () => {
 };
 
 export default TeacherLoginPage;
+
+export const getStaticProps: GetStaticProps<TeacherLoginPageProps> = async () => {
+  const { supabase, isSupabaseConfigured } = await import(
+    "@/utils/supabaseClient"
+  );
+
+  if (!isSupabaseConfigured) {
+    return { props: { headerContent: null, footerContent: null }, revalidate: 300 };
+  }
+
+  const { headerContent, footerContent } = await getGlobalLayoutContent(supabase);
+  return { props: { headerContent, footerContent }, revalidate: 300 };
+};

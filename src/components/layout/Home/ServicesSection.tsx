@@ -1,9 +1,15 @@
-import { Service } from "../../../pages/api/content";
 import { PageSection } from "../../../pages/api/page-content";
 import styles from "./ServicesSection.module.css";
 
+export interface ServiceLite {
+  id: string;
+  title?: string;
+  description?: string;
+  content: Record<string, any>;
+}
+
 export interface ServicesSectionProps {
-  services: Service[];
+  services: ServiceLite[];
   section?: PageSection | null;
 }
 

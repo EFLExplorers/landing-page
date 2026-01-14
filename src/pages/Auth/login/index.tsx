@@ -1,8 +1,17 @@
 import { useRouter } from "next/router";
 import Link from "next/link";
 import styles from "@/styles/Auth.module.css";
+import type { GetStaticProps } from "next";
+import type { HeaderContent } from "@/components/layout/Header-Footer/Header";
+import type { FooterContent } from "@/components/layout/Header-Footer/Footer";
+import { getGlobalLayoutContent } from "@/utils/globalSections";
 
-export const LoginPage = () => {
+interface LoginPageProps {
+  headerContent: HeaderContent | null;
+  footerContent: FooterContent | null;
+}
+
+export const LoginPage = (_props: LoginPageProps) => {
   const router = useRouter();
 
   const handlePlatformSelect = (platform: "student" | "teacher" | "admin") => {
@@ -58,3 +67,16 @@ export const LoginPage = () => {
 };
 
 export default LoginPage; 
+
+export const getStaticProps: GetStaticProps<LoginPageProps> = async () => {
+  const { supabase, isSupabaseConfigured } = await import(
+    "@/utils/supabaseClient"
+  );
+
+  if (!isSupabaseConfigured) {
+    return { props: { headerContent: null, footerContent: null }, revalidate: 300 };
+  }
+
+  const { headerContent, footerContent } = await getGlobalLayoutContent(supabase);
+  return { props: { headerContent, footerContent }, revalidate: 300 };
+};
