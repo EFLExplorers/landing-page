@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Slot } from "@radix-ui/react-slot";
+// Removed Slot dependency
 import { cn } from "@/lib/utils";
 import styles from "./button.module.css";
 
@@ -27,7 +27,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) => {
-    const Comp = asChild ? Slot : "button";
+    const Comp = asChild ? React.Fragment : "button";
     return (
       <Comp
         className={cn(

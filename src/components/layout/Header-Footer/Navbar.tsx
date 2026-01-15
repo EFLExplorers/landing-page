@@ -1,12 +1,6 @@
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuPortal,
-} from "../../ui/dropdown-menu";
+import { useState } from "react";
 import styles from "./Navbar.module.css";
 
 export interface NavbarLink {
@@ -29,43 +23,41 @@ export interface NavbarProps {
 }
 
 export const Navbar = ({ content }: NavbarProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+
   if (!content) return null;
   const dropdown = content.dropdown;
   const links = content.links || [];
 
   return (
     <nav className={styles.desktopNav} data-cy="navbar">
-      <DropdownMenu modal={false}>
-        <DropdownMenuTrigger
+      <div className={styles.dropdown}>
+        <button
           className={styles.navLink}
+          onClick={() => setIsOpen(!isOpen)}
           data-cy="nav-platforms-trigger"
         >
-          {dropdown.label} <ChevronDown className={styles.dropdownIcon} />
-        </DropdownMenuTrigger>
-        <DropdownMenuPortal>
-          <DropdownMenuContent
+          {dropdown.label} <ChevronDown className={`${styles.dropdownIcon} ${isOpen ? styles.rotated : ''}`} />
+        </button>
+        {isOpen && (
+          <div
             className={styles.dropdownContent}
-            sideOffset={8}
             data-cy="nav-platforms-menu"
           >
             {(dropdown.items || []).map((item) => (
-              <DropdownMenuItem
+              <Link
                 key={item.href}
-                className={styles.dropdownItem}
-                data-cy={`nav-dropdown-item-${item.label.toLowerCase()}`}
+                href={item.href}
+                className={styles.dropdownLink}
+                onClick={() => setIsOpen(false)}
+                data-cy={`nav-dropdown-link-${item.label.toLowerCase()}`}
               >
-                <Link
-                  href={item.href}
-                  className={styles.dropdownLink}
-                  data-cy={`nav-dropdown-link-${item.label.toLowerCase()}`}
-                >
-                  {item.label}
-                </Link>
-              </DropdownMenuItem>
+                {item.label}
+              </Link>
             ))}
-          </DropdownMenuContent>
-        </DropdownMenuPortal>
-      </DropdownMenu>
+          </div>
+        )}
+      </div>
       {links.map((link) => (
         <Link
           key={link.href}

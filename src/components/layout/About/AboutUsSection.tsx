@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { PageSection } from "../../../pages/api/page-content";
 import styles from "./AboutUsSection.module.css";
 
@@ -225,9 +226,11 @@ export const AboutUsSection = ({
                   >
                     {member.image ? (
                       <div className={styles.memberImage}>
-                        <img
+                        <Image
                           src={member.image}
                           alt={member.name}
+                          width={120}
+                          height={120}
                           className={styles.memberPhoto}
                         />
                         <div className={styles.memberOverlay}>

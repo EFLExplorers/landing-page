@@ -1,6 +1,6 @@
 import { useState } from "react";
 import styles from "./ContactSection.module.css";
-import { MdLocationOn, MdEmail, MdPhone, MdChevronRight } from "react-icons/md";
+import { MapPin, Mail, Phone, ChevronRight } from "lucide-react";
 
 interface FAQ {
   question: string;
@@ -72,17 +72,17 @@ export const ContactSection = () => {
             </p>
             <div className={styles.contactInfo}>
               <div className={styles.infoItem}>
-                <MdLocationOn className={styles.icon} />
+                <MapPin className={styles.icon} />
                 <span>123 Learning Street, Education City, EC 12345</span>
               </div>
               <div className={styles.infoItem}>
-                <MdEmail className={styles.icon} />
+                <Mail className={styles.icon} />
                 <a href="mailto:contact@eslexplorers.com">
                   contact@eslexplorers.com
                 </a>
               </div>
               <div className={styles.infoItem}>
-                <MdPhone className={styles.icon} />
+                <Phone className={styles.icon} />
                 <a href="tel:+1234567890">+1 (234) 567-890</a>
               </div>
             </div>
@@ -150,7 +150,7 @@ export const ContactSection = () => {
               >
                 <div className={styles.faqQuestion}>
                   <span>{faq.question}</span>
-                  <MdChevronRight className={styles.faqArrow} />
+                  <ChevronRight className={styles.faqArrow} />
                 </div>
                 {activeQuestion === index && (
                   <div className={styles.faqAnswer}>{faq.answer}</div>
