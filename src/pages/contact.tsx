@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import { GetServerSideProps } from "next";
+import { GetStaticProps } from "next";
 import { PageLayout } from "../components/layout/PageLayout";
 import { ContactHeroSection } from "../components/layout/Contact/ContactHeroSection";
 import { ContactFormSection } from "../components/layout/Contact/ContactFormSection";
@@ -70,9 +70,7 @@ export const ContactPage: NextPage<ContactPageProps> = ({
   );
 };
 
-export const getServerSideProps: GetServerSideProps<
-  ContactPageProps
-> = async () => {
+export const getStaticProps: GetStaticProps<ContactPageProps> = async () => {
   // strict: contact is DB-driven (SSR so build doesn't depend on seeded DB)
   const { supabase, isSupabaseConfigured } = await import(
     "../utils/supabaseClient"
@@ -82,7 +80,9 @@ export const getServerSideProps: GetServerSideProps<
     throw new Error("[Contact] Supabase environment variables are missing.");
   }
 
-  const { headerContent, footerContent } = await getGlobalLayoutContent(supabase);
+  const { headerContent, footerContent } = await getGlobalLayoutContent(
+    supabase
+  );
 
   const { data: pageData, error: pageError } = await supabase
     .from("pages")

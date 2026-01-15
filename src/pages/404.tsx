@@ -27,9 +27,14 @@ export const getStaticProps: GetStaticProps<Custom404Props> = async () => {
   );
 
   if (!isSupabaseConfigured) {
-    return { props: { headerContent: null, footerContent: null }, revalidate: 300 };
+    return {
+      props: { headerContent: null, footerContent: null },
+      revalidate: 300,
+    };
   }
 
-  const { headerContent, footerContent } = await getGlobalLayoutContent(supabase);
-  return { props: { headerContent, footerContent }, revalidate: 300 };
+  const { headerContent, footerContent } = await getGlobalLayoutContent(
+    supabase
+  );
+  return { props: { headerContent, footerContent } };
 };

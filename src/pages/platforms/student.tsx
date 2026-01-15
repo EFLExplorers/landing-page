@@ -61,97 +61,119 @@ export default function StudentPlatform(props: StudentPlatformPageProps) {
 export const getStaticProps: GetStaticProps<
   StudentPlatformPageProps
 > = async () => {
-  try {
-    const { supabase, isSupabaseConfigured } = await import(
-      "@/utils/supabaseClient"
+  const { supabase, isSupabaseConfigured } = await import(
+    "@/utils/supabaseClient"
+  );
+
+  if (!isSupabaseConfigured) {
+    throw new Error(
+      "[StudentPlatform] Supabase environment variables are missing."
     );
-
-    if (!isSupabaseConfigured) {
-      console.warn(
-        "[StudentPlatform] Supabase environment variables are missing; using empty content."
-      );
-      return { props: emptyStudentPlatformProps, revalidate: 300 };
-    }
-
-    const { headerContent, footerContent } = await getGlobalLayoutContent(
-      supabase
-    );
-
-    const { data: pageData } = await supabase
-      .from("pages")
-      .select("id, route, title, meta_description")
-      .eq("route", "/platforms/student")
-      .single();
-
-    const { data: sectionsData } = await supabase
-      .from("page_sections")
-      .select(
-        "id, section_key, section_type, title, subtitle, heading, subheading, body, cta_label, cta_href, content, data, settings, sort_order, active"
-      )
-      .eq("page_id", pageData?.id || "")
-      .eq("active", true)
-      .order("sort_order", { ascending: true });
-
-    const sections = sectionsData || [];
-
-    const heroSection = sections.find((s) => s.section_key === "hero") || null;
-    const charactersSection =
-      sections.find((s) => s.section_key === "characters") || null;
-    const planetsSection =
-      sections.find((s) => s.section_key === "planets") || null;
-    const ctaSection = sections.find((s) => s.section_key === "cta") || null;
-
-    const { data: characterItems } = await supabase
-      .from("content_items")
-      .select("slug, title, content, sort_order, active")
-      .eq("page_id", pageData?.id || "")
-      .eq("content_type", "student_character")
-      .eq("active", true)
-      .order("sort_order", { ascending: true });
-
-    const { data: planetItems } = await supabase
-      .from("content_items")
-      .select("slug, title, content, sort_order, active")
-      .eq("page_id", pageData?.id || "")
-      .eq("content_type", "student_planet")
-      .eq("active", true)
-      .order("sort_order", { ascending: true });
-
-    const characters: StudentCharacter[] = (characterItems || [])
-      .map((item: any) => ({
-        slug: item.slug,
-        name: item.title || "",
-        imageUrl: item.content?.imageUrl || "",
-      }))
-      .filter((c: StudentCharacter) => c.slug && c.name && c.imageUrl);
-
-    const planets: StudentPlanet[] = (planetItems || [])
-      .map((item: any) => ({
-        slug: item.slug,
-        name: item.title || "",
-        color: item.content?.color || "",
-        icon: item.content?.icon || "",
-      }))
-      .filter((p: StudentPlanet) => p.slug && p.name && p.color && p.icon);
-
-    return {
-      props: {
-        headerContent,
-        footerContent,
-        heroSection,
-        charactersSection,
-        planetsSection,
-        ctaSection,
-        characters,
-        planets,
-      },
-      revalidate: 300,
-    };
-  } catch (error) {
-    console.warn(
-      "[StudentPlatform] Failed to load DB content; using empty content.",
-      { error }
-    );
-    return { props: emptyStudentPlatformProps, revalidate: 300 };
   }
+
+  const { headerContent, footerContent } = await getGlobalLayoutContent(
+    supabase
+  );
+
+  const { data: pageData, error: pageError } = await supabase
+    .from("pages")
+    .select("id, route, title, meta_description")
+    .eq("route", "/platforms/student")
+    .single();
+
+  if (pageError || !pageData?.id) {
+    throw new Error(
+      `[StudentPlatform] Missing pages row for route '/platforms/student': ${
+        pageError?.message || "no id"
+      }`
+    );
+  }
+
+  const { data: sectionsData, error: sectionsError } = await supabase
+    .from("page_sections")
+    .select(
+      "id, section_key, section_type, title, subtitle, heading, subheading, body, cta_label, cta_href, content, data, settings, sort_order, active"
+    )
+    .eq("page_id", pageData.id)
+    .eq("active", true)
+    .order("sort_order", { ascending: true });
+
+  if (sectionsError || !sectionsData?.length) {
+    throw new Error(
+      `[StudentPlatform] Missing page_sections for '/platforms/student': ${
+        sectionsError?.message || "none"
+      }`
+    );
+  }
+
+  const sections = sectionsData;
+
+  const heroSection = sections.find((s) => s.section_key === "hero") || null;
+  const charactersSection =
+    sections.find((s) => s.section_key === "characters") || null;
+  const planetsSection =
+    sections.find((s) => s.section_key === "planets") || null;
+  const ctaSection = sections.find((s) => s.section_key === "cta") || null;
+
+  if (!heroSection) throw new Error("[StudentPlatform] Missing hero section.");
+  if (!charactersSection)
+    throw new Error("[StudentPlatform] Missing characters section.");
+  if (!planetsSection)
+    throw new Error("[StudentPlatform] Missing planets section.");
+  if (!ctaSection) throw new Error("[StudentPlatform] Missing cta section.");
+
+  const { data: characterItems, error: characterError } = await supabase
+    .from("content_items")
+    .select("slug, title, content, sort_order, active")
+    .eq("page_id", pageData.id)
+    .eq("content_type", "student_character")
+    .eq("active", true)
+    .order("sort_order", { ascending: true });
+
+  if (characterError) throw new Error(characterError.message);
+
+  const { data: planetItems, error: planetError } = await supabase
+    .from("content_items")
+    .select("slug, title, content, sort_order, active")
+    .eq("page_id", pageData.id)
+    .eq("content_type", "student_planet")
+    .eq("active", true)
+    .order("sort_order", { ascending: true });
+
+  if (planetError) throw new Error(planetError.message);
+
+  const characters: StudentCharacter[] = (characterItems || [])
+    .map((item: any) => ({
+      slug: item.slug,
+      name: item.title || "",
+      imageUrl: item.content?.imageUrl || "",
+    }))
+    .filter((c: StudentCharacter) => c.slug && c.name && c.imageUrl);
+
+  const planets: StudentPlanet[] = (planetItems || [])
+    .map((item: any) => ({
+      slug: item.slug,
+      name: item.title || "",
+      color: item.content?.color || "",
+      icon: item.content?.icon || "",
+    }))
+    .filter((p: StudentPlanet) => p.slug && p.name && p.color && p.icon);
+
+  if (!characters.length)
+    throw new Error("[StudentPlatform] Missing student characters.");
+  if (!planets.length)
+    throw new Error("[StudentPlatform] Missing student planets.");
+
+  return {
+    props: {
+      headerContent,
+      footerContent,
+      heroSection,
+      charactersSection,
+      planetsSection,
+      ctaSection,
+      characters,
+      planets,
+    },
+  };
 };

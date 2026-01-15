@@ -1,29 +1,12 @@
 import { GetStaticProps } from "next";
 import { PageLayout } from "../components/layout/PageLayout";
-import HeroSection, {
-  HeroSectionProps,
-} from "../components/layout/Home/HeroSection";
-import TaglineSection, {
-  TaglineSectionProps,
-} from "../components/layout/Home/TaglineSection";
-import LearningToolsSection, {
-  LearningToolsSectionProps,
-} from "../components/layout/Home/LearningToolsSection";
-import ServicesSection, {
-  ServicesSectionProps,
-} from "../components/layout/Home/ServicesSection";
-import {
-  PricingSection,
-  PricingSectionProps,
-} from "../components/layout/Home/PricingSection";
-import {
-  RegisterCTASection,
-  RegisterCTASectionProps,
-} from "../components/layout/Home/RegisterCTASection";
-import {
-  HowWeTeachSection,
-  HowWeTeachSectionProps,
-} from "../components/layout/Home/HowWeTeachSection";
+import HeroSection from "../components/layout/Home/HeroSection";
+import TaglineSection from "../components/layout/Home/TaglineSection";
+import LearningToolsSection from "../components/layout/Home/LearningToolsSection";
+import ServicesSection from "../components/layout/Home/ServicesSection";
+import { PricingSection } from "../components/layout/Home/PricingSection";
+import { RegisterCTASection } from "../components/layout/Home/RegisterCTASection";
+import { HowWeTeachSection } from "../components/layout/Home/HowWeTeachSection";
 import { ContentErrorBoundary } from "../components/common/ErrorBoundary";
 import type { PageSection } from "./api/page-content";
 import type { PricingTierLite } from "../components/layout/Home/PricingSection";
@@ -106,7 +89,9 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
     throw new Error("[Home] Supabase environment variables are missing.");
   }
 
-  const { headerContent, footerContent } = await getGlobalLayoutContent(supabase);
+  const { headerContent, footerContent } = await getGlobalLayoutContent(
+    supabase
+  );
 
   // Fetch page content
   const { data: pageData, error: pageError } = await supabase
@@ -248,7 +233,6 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
       services,
       learningTools,
     },
-    revalidate: 300,
   };
 };
 

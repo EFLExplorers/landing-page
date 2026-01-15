@@ -11,16 +11,12 @@ import type { HeaderContent } from "@/components/layout/Header-Footer/Header";
 import type { FooterContent } from "@/components/layout/Header-Footer/Footer";
 import { getGlobalLayoutContent } from "@/utils/globalSections";
 import type { PageSection } from "@/pages/api/page-content";
-import type {
-  TeachingToolLite,
-} from "@/components/layout/TeacherPlatform/TeachingToolsSection";
+import type { TeachingToolLite } from "@/components/layout/TeacherPlatform/TeachingToolsSection";
 import type {
   LessonModuleLite,
   LessonModuleColorKey,
 } from "@/components/layout/TeacherPlatform/LessonModulesSection";
-import type {
-  TeacherBenefitLite,
-} from "@/components/layout/TeacherPlatform/TeacherBenefitsSection";
+import type { TeacherBenefitLite } from "@/components/layout/TeacherPlatform/TeacherBenefitsSection";
 
 interface TeacherPlatformPageProps {
   headerContent: HeaderContent | null;
@@ -53,7 +49,10 @@ export default function TeacherPlatform(props: TeacherPlatformPageProps) {
     <main className={styles.main}>
       <TeacherHeroSection section={props.heroSection} />
       <TeachingToolsSection section={props.toolsSection} tools={props.tools} />
-      <LessonModulesSection section={props.modulesSection} modules={props.modules} />
+      <LessonModulesSection
+        section={props.modulesSection}
+        modules={props.modules}
+      />
       <TeacherBenefitsSection
         section={props.benefitsSection}
         benefits={props.benefits}
@@ -63,16 +62,22 @@ export default function TeacherPlatform(props: TeacherPlatformPageProps) {
   );
 }
 
-export const getStaticProps: GetStaticProps<TeacherPlatformPageProps> = async () => {
+export const getStaticProps: GetStaticProps<
+  TeacherPlatformPageProps
+> = async () => {
   const { supabase, isSupabaseConfigured } = await import(
     "@/utils/supabaseClient"
   );
 
   if (!isSupabaseConfigured) {
-    return { props: emptyTeacherProps, revalidate: 300 };
+    throw new Error(
+      "[TeacherPlatform] Supabase environment variables are missing."
+    );
   }
 
-  const { headerContent, footerContent } = await getGlobalLayoutContent(supabase);
+  const { headerContent, footerContent } = await getGlobalLayoutContent(
+    supabase
+  );
 
   const { data: pageData, error: pageError } = await supabase
     .from("pages")
@@ -81,10 +86,14 @@ export const getStaticProps: GetStaticProps<TeacherPlatformPageProps> = async ()
     .single();
 
   if (pageError || !pageData?.id) {
-    return { props: { ...emptyTeacherProps, headerContent, footerContent }, revalidate: 300 };
+    throw new Error(
+      `[TeacherPlatform] Missing pages row for route '/platforms/teacher': ${
+        pageError?.message || "no id"
+      }`
+    );
   }
 
-  const { data: sectionsData } = await supabase
+  const { data: sectionsData, error: sectionsError } = await supabase
     .from("page_sections")
     .select(
       "id, section_key, section_type, title, subtitle, heading, subheading, body, cta_label, cta_href, content, data, settings, sort_order, active"
@@ -93,7 +102,15 @@ export const getStaticProps: GetStaticProps<TeacherPlatformPageProps> = async ()
     .eq("active", true)
     .order("sort_order", { ascending: true });
 
-  const sections = sectionsData || [];
+  if (sectionsError || !sectionsData?.length) {
+    throw new Error(
+      `[TeacherPlatform] Missing page_sections for '/platforms/teacher': ${
+        sectionsError?.message || "none"
+      }`
+    );
+  }
+
+  const sections = sectionsData;
   const heroSection = sections.find((s) => s.section_key === "hero") || null;
   const toolsSection = sections.find((s) => s.section_key === "tools") || null;
   const modulesSection =
@@ -101,6 +118,15 @@ export const getStaticProps: GetStaticProps<TeacherPlatformPageProps> = async ()
   const benefitsSection =
     sections.find((s) => s.section_key === "benefits") || null;
   const ctaSection = sections.find((s) => s.section_key === "cta") || null;
+
+  if (!heroSection) throw new Error("[TeacherPlatform] Missing hero section.");
+  if (!toolsSection)
+    throw new Error("[TeacherPlatform] Missing tools section.");
+  if (!modulesSection)
+    throw new Error("[TeacherPlatform] Missing lesson-modules section.");
+  if (!benefitsSection)
+    throw new Error("[TeacherPlatform] Missing benefits section.");
+  if (!ctaSection) throw new Error("[TeacherPlatform] Missing cta section.");
 
   const [toolsData, modulesData, benefitsData] = await Promise.all([
     supabase
@@ -125,6 +151,10 @@ export const getStaticProps: GetStaticProps<TeacherPlatformPageProps> = async ()
       .eq("active", true)
       .order("sort_order", { ascending: true }),
   ]);
+
+  if (toolsData.error) throw new Error(toolsData.error.message);
+  if (modulesData.error) throw new Error(modulesData.error.message);
+  if (benefitsData.error) throw new Error(benefitsData.error.message);
 
   const tools: TeachingToolLite[] = (toolsData.data || [])
     .map((row: any) => ({
@@ -155,6 +185,13 @@ export const getStaticProps: GetStaticProps<TeacherPlatformPageProps> = async ()
     }))
     .filter((b: TeacherBenefitLite) => b.id && b.title && b.description);
 
+  if (!tools.length)
+    throw new Error("[TeacherPlatform] Missing teaching tools.");
+  if (!modules.length)
+    throw new Error("[TeacherPlatform] Missing lesson modules.");
+  if (!benefits.length)
+    throw new Error("[TeacherPlatform] Missing teacher benefits.");
+
   return {
     props: {
       headerContent,
@@ -168,7 +205,5 @@ export const getStaticProps: GetStaticProps<TeacherPlatformPageProps> = async ()
       modules,
       benefits,
     },
-    revalidate: 300,
   };
 };
-

@@ -61,80 +61,101 @@ export const Pricing: NextPage<PricingPageProps> = ({
 };
 
 export const getStaticProps: GetStaticProps<PricingPageProps> = async () => {
-  try {
-    const { supabase, isSupabaseConfigured } = await import(
-      "../utils/supabaseClient"
-    );
+  // During build time, use direct API calls instead of fetch
+  const { supabase, isSupabaseConfigured } = await import(
+    "../utils/supabaseClient"
+  );
 
-    if (!isSupabaseConfigured) {
-      console.warn(
-        "[Pricing] Supabase environment variables are missing; using empty content."
-      );
-      return { props: emptyPricingProps, revalidate: 300 };
-    }
-
-    const { headerContent, footerContent } = await getGlobalLayoutContent(
-      supabase
-    );
-
-    const { data: pageData } = await supabase
-      .from("pages")
-      .select("id, route, title, meta_description")
-      .eq("route", "/pricing")
-      .single();
-
-    const { data: sectionsData } = await supabase
-      .from("page_sections")
-      .select(
-        "id, section_key, section_type, title, subtitle, heading, subheading, body, cta_label, cta_href, content, data, settings, sort_order, active"
-      )
-      .eq("page_id", pageData?.id || "")
-      .eq("active", true)
-      .order("sort_order", { ascending: true });
-
-    const sections = sectionsData || [];
-    const pageTitle = pageData?.title || "";
-    const pageDescription = pageData?.meta_description || "";
-
-    const headerSection =
-      sections.find((s) => s.section_key === "pricing-header") || null;
-    const footerSection =
-      sections.find((s) => s.section_key === "pricing-footer") || null;
-
-    const { data: planItems } = await supabase
-      .from("content_items")
-      .select("slug, title, subtitle, description, content, sort_order, active")
-      .eq("page_id", pageData?.id || "")
-      .eq("content_type", "pricing_plan")
-      .eq("active", true)
-      .order("sort_order", { ascending: true });
-
-    const plans: PricingPlan[] = (planItems || []).map((item: any) => ({
-      slug: item.slug,
-      title: item.title || "",
-      badge: item.subtitle || null,
-      description: item.description || null,
-      content: item.content || {},
-    }));
-
-    return {
-      props: {
-        headerContent,
-        footerContent,
-        pageTitle,
-        pageDescription,
-        headerSection,
-        footerSection,
-        plans,
-      },
-      revalidate: 300,
-    };
-  } catch (error) {
-    console.warn("[Pricing] Failed to load DB content; using empty content.", {
-      error,
-    });
-    return { props: emptyPricingProps, revalidate: 300 };
+  if (!isSupabaseConfigured) {
+    throw new Error("[Pricing] Supabase environment variables are missing.");
   }
+
+  const { headerContent, footerContent } = await getGlobalLayoutContent(
+    supabase
+  );
+
+  // Fetch page content
+  const { data: pageData, error: pageError } = await supabase
+    .from("pages")
+    .select("id, route, title, meta_description")
+    .eq("route", "/pricing")
+    .single();
+
+  if (pageError || !pageData?.id) {
+    throw new Error(
+      `[Pricing] Missing pages row for route '/pricing': ${
+        pageError?.message || "no id"
+      }`
+    );
+  }
+
+  const { data: sectionsData, error: sectionsError } = await supabase
+    .from("page_sections")
+    .select(
+      "id, section_key, section_type, title, subtitle, heading, subheading, body, cta_label, cta_href, content, data, settings, sort_order, active"
+    )
+    .eq("page_id", pageData.id)
+    .eq("active", true)
+    .order("sort_order", { ascending: true });
+
+  if (sectionsError || !sectionsData?.length) {
+    throw new Error(
+      `[Pricing] Missing page_sections for '/pricing': ${
+        sectionsError?.message || "none"
+      }`
+    );
+  }
+
+  const sections = sectionsData;
+  const pageTitle = pageData.title || "";
+  const pageDescription = pageData.meta_description || "";
+
+  const headerSection =
+    sections.find((s) => s.section_key === "pricing-header") || null;
+  const footerSection =
+    sections.find((s) => s.section_key === "pricing-footer") || null;
+
+  if (!headerSection) {
+    throw new Error("[Pricing] Missing pricing-header section.");
+  }
+
+  if (!footerSection) {
+    throw new Error("[Pricing] Missing pricing-footer section.");
+  }
+
+  const { data: planItems, error: planError } = await supabase
+    .from("content_items")
+    .select("slug, title, subtitle, description, content, sort_order, active")
+    .eq("page_id", pageData.id)
+    .eq("content_type", "pricing_plan")
+    .eq("active", true)
+    .order("sort_order", { ascending: true });
+
+  if (planError) throw new Error(planError.message);
+
+  const plans: PricingPlan[] = (planItems || []).map((item: any) => ({
+    slug: item.slug,
+    title: item.title || "",
+    badge: item.subtitle || null,
+    description: item.description || null,
+    content: item.content || {},
+  }));
+
+  if (!plans.length) {
+    throw new Error("[Pricing] Missing pricing plans.");
+  }
+
+  return {
+    props: {
+      headerContent,
+      footerContent,
+      pageTitle,
+      pageDescription,
+      headerSection,
+      footerSection,
+      plans,
+    },
+  };
 };
 
 export default Pricing;
