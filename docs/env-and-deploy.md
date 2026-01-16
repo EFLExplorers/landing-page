@@ -25,7 +25,9 @@ Document env vars and deployment steps as they become defined.
 
 - Build: `npm run build`
 - Start: `npm start` (if used)
-- Hosting: (fill in) Vercel/other; include any required secrets
+- Hosting: Vercel recommended (analytics and speed insights work automatically in production)
+  - Vercel Analytics: automatically tracks page views and events when deployed to Vercel
+  - Vercel Speed Insights: automatically monitors Core Web Vitals
 
 ### Windows PowerShell note
 

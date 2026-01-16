@@ -7,7 +7,7 @@ Marketing site for the ESL Explorers / EFL ecosystem. This repo serves the publi
 - **Next.js (Pages Router)** + **React** + **TypeScript**
 - **Supabase** (Postgres + Auth) for content + user management
 - **CSS Modules** for styling (no Tailwind usage in UI)
-- **Lucide React** (icons), **Vercel Speed Insights**, **Cypress** for e2e
+- **Lucide React** (icons), **Vercel Speed Insights**, **Vercel Analytics**, **Cypress** for e2e
 - **144KB bundle size** (ultra-optimized for speed)
 
 ### Performance optimizations

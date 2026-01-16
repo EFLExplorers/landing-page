@@ -14,12 +14,8 @@ interface LoginPageProps {
 export const LoginPage = (_props: LoginPageProps) => {
   const router = useRouter();
 
-  const handlePlatformSelect = (platform: "student" | "teacher" | "admin") => {
-    if (platform === "admin") {
-      router.push(`/Auth/login/admin`);
-    } else {
-      router.push(`/Auth/login/${platform}`);
-    }
+  const handlePlatformSelect = (platform: "student" | "teacher") => {
+    router.push(`/Auth/login/${platform}`);
   };
 
   return (
@@ -42,18 +38,6 @@ export const LoginPage = (_props: LoginPageProps) => {
             👨‍🏫 Teacher Login
           </button>
         </div>
-        
-        <div className={styles.adminSection}>
-          <div className={styles.separator}>
-            <span>Administrative Access</span>
-          </div>
-          <button
-            onClick={() => handlePlatformSelect("admin")}
-            className={`${styles.button} ${styles.adminButton}`}
-          >
-            Admin Login
-          </button>
-        </div>
 
         <p className={styles.registerLink}>
           New to ESL Explorers?{" "}
@@ -66,7 +50,7 @@ export const LoginPage = (_props: LoginPageProps) => {
   );
 };
 
-export default LoginPage; 
+export default LoginPage;
 
 export const getStaticProps: GetStaticProps<LoginPageProps> = async () => {
   const { supabase, isSupabaseConfigured } = await import(
@@ -74,9 +58,14 @@ export const getStaticProps: GetStaticProps<LoginPageProps> = async () => {
   );
 
   if (!isSupabaseConfigured) {
-    return { props: { headerContent: null, footerContent: null }, revalidate: 300 };
+    return {
+      props: { headerContent: null, footerContent: null },
+      revalidate: 300,
+    };
   }
 
-  const { headerContent, footerContent } = await getGlobalLayoutContent(supabase);
+  const { headerContent, footerContent } = await getGlobalLayoutContent(
+    supabase
+  );
   return { props: { headerContent, footerContent }, revalidate: 300 };
 };

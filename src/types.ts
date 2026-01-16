@@ -1,4 +1,4 @@
-export type Platform = "student" | "teacher" | "admin";
+export type Platform = "student" | "teacher";
 
 export const getPlatformUrl = (platform: Platform): string => {
   switch (platform) {
@@ -6,8 +6,6 @@ export const getPlatformUrl = (platform: Platform): string => {
       return process.env.NEXT_PUBLIC_STUDENT_URL || "";
     case "teacher":
       return process.env.NEXT_PUBLIC_TEACHER_URL || "";
-    case "admin":
-      return process.env.NEXT_PUBLIC_ADMIN_URL || "";
     default:
       return "";
   }

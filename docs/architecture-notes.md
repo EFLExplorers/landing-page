@@ -6,6 +6,7 @@
 - Layout: `_app` wraps `Layout` → `Header` + `Footer`; `PageLayout` is a light wrapper for some pages.
 - Routing: `/`, `/pricing`, `/about`, `/contact`, `/platforms/{teacher|student}`, `/courses`, auth under `/Auth/...`, system `/404`.
 - State: primarily server-fetched content (SSG) + component props; no global state manager observed.
+- Analytics: Vercel Analytics and Speed Insights integrated in `_app.tsx` for production monitoring.
 
 ## Data & Content
 
