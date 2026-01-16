@@ -133,9 +133,9 @@ CREATE POLICY "Media assets are publicly readable" ON public.media_assets
 -- Pages
 INSERT INTO public.pages (route, title, meta_description)
 VALUES
-  ('/', 'ESL Explorers - Home', 'Start your English learning journey with ESL Explorers'),
-  ('/about', 'About ESL Explorers', 'Learn more about the ESL Explorers team, mission, and vision'),
-  ('/contact', 'Contact ESL Explorers', 'Get in touch with ESL Explorers for course and platform information')
+  ('/', 'EFL Explorers - Home', 'Start your English learning journey with EFL Explorers'),
+  ('/about', 'About EFL Explorers', 'Learn more about the EFL Explorers team, mission, and vision'),
+  ('/contact', 'Contact EFL Explorers', 'Get in touch with EFL Explorers for course and platform information')
 ON CONFLICT (route) DO UPDATE SET
   title = EXCLUDED.title,
   meta_description = EXCLUDED.meta_description;
@@ -146,7 +146,7 @@ SELECT
   p.id,
   'hero',
   'hero',
-  '{"title": "Welcome to ESL Explorers", "subtitle": "Start your English learning adventure today", "background_image": "/hero-bg.jpg"}',
+  '{"title": "Welcome to EFL Explorers", "subtitle": "Start your English learning adventure today", "background_image": "/hero-bg.jpg"}',
   10,
   true
 FROM public.pages p WHERE p.route = '/';
@@ -183,7 +183,7 @@ VALUES
 INSERT INTO public.content_items (content_type, content, sort_order, active)
 VALUES
   ('service', '{"title": "Student Portal", "description": "Our lessons make learning feel like an exciting adventure, where young learners can explore and grow. Each lesson keeps students feeling they''re in class.", "icon": "🎓", "background_icons": ["📖","✏️","🎯"]}', 10, true),
-  ('service', '{"title": "Teacher Resources", "description": "Access a comprehensive library of teaching materials, lesson plans, and interactive activities designed to make your ESL classes more engaging and effective.", "icon": "📚", "background_icons": ["📝","🎨","🔍"]}', 20, true),
+  ('service', '{"title": "Teacher Resources", "description": "Access a comprehensive library of teaching materials, lesson plans, and interactive activities designed to make your EFL classes more engaging and effective.", "icon": "📚", "background_icons": ["📝","🎨","🔍"]}', 20, true),
   ('service', '{"title": "Interactive Learning", "description": "Engage students with our interactive games and exploration features that make learning English fun while building confidence.", "icon": "🎮", "background_icons": ["🎲","🏆","⭐"]}', 30, true),
   ('service', '{"title": "Progress Tracking", "description": "Monitor student progress with detailed analytics and personalized learning paths that adapt to each student''s needs.", "icon": "📊", "background_icons": ["📈","🎯","🏅"]}', 40, true),
   ('service', '{"title": "Assessment Tools", "description": "Comprehensive evaluation tools and quizzes that help measure learning outcomes and identify areas for improvement in real-time.", "icon": "✅", "background_icons": ["📋","🎯","📝"]}', 50, true),

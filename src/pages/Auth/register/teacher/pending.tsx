@@ -17,7 +17,7 @@ export const TeacherPendingPage = (_props: TeacherPendingPageProps) => {
         <h1 className={styles.title}>Registration Pending</h1>
         <div className={styles.messageBox}>
           <p>
-            Thank you for registering as a teacher with ESL Explorers. Your
+            Thank you for registering as a teacher with EFL Explorers. Your
             application is currently under review.
           </p>
           <p>

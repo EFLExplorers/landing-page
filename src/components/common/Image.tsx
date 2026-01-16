@@ -9,7 +9,7 @@ export const Image = ({ src, alt, className, ...props }: ImageProps) => {
   // Fallback to text if image fails to load
   if (isError) {
     console.error(`Failed to load image: ${src}`);
-    return <span className={className}>ESL Explorers</span>;
+    return <span className={className}>EFL Explorers</span>;
   }
 
   return (

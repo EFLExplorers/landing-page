@@ -1,5 +1,5 @@
--- Seed 4.0: top-down ordered seed script
--- Goal: make the seed easier to reason about and run top-to-bottom.
+-- Seed 5.0: Header content ensured + all v4 content
+-- Goal: Ensure header/footer navigation is properly seeded for all pages.
 -- Safe to rerun; uses upserts by route/section/content_type/slug.
 -- Run AFTER db/content-schema.sql
 
@@ -19,8 +19,9 @@ ON CONFLICT (route) DO UPDATE SET
   meta_description = EXCLUDED.meta_description;
 
 -- ============================================
--- 2) Global site sections (header/footer)
+-- 2) Global site sections (header/footer) - ENSURE HEADER CONTENT
 -- ============================================
+-- Header content is REQUIRED for navigation to work properly
 INSERT INTO public.site_sections (section_key, section_type, content, sort_order, active)
 VALUES
   (
@@ -492,10 +493,10 @@ SELECT p.id, 'pricing', v.content_type, v.slug, v.title, v.content::jsonb, v.sor
 FROM public.pages p
 JOIN (
   VALUES
-    ('pricing', 'pricing-free-access', 'Free Access', '{"price": "Free", "period": "", "description": "Free access to basic features and content to help you get started."}'::text, 10, true),
-    ('pricing', 'pricing-individual', 'Individual', '{"price": "$20", "period": "/MO", "description": "Access to all features and content, perfect for individual learners."}'::text, 20, true),
-    ('pricing', 'pricing-teacher', 'Teacher', '{"price": "$25", "period": "/MO", "description": "Complete access with additional teaching tools and resources."}'::text, 30, true),
-    ('pricing', 'pricing-school', 'School', '{"price": "$15", "period": "/MO", "description": "Bulk pricing for schools, includes all features and management tools."}'::text, 40, true)
+    ('pricing', 'pricing-free-access', 'Free Access', '{"price": "Free", "period": "", "description": "Free access to basic features and content to help you get started.", "cta_label": "Get Started", "cta_href": "/Auth/register"}'::text, 10, true),
+    ('pricing', 'pricing-individual', 'Individual', '{"price": "$20", "period": "/MO", "description": "Access to all features and content, perfect for individual learners.", "cta_label": "Get Started", "cta_href": "/Auth/register"}'::text, 20, true),
+    ('pricing', 'pricing-teacher', 'Teacher', '{"price": "$25", "period": "/MO", "description": "Complete access with additional teaching tools and resources.", "cta_label": "Get Started", "cta_href": "/Auth/register"}'::text, 30, true),
+    ('pricing', 'pricing-school', 'School', '{"price": "$15", "period": "/MO", "description": "Bulk pricing for schools, includes all features and management tools.", "cta_label": "Get Started", "cta_href": "/Auth/register"}'::text, 40, true)
 ) AS v(content_type, slug, title, content, sort_order, active)
   ON true
 WHERE p.route = '/'
@@ -520,10 +521,10 @@ JOIN (
   VALUES
     ('service', 'service-student-portal', 'Student Portal', 'Our lessons make learning feel like an exciting adventure, where young learners can explore and grow. Each lesson keeps students feeling they''re in class.', '{"icon": "🎓", "background_icons": ["📖","✏️","🎯"], "cta_label": "Learn more", "cta_href": "/platforms/student"}'::text, 10, true),
     ('service', 'service-teacher-resources', 'Teacher Resources', 'Access a comprehensive library of teaching materials, lesson plans, and interactive activities designed to make your EFL classes more engaging and effective.', '{"icon": "📚", "background_icons": ["📝","🎨","🔍"], "cta_label": "See resources", "cta_href": "/platforms/teacher"}'::text, 20, true),
-    ('service', 'service-interactive-learning', 'Interactive Learning', 'Engage students with our interactive games and exploration features that make learning English fun while building confidence.', '{"icon": "🎮", "background_icons": ["🎲","🏆","⭐"]}'::text, 30, true),
-    ('service', 'service-progress-tracking', 'Progress Tracking', 'Monitor student progress with detailed analytics and personalized learning paths that adapt to each student''s needs.', '{"icon": "📊", "background_icons": ["📈","🎯","🏅"]}'::text, 40, true),
-    ('service', 'service-assessment-tools', 'Assessment Tools', 'Comprehensive evaluation tools and quizzes that help measure learning outcomes and identify areas for improvement in real-time.', '{"icon": "✅", "background_icons": ["📋","🎯","📝"]}'::text, 50, true),
-    ('service', 'service-communication-hub', 'Communication Hub', 'Foster collaboration between students, teachers, and parents with our integrated messaging and feedback system.', '{"icon": "💬", "background_icons": ["📱","📧","👥"]}'::text, 60, true)
+    ('service', 'service-interactive-learning', 'Interactive Learning', 'Engage students with our interactive games and exploration features that make learning English fun while building confidence.', '{"icon": "🎮", "background_icons": ["🎲","🏆","⭐"], "cta_label": "Learn more", "cta_href": "/platforms/student"}'::text, 30, true),
+    ('service', 'service-progress-tracking', 'Progress Tracking', 'Monitor student progress with detailed analytics and personalized learning paths that adapt to each student''s needs.', '{"icon": "📊", "background_icons": ["📈","🎯","🏅"], "cta_label": "Learn more", "cta_href": "/platforms/teacher"}'::text, 40, true),
+    ('service', 'service-assessment-tools', 'Assessment Tools', 'Comprehensive evaluation tools and quizzes that help measure learning outcomes and identify areas for improvement in real-time.', '{"icon": "✅", "background_icons": ["📋","🎯","📝"], "cta_label": "Learn more", "cta_href": "/platforms/teacher"}'::text, 50, true),
+    ('service', 'service-communication-hub', 'Communication Hub', 'Foster collaboration between students, teachers, and parents with our integrated messaging and feedback system.', '{"icon": "💬", "background_icons": ["📱","📧","👥"], "cta_label": "Learn more", "cta_href": "/platforms/teacher"}'::text, 60, true)
 ) AS v(content_type, slug, title, description, content, sort_order, active)
   ON true
 WHERE p.route = '/'
@@ -907,4 +908,3 @@ INSERT INTO public.faqs (category, question, answer, sort_order, active)
 VALUES
   ('contact', 'How do I get started?', 'Fill out the contact form or reach out via email/phone. We''ll schedule a free consultation to assess your level and goals.', 10, true)
 ON CONFLICT DO NOTHING;
-

@@ -18,8 +18,8 @@ function App({ Component, pageProps }: AppProps<AppPageProps>) {
     <>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="description" content="ESL Explorers - Learning Platform" />
-        <title>ESL Explorers</title>
+        <meta name="description" content="EFL Explorers - Learning Platform" />
+        <title>EFL Explorers</title>
       </Head>
       <Layout
         headerContent={pageProps.headerContent ?? null}

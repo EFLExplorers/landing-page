@@ -20,7 +20,7 @@ export const TeacherBenefitsSection = ({
   if (!benefits?.length) return null;
 
   const title =
-    (section.content as any)?.title ?? "Why Teachers Choose ESL Explorers";
+    (section.content as any)?.title ?? "Why Teachers Choose EFL Explorers";
 
   return (
     <section

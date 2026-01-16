@@ -40,7 +40,7 @@ export const LoginPage = (_props: LoginPageProps) => {
         </div>
 
         <p className={styles.registerLink}>
-          New to ESL Explorers?{" "}
+          New to EFL Explorers?{" "}
           <Link href="/Auth/register" className={styles.link}>
             Register here
           </Link>

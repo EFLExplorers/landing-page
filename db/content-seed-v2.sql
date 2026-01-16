@@ -225,7 +225,7 @@ VALUES
       "bottom_bar": [
         "All rights reserved",
         "Copyright 2026 | Privacy Policy",
-        "Powered by ESL Explorers"
+        "Powered by EFL Explorers"
       ]
     }'::jsonb,
     20,
@@ -264,7 +264,7 @@ ON CONFLICT (page_id, section_key) DO UPDATE SET content = EXCLUDED.content, act
 INSERT INTO public.page_sections (page_id, section_key, section_type, content, sort_order, active)
 SELECT p.id, 'tagline', 'content',
   '{
-    "text": "Adventure awaits - learn English with ESL Explorers"
+    "text": "Adventure awaits - learn English with EFL Explorers"
   }'::jsonb,
   30, true
 FROM public.pages p WHERE p.route = '/about'
@@ -274,7 +274,7 @@ INSERT INTO public.page_sections (page_id, section_key, section_type, content, s
 SELECT p.id, 'mission', 'content',
   '{
     "title": "Our Mission",
-    "body": "At ESL Explorers, we believe learning English should be an exciting journey, not a daunting task. Our mission is to transform language education through innovative technology, engaging content, and personalized learning experiences. We empower both teachers and students with tools that make learning effective, enjoyable, and accessible to everyone, regardless of their background or location.",
+    "body": "At EFL Explorers, we believe learning English should be an exciting journey, not a daunting task. Our mission is to transform language education through innovative technology, engaging content, and personalized learning experiences. We empower both teachers and students with tools that make learning effective, enjoyable, and accessible to everyone, regardless of their background or location.",
     "points": [
       "✨ Interactive Learning Experiences",
       "🌍 Global Community Building",
@@ -289,7 +289,7 @@ INSERT INTO public.page_sections (page_id, section_key, section_type, content, s
 SELECT p.id, 'vision', 'content',
   '{
     "title": "Our Vision",
-    "body": "We envision a world where language barriers dissolve and every individual can confidently communicate in English. Our platform will be the leading destination for ESL education, known for its innovative approach, engaging content, and proven results. We see a future where learning English is not just about grammar and vocabulary, but about connecting cultures and building bridges between people worldwide.",
+    "body": "We envision a world where language barriers dissolve and every individual can confidently communicate in English. Our platform will be the leading destination for EFL education, known for its innovative approach, engaging content, and proven results. We see a future where learning English is not just about grammar and vocabulary, but about connecting cultures and building bridges between people worldwide.",
     "goals": [
       "🚀 Global Accessibility",
       "💡 Innovation Leadership",
@@ -328,7 +328,7 @@ SELECT p.id, 'hero', 'content',
     "title": "Get in Touch",
     "subtitle": "Have questions about our English learning programs? We''re here to help! Reach out to us and let''s start your learning journey together.",
     "contact_methods": [
-      { "icon": "📧", "href": "mailto:contact@eslexplorers.com", "text": "contact@eslexplorers.com" },
+      { "icon": "📧", "href": "mailto:contact@eflexplorers.com", "text": "contact@eflexplorers.com" },
       { "icon": "📞", "href": "tel:+1234567890", "text": "+1 (234) 567-890" }
     ]
   }'::jsonb,
@@ -389,7 +389,7 @@ ON CONFLICT (page_id, section_key) DO UPDATE SET content = EXCLUDED.content, act
 INSERT INTO public.page_sections (page_id, section_key, section_type, content, sort_order, active)
 SELECT p.id, 'characters', 'content',
   '{
-    "intro": "Help the gang unlock items by completing guided tasks. As you move ahead, they stay around to guide you on the ESL Explorer, and give rewards and English skills!",
+    "intro": "Help the gang unlock items by completing guided tasks. As you move ahead, they stay around to guide you on the EFL Explorer, and give rewards and English skills!",
     "outro": "With 3D lessons per planet, equipping learners with a solid foundation in English. Each lesson allows you to practice everyday English. That''s the lessons already prepared for teachers, allowing them to focus on their main passion: teaching! Students can track their progress and become masters of the English language. Learning English has never been this easy!"
   }'::jsonb,
   20, true
@@ -632,7 +632,7 @@ JOIN (
       'pricing-basic',
       'Basic',
       'Free',
-      'Perfect for individual use and exploration of ESL learning',
+      'Perfect for individual use and exploration of EFL learning',
       '{
         "variant": "basic",
         "price": "0",
@@ -642,7 +642,7 @@ JOIN (
         "features": [
           "10 daily active users",
           "Basic learning resources access",
-          "Limited ESL exercises",
+          "Limited EFL exercises",
           "Community support"
         ]
       }'::text,
@@ -664,7 +664,7 @@ JOIN (
           "Unlimited active users",
           "Full learning resources access",
           "Priority email support",
-          "Advanced ESL exercises",
+          "Advanced EFL exercises",
           "Progress tracking",
           "Custom learning paths"
         ]

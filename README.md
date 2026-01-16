@@ -1,6 +1,6 @@
-## ESL Explorers — Landing Page (Next.js)
+## EFL Explorers — Landing Page (Next.js)
 
-Marketing site for the ESL Explorers / EFL ecosystem. This repo serves the public landing site and routes users into the Student and Teacher platforms.
+Marketing site for the EFL Explorers / EFL ecosystem. This repo serves the public landing site and routes users into the Student and Teacher platforms.
 
 ### Tech stack
 
@@ -41,7 +41,7 @@ npm install
 - In Supabase → **SQL Editor**, run:
   - `db/content-schema.sql`
   - then **one** seed file:
-    - `db/content-seed-v4.sql` (full seed; safe to re-run via upserts), or
+    - `db/content-seed-v5.sql` (full seed with header content ensured; safe to re-run via upserts), or
     - `db/content-seed-simple.sql` (minimal seed)
 
 4. Run dev server:

@@ -1,6 +1,10 @@
 .tools {
   width: 100%;
-  background: linear-gradient(135deg, var(--theme-background) 0%, var(--theme-muted) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--theme-background) 0%,
+    var(--theme-muted) 100%
+  );
   background-image: url("/assets/Space4.png");
   background-size: cover;
   background-position: bottom;
@@ -9,16 +13,21 @@
   padding: 6rem 0;
   position: relative;
   overflow: hidden;
+  margin-top: 0;
 }
 
 .tools::before {
   content: "";
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+  top: -2px;
+  left: -1px;
+  right: -1px;
   bottom: 0;
-  background: linear-gradient(135deg, var(--theme-background) 0%, var(--theme-muted) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--theme-background) 0%,
+    var(--theme-muted) 100%
+  );
   opacity: 0.8;
   z-index: 0;
 }
@@ -26,11 +35,15 @@
 .tools::after {
   content: "";
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+  top: -2px;
+  left: -1px;
+  right: -1px;
   bottom: 0;
-  background: radial-gradient(circle at 50% 50%, var(--theme-accent) 0%, transparent 70%);
+  background: radial-gradient(
+    circle at 50% 50%,
+    var(--theme-accent) 0%,
+    transparent 70%
+  );
   opacity: 0.1;
   z-index: 0;
 }
@@ -52,7 +65,8 @@
   padding-bottom: var(--spacing-lg);
   text-align: center;
   line-height: 1.2;
-  text-shadow: 0 6px 12px rgba(0, 0, 0, 0.6), 0 3px 6px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.4);
+  text-shadow: 0 6px 12px rgba(0, 0, 0, 0.6), 0 3px 6px rgba(0, 0, 0, 0.5),
+    0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 .subtitle {
@@ -97,7 +111,12 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background: linear-gradient(
+    45deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
   transform: translateX(-100%);
   transition: transform 0.6s;
   z-index: 1;
@@ -138,7 +157,8 @@
   font-weight: var(--font-semibold);
   color: var(--text-primary);
   margin: 0;
-  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.4),
+    0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .toolCard:hover .toolTitle {

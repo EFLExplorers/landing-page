@@ -6,7 +6,7 @@ const Testimonials = () => {
       <h2>What Our Users Say</h2>
       <div className={styles.testimonial}>
         <p>
-          &quot;ESL Explorers has transformed my learning experience! The
+          &quot;EFL Explorers has transformed my learning experience! The
           interactive lessons are fantastic.&quot;
         </p>
       </div>

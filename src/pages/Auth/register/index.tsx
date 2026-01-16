@@ -21,7 +21,7 @@ export const RegisterPage = (_props: RegisterPageProps) => {
   return (
     <div className={styles.container}>
       <div className={styles.formContainer}>
-        <h1 className={styles.title}>Join ESL Explorers</h1>
+        <h1 className={styles.title}>Join EFL Explorers</h1>
         <p className={styles.subtitle}>Choose your account type:</p>
 
         <div className={styles.buttonGroup}>

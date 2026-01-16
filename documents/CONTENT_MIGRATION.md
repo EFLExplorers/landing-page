@@ -2,7 +2,7 @@
 
 ## Overview
 
-The ESL Explorers landing page has been migrated from hardcoded content to a database-driven content management system. This enables dynamic content updates without requiring code deployments.
+The EFL Explorers landing page has been migrated from hardcoded content to a database-driven content management system. This enables dynamic content updates without requiring code deployments.
 
 ## What Changed
 

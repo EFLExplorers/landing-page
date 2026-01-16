@@ -43,10 +43,10 @@ export const ContactPage: NextPage<ContactPageProps> = ({
   faqSection,
   faqs,
 }) => {
-  const safeTitle = pageTitle || "Contact Us - ESL Explorers";
+  const safeTitle = pageTitle || "Contact Us - EFL Explorers";
   const safeDescription =
     pageDescription ||
-    "Get in touch with ESL Explorers. We're here to help with your English learning journey through innovative education methods and dedicated support.";
+    "Get in touch with EFL Explorers. We're here to help with your English learning journey through innovative education methods and dedicated support.";
 
   return (
     <>
@@ -55,7 +55,7 @@ export const ContactPage: NextPage<ContactPageProps> = ({
         <meta name="description" content={safeDescription} />
         <meta
           name="keywords"
-          content="ESL contact, English learning support, language education help, contact us"
+          content="EFL contact, English learning support, language education help, contact us"
         />
         <meta property="og:title" content={safeTitle} />
         <meta property="og:description" content={safeDescription} />

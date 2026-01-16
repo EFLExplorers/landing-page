@@ -7,7 +7,7 @@ export const Contact = () => {
         <h1>Contact</h1>
         <p>
           If you have any questions or need support, please email us at
-          support@eslexplorers.com.
+          support@eflexplorers.com.
         </p>
       </div>
     </>

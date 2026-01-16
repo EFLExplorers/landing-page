@@ -72,7 +72,7 @@ Visit these URLs in your browser or use curl:
 
 #### About Page Tests
 - [ ] Visit: `http://localhost:3000/about`
-- [ ] **Hero**: Shows "About ESL Explorers" with subtitle
+- [ ] **Hero**: Shows "About EFL Explorers" with subtitle
 - [ ] **Team Section**: Shows 3 team members (Shinade, Bobby, Nathan)
 - [ ] **Stats**: Shows 4 statistics (10K+, 500+, 95%, 24/7)
 - [ ] **Core Values**: Shows 4 values (Excellence, Community, Innovation, Accessibility)
@@ -158,7 +158,7 @@ Visit these URLs in your browser or use curl:
 {
   "id": "uuid",
   "route": "/",
-  "title": "ESL Explorers - Home",
+  "title": "EFL Explorers - Home",
   "sections": [
     {
       "section_key": "hero",

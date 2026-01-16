@@ -14,7 +14,7 @@ export const Logo = () => {
       <div className={styles.logoContainer}>
         <Image
           src={logoPath}
-          alt="ESL Explorers"
+          alt="EFL Explorers"
           width={width}
           height={height}
           priority

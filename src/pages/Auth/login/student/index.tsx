@@ -14,7 +14,7 @@ export const StudentLoginPage = (_props: StudentLoginPageProps) => {
   return (
     <AuthContainer
       title="Student Login"
-      subtitle="Welcome back to ESL Explorers"
+      subtitle="Welcome back to EFL Explorers"
     >
       <LoginForm platform="student" />
     </AuthContainer>

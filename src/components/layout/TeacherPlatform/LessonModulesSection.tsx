@@ -53,7 +53,7 @@ export const LessonModulesSection = ({
   const title = (section.content as any)?.title ?? "Explore our lesson modules";
   const subtitle =
     (section.content as any)?.subtitle ??
-    "Choose from our comprehensive range of ESL modules designed for every proficiency level";
+    "Choose from our comprehensive range of EFL modules designed for every proficiency level";
 
   const active = modules[selectedModule] ?? modules[0];
   const activeColorClass = colorClassByKey[active.colorKey] ?? "";

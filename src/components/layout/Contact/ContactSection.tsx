@@ -77,8 +77,8 @@ export const ContactSection = () => {
               </div>
               <div className={styles.infoItem}>
                 <Mail className={styles.icon} />
-                <a href="mailto:contact@eslexplorers.com">
-                  contact@eslexplorers.com
+                <a href="mailto:contact@eflexplorers.com">
+                  contact@eflexplorers.com
                 </a>
               </div>
               <div className={styles.infoItem}>

@@ -38,10 +38,10 @@ export const Pricing: NextPage<PricingPageProps> = ({
   footerSection,
   plans,
 }) => {
-  const safeTitle = pageTitle || "Pricing - ESL Explorers";
+  const safeTitle = pageTitle || "Pricing - EFL Explorers";
   const safeDescription =
     pageDescription ||
-    "Choose the best plan to improve your English skills with ESL Explorers.";
+    "Choose the best plan to improve your English skills with EFL Explorers.";
 
   return (
     <>

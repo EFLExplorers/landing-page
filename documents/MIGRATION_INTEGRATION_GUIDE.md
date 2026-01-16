@@ -2,7 +2,7 @@
 
 ## 🎯 **Overview**
 
-This guide provides a step-by-step checklist for migrating to and integrating the database-driven content management system for ESL Explorers.
+This guide provides a step-by-step checklist for migrating to and integrating the database-driven content management system for EFL Explorers.
 
 ## 📋 **Phase 1: Database Setup & Verification**
 
