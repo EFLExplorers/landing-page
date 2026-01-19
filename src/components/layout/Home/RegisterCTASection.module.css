@@ -4,7 +4,6 @@
   background-size: cover;
   background-position: bottom;
   background-repeat: no-repeat;
-  background-attachment: fixed;
   padding: var(--spacing-2xl) var(--site-padding-x);
   width: 100%;
   position: relative;

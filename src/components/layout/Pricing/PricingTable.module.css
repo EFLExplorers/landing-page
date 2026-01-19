@@ -6,11 +6,13 @@
   background-size: cover;
   background-position: bottom;
   background-repeat: no-repeat;
+  background-attachment: scroll;
   min-height: calc(100vh - var(--header-height));
   display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
+  will-change: auto;
 }
 
 .pricing::before {
