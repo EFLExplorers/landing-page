@@ -1,11 +1,21 @@
 import "../styles/globals.css";
 import type { AppProps } from "next/app";
 import Head from "next/head";
+import dynamic from "next/dynamic";
 import { Layout } from "../components/layout/Layout";
 import type { HeaderContent } from "../components/layout/Header-Footer/Header";
 import type { FooterContent } from "../components/layout/Header-Footer/Footer";
-import { SpeedInsights } from "@vercel/speed-insights/next";
-import { Analytics } from "@vercel/analytics/react";
+
+// Dynamically import analytics with no SSR to avoid blocking initial render
+const SpeedInsights = dynamic(
+  () => import("@vercel/speed-insights/next").then((mod) => mod.SpeedInsights),
+  { ssr: false }
+);
+
+const Analytics = dynamic(
+  () => import("@vercel/analytics/react").then((mod) => mod.Analytics),
+  { ssr: false }
+);
 
 type AppPageProps = {
   headerContent?: HeaderContent | null;
