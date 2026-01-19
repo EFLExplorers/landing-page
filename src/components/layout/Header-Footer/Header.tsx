@@ -71,14 +71,6 @@ export const Header = ({ content }: HeaderProps) => {
     };
   }, [isMobileMenuOpen]);
 
-  const buttonProps = {
-    className: styles.mobileMenuButton,
-    onClick: toggleMobileMenu,
-    "aria-label": "Toggle mobile menu",
-    "aria-expanded": isMobileMenuOpen ? "true" : "false" as const,
-    "data-cy": "mobile-menu-button",
-  };
-
   return (
     <header className={styles.header} data-cy="site-header">
       <div className={styles.container} data-cy="site-header-container">
@@ -91,7 +83,13 @@ export const Header = ({ content }: HeaderProps) => {
         </div>
 
         {/* Mobile Menu Button */}
-        <button {...buttonProps}>
+        <button
+          className={styles.mobileMenuButton}
+          onClick={toggleMobileMenu}
+          aria-label="Toggle mobile menu"
+          aria-expanded={isMobileMenuOpen}
+          data-cy="mobile-menu-button"
+        >
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
