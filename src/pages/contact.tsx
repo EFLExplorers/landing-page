@@ -43,22 +43,17 @@ export const ContactPage: NextPage<ContactPageProps> = ({
   faqSection,
   faqs,
 }) => {
-  const safeTitle = pageTitle || "Contact Us - EFL Explorers";
-  const safeDescription =
-    pageDescription ||
-    "Get in touch with EFL Explorers. We're here to help with your English learning journey through innovative education methods and dedicated support.";
-
   return (
     <>
       <Head>
-        <title>{safeTitle}</title>
-        <meta name="description" content={safeDescription} />
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
         <meta
           name="keywords"
           content="EFL contact, English learning support, language education help, contact us"
         />
-        <meta property="og:title" content={safeTitle} />
-        <meta property="og:description" content={safeDescription} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
         <meta property="og:type" content="website" />
       </Head>
       <PageLayout>
@@ -115,8 +110,14 @@ export const getStaticProps: GetStaticProps<ContactPageProps> = async () => {
     );
   }
 
-  const pageTitle = pageData.title || "";
-  const pageDescription = pageData.meta_description || "";
+  if (!pageData.title || !pageData.meta_description) {
+    throw new Error(
+      "[Contact] Missing required page fields (title, meta_description)"
+    );
+  }
+
+  const pageTitle = pageData.title;
+  const pageDescription = pageData.meta_description;
 
   const sections = sectionsData;
   const heroSection = sections.find((s) => s.section_key === "hero") || null;
@@ -137,12 +138,21 @@ export const getStaticProps: GetStaticProps<ContactPageProps> = async () => {
 
   if (faqError) throw new Error(faqError.message);
 
-  const faqs: ContactFAQ[] = (faqItems || [])
-    .map((item: any) => ({
-      question: item.title || "",
-      answer: item.description || "",
-    }))
-    .filter((f: ContactFAQ) => f.question && f.answer);
+  if (!faqItems || faqItems.length === 0) {
+    throw new Error("[Contact] Missing FAQ items.");
+  }
+
+  const faqs: ContactFAQ[] = faqItems.map((item: any) => {
+    if (!item.title || !item.description) {
+      throw new Error(
+        "[Contact] FAQ item missing required fields (title, description)"
+      );
+    }
+    return {
+      question: item.title,
+      answer: item.description,
+    };
+  });
 
   if (!faqs.length) throw new Error("[Contact] Missing FAQ items.");
 

@@ -9,14 +9,21 @@ import styles from "./404.module.css";
 interface Custom404Props {
   headerContent: HeaderContent | null;
   footerContent: FooterContent | null;
+  title: string;
+  message: string;
+  homeLinkText: string;
 }
 
-export default function Custom404(_props: Custom404Props) {
+export default function Custom404({
+  title,
+  message,
+  homeLinkText,
+}: Custom404Props) {
   return (
     <div className={styles.container}>
-      <h1>404 - Page Not Found</h1>
-      <p>The page you&apos;re looking for doesn&apos;t exist.</p>
-      <Link href="/">Go back home</Link>
+      <h1>{title}</h1>
+      <p>{message}</p>
+      <Link href="/">{homeLinkText}</Link>
     </div>
   );
 }
@@ -27,14 +34,43 @@ export const getStaticProps: GetStaticProps<Custom404Props> = async () => {
   );
 
   if (!isSupabaseConfigured) {
-    return {
-      props: { headerContent: null, footerContent: null },
-      revalidate: 300,
-    };
+    throw new Error("[404] Supabase environment variables are missing.");
   }
 
   const { headerContent, footerContent } = await getGlobalLayoutContent(
     supabase
   );
-  return { props: { headerContent, footerContent } };
+
+  // Fetch 404 page content from site_sections
+  const { data: sectionData, error: sectionError } = await supabase
+    .from("site_sections")
+    .select("content")
+    .eq("section_key", "404")
+    .eq("active", true)
+    .single();
+
+  if (sectionError || !sectionData) {
+    throw new Error(
+      `[404] Missing site_sections row for section_key '404': ${
+        sectionError?.message || "no data"
+      }`
+    );
+  }
+
+  const content = sectionData.content as any;
+  if (!content.title || !content.message || !content.home_link_text) {
+    throw new Error(
+      "[404] Missing required content fields in 404 site_section (title, message, home_link_text)"
+    );
+  }
+
+  return {
+    props: {
+      headerContent,
+      footerContent,
+      title: content.title,
+      message: content.message,
+      homeLinkText: content.home_link_text,
+    },
+  };
 };

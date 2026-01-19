@@ -9,9 +9,24 @@ import { getGlobalLayoutContent } from "@/utils/globalSections";
 interface RegisterPageProps {
   headerContent: HeaderContent | null;
   footerContent: FooterContent | null;
+  title: string;
+  subtitle: string;
+  studentButtonLabel: string;
+  teacherButtonLabel: string;
+  loginPrompt: string;
+  loginLinkText: string;
+  loginHref: string;
 }
 
-export const RegisterPage = (_props: RegisterPageProps) => {
+export const RegisterPage = ({
+  title,
+  subtitle,
+  studentButtonLabel,
+  teacherButtonLabel,
+  loginPrompt,
+  loginLinkText,
+  loginHref,
+}: RegisterPageProps) => {
   const router = useRouter();
 
   const handlePlatformSelect = (platform: "student" | "teacher") => {
@@ -21,28 +36,28 @@ export const RegisterPage = (_props: RegisterPageProps) => {
   return (
     <div className={styles.container}>
       <div className={styles.formContainer}>
-        <h1 className={styles.title}>Join EFL Explorers</h1>
-        <p className={styles.subtitle}>Choose your account type:</p>
+        <h1 className={styles.title}>{title}</h1>
+        <p className={styles.subtitle}>{subtitle}</p>
 
         <div className={styles.buttonGroup}>
           <button
             onClick={() => handlePlatformSelect("student")}
             className={`${styles.button} ${styles.studentButton}`}
           >
-            📚 Register as Student
+            {studentButtonLabel}
           </button>
           <button
             onClick={() => handlePlatformSelect("teacher")}
             className={`${styles.button} ${styles.teacherButton}`}
           >
-            👨‍🏫 Register as Teacher
+            {teacherButtonLabel}
           </button>
         </div>
 
         <div className={styles.registerLink}>
-          Already have an account?{" "}
-          <Link href="/Auth/login" className={styles.link}>
-            Login here
+          {loginPrompt}{" "}
+          <Link href={loginHref} className={styles.link}>
+            {loginLinkText}
           </Link>
         </div>
       </div>
@@ -58,9 +73,70 @@ export const getStaticProps: GetStaticProps<RegisterPageProps> = async () => {
   );
 
   if (!isSupabaseConfigured) {
-    return { props: { headerContent: null, footerContent: null }, revalidate: 300 };
+    throw new Error("[Register] Supabase environment variables are missing.");
   }
 
-  const { headerContent, footerContent } = await getGlobalLayoutContent(supabase);
-  return { props: { headerContent, footerContent }, revalidate: 300 };
+  const { headerContent, footerContent } = await getGlobalLayoutContent(
+    supabase
+  );
+
+  const { data: pageData, error: pageError } = await supabase
+    .from("pages")
+    .select("id")
+    .eq("route", "/Auth/register")
+    .single();
+
+  if (pageError || !pageData?.id) {
+    throw new Error(
+      `[Register] Missing pages row for route '/Auth/register': ${
+        pageError?.message || "no id"
+      }`
+    );
+  }
+
+  const { data: sectionData, error: sectionError } = await supabase
+    .from("page_sections")
+    .select("content")
+    .eq("page_id", pageData.id)
+    .eq("section_key", "selection")
+    .eq("active", true)
+    .single();
+
+  if (sectionError || !sectionData) {
+    throw new Error(
+      `[Register] Missing page_sections for '/Auth/register' (selection): ${
+        sectionError?.message || "no data"
+      }`
+    );
+  }
+
+  const content = sectionData.content as any;
+  if (
+    !content.title ||
+    !content.subtitle ||
+    !content.student_button_label ||
+    !content.teacher_button_label ||
+    !content.login_prompt ||
+    !content.login_link_text ||
+    !content.login_href
+  ) {
+    throw new Error(
+      "[Register] Missing required content fields in selection section"
+    );
+  }
+
+  return {
+    props: {
+      headerContent,
+      footerContent,
+      title: content.title,
+      subtitle: content.subtitle,
+      studentButtonLabel: content.student_button_label,
+      teacherButtonLabel: content.teacher_button_label,
+      loginPrompt: content.login_prompt,
+      loginLinkText: content.login_link_text,
+      loginHref: content.login_href,
+    },
+    revalidate: 300,
+  };
 };

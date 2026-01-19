@@ -2,10 +2,12 @@
 
 This doc is the working contract between:
 
-- DB seed files (e.g. `db/content-seed-v3.sql`)
-- Supabase tables (`pages`, `page_sections`, `content_items`)
+- DB seed files (e.g. `db/content-seed-v5.sql`)
+- Supabase tables (`pages`, `page_sections`, `content_items`, `site_sections`)
 - Page loaders (`getStaticProps`)
 - UI components (props-driven rendering)
+
+**Important**: All pages use strict mode - missing required content will cause build to fail. All data must be seeded via `content-seed-v5.sql` before deployment.
 
 ## 1) Page content (route-scoped)
 
@@ -57,6 +59,32 @@ This doc is the working contract between:
 - `benefits`
 - `cta`
 
+#### `/contact`
+
+- `hero`
+- `form` (includes `form_labels` object for all form field labels)
+- `faq`
+
+#### `/Auth/login`
+
+- `selection` (platform selection page content)
+
+#### `/Auth/register`
+
+- `selection` (platform selection page content)
+
+#### `/Auth/forgot-password`
+
+- `form` (includes nested `form` and `success` objects)
+
+#### `/Auth/reset-password`
+
+- `form` (includes nested `form` and `success` objects)
+
+#### `/Auth/register/teacher/pending`
+
+- `content` (pending message content)
+
 ## 2) List content (typed collections)
 
 ### Table
@@ -65,18 +93,19 @@ This doc is the working contract between:
 
 ### Content types used today
 
-- `pricing`
-- `pricing_plan`
-- `service`
-- `learning_tool`
-- `student_character`
-- `student_planet`
-- `teaching_tool`
-- `team_member`
-- `about_stat`
-- `core_value`
-- `lesson_module`
-- `teacher_benefit`
+- `pricing` (home page pricing tiers)
+- `pricing_plan` (pricing page plans)
+- `service` (home page services)
+- `learning_tool` (home page learning tools)
+- `student_character` (student platform characters)
+- `student_planet` (student platform planets)
+- `teaching_tool` (teacher platform tools)
+- `team_member` (about page team)
+- `about_stat` (about page statistics)
+- `core_value` (about page values)
+- `lesson_module` (teacher platform modules)
+- `teacher_benefit` (teacher platform benefits)
+- `faq` (contact page FAQs)
 
 ### Important seed rule
 
@@ -84,9 +113,18 @@ This doc is the working contract between:
 
 ## 3) Header/Footer (current implementation)
 
-Today, `header`/`footer` are stored as `page_sections` on `/` and mapped into `headerContent` / `footerContent` props for the shared `Layout`.
+Today, `header`/`footer` are stored in `site_sections` table and fetched via `getGlobalLayoutContent()` utility.
 
 Notes:
 
 - Header/Footer have no hardcoded copy fallbacks.
-- If no props are provided, those elements render nothing.
+- Missing header/footer content will cause build to fail (strict mode).
+- All pages fetch header/footer from `site_sections` during `getStaticProps`.
+
+## 4) System sections (site_sections)
+
+Global sections stored in `site_sections` table:
+
+- `header` - Navigation and auth buttons
+- `footer` - Footer links and copyright
+- `404` - 404 error page content (title, message, home_link_text)

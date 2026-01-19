@@ -2,61 +2,82 @@
 
 Goal: reduce duplicated/hardcoded text/objects, centralize data in DB/config, and keep the UI lean.
 
-## Hardcoded Content to Externalize
+## Content Status (Current)
 
-- Home: learning tools cards; services cards; pricing teaser tiers.
-- Pricing page: plans, features, CTAs.
-- About: stats, mission/vision/values copy, team members.
-- Contact: contact info; FAQs.
-- Teacher platform: teaching tools; lesson modules; benefits; CTA.
-- Student platform: characters; planets; CTA.
-- Courses: placeholder → course catalog.
-- Auth/CTA: role-based redirect rules and target URLs.
+✅ **All content is DB-driven** - No hardcoded content remains:
 
-## Suggested Storage Model
+- ✅ Home: learning tools cards; services cards; pricing teaser tiers.
+- ✅ Pricing page: plans, features, CTAs.
+- ✅ About: stats, mission/vision/values copy, team members.
+- ✅ Contact: contact info; FAQs; form labels.
+- ✅ Teacher platform: teaching tools; lesson modules; benefits; CTA.
+- ✅ Student platform: characters; planets; CTA.
+- ✅ Auth pages: all text, labels, messages, success states.
+- ✅ 404 page: title, message, link text.
+- ⏳ Courses: placeholder → course catalog (future work).
 
-- Current tables (implemented):
-  - `pages` (one row per route, e.g. `/`, `/about`)
+## Storage Model (Current Implementation)
+
+- Tables (all implemented):
+  - `pages` (one row per route, e.g. `/`, `/about`, `/Auth/login`, etc.)
   - `page_sections` (sections per page by `section_key`, with `content` JSON)
-  - `content_items` (typed list data: `pricing`, `service`, `learning_tool`, `team_member`, `about_stat`, `core_value`, etc.)
-- Seed (implemented):
-  - `db/content-seed-v3.sql` seeds routes, sections, and list content.
-  - Seed reruns are safe for `content_items` via stable `slug` + `ON CONFLICT (slug) DO UPDATE`.
+  - `content_items` (typed list data: `pricing`, `service`, `learning_tool`, `team_member`, `about_stat`, `core_value`, `teaching_tool`, `lesson_module`, `teacher_benefit`, `faq`, etc.)
+  - `site_sections` (global sections: `header`, `footer`, `404`)
+- Seed (current):
+  - `db/content-seed-v5.sql` - Complete seed with all pages, sections, and content items.
+  - Seed reruns are safe via `ON CONFLICT` clauses (upserts).
+  - **Required before build**: All content must be seeded or build will fail.
 
-## What is DB-driven today
+## What is DB-driven (Complete List)
 
-- `/`:
-  - `pages` + `page_sections` for section copy and header/footer sections
+**All pages are DB-driven with strict mode** (build fails if content missing):
+
+- `/` (home):
+  - `pages` + `page_sections` for section copy
   - `content_items` for pricing tiers, services, learning tools
-  - strict mode: missing env/seeded content fails build/SSG
 - `/about`:
   - `pages` + `page_sections` for copy blocks
   - `content_items` for team members/stats/core values
 - `/contact`:
-  - `pages` + `page_sections` for hero/form/faq header copy
+  - `pages` + `page_sections` for hero/form (with form_labels)/faq
   - `content_items` for FAQs
-  - SSR: uses `getServerSideProps`
 - `/pricing`:
   - `pages` + `page_sections` for `pricing-header` / `pricing-footer`
   - `content_items` for `pricing_plan`
 - `/platforms/student`:
   - `pages` + `page_sections` for hero/characters/planets/cta
   - `content_items` for `student_character` / `student_planet`
+- `/platforms/teacher`:
+  - `pages` + `page_sections` for hero/tools/lesson-modules/benefits/cta
+  - `content_items` for `teaching_tool` / `lesson_module` / `teacher_benefit`
+- `/Auth/login`:
+  - `pages` + `page_sections` for selection page content
+- `/Auth/register`:
+  - `pages` + `page_sections` for selection page content
+- `/Auth/forgot-password`:
+  - `pages` + `page_sections` for form and success states
+- `/Auth/reset-password`:
+  - `pages` + `page_sections` for form and success states
+- `/Auth/register/teacher/pending`:
+  - `pages` + `page_sections` for pending message content
+- `/404`:
+  - `site_sections` for error page content
 
-## Cleanup & De-duplication
+## Strict Mode Policy
 
-- Move repeated CTAs (register links) to a single resolver helper.
-- Standardize pricing copy (teaser vs pricing page) from one source.
-- Centralize icon references instead of inline emoji where possible.
+- **No fallbacks**: All pages throw errors if required content is missing.
+- **Build-time validation**: Missing data causes build to fail immediately.
+- **Data integrity**: Ensures all content is properly seeded before deployment.
+- **Clean codebase**: No bloated fallback code - just strict validation.
 
-## Loading/Empty/Error Patterns
+## Content Contracts
 
-- Each dynamic section should render: loading skeleton, empty-state message, and error retry.
-- Keep layout stable (fixed card counts with placeholders) to avoid content shift.
+- Section keys and JSON shapes are documented in `docs/content-model.md` and `docs/data-schemas.md`.
+- Seed file (`content-seed-v5.sql`) serves as the source of truth for content structure.
+- All content must match the expected schema or build will fail.
 
-## Steps to Implement
+## Future Work
 
-- Continue migrating remaining pages (teacher platform, courses, auth pages) to DB-driven props (if desired).
-- Keep content contracts (section keys + JSON shapes) documented and versioned with the seed.
-- Add a CTA resolver utility with role + auth-state inputs.
-- Add tests to ensure sections render from provided data and handle empty/error cases.
+- Centralize CTA/link routing with role + auth-state awareness.
+- Courses page: migrate to DB-driven when ready.
+- Add tests to ensure sections render from provided data (build-time validation already covers this).

@@ -9,10 +9,36 @@ export interface ContactFormSectionProps {
 export const ContactFormSection = ({ section }: ContactFormSectionProps) => {
   if (!section) return null;
 
-  const title = (section.content as any)?.title ?? "";
-  const subtitle = (section.content as any)?.subtitle ?? "";
-  const subjectOptions =
-    ((section.content as any)?.subject_options as string[] | undefined) || [];
+  const content = section.content as any;
+  if (!content.form_labels) {
+    throw new Error("[ContactFormSection] Missing form_labels in section content");
+  }
+
+  const formLabels = content.form_labels;
+  if (
+    !formLabels.first_name ||
+    !formLabels.last_name ||
+    !formLabels.email ||
+    !formLabels.subject ||
+    !formLabels.message ||
+    !formLabels.submit_button ||
+    !formLabels.select_subject
+  ) {
+    throw new Error(
+      "[ContactFormSection] Missing required form label fields in section content"
+    );
+  }
+
+  const title = content.title ?? "";
+  const subtitle = content.subtitle ?? "";
+  const subjectOptions = (content.subject_options as string[] | undefined) || [];
+  const firstNameLabel = formLabels.first_name;
+  const lastNameLabel = formLabels.last_name;
+  const emailLabel = formLabels.email;
+  const subjectLabel = formLabels.subject;
+  const messageLabel = formLabels.message;
+  const submitButtonLabel = formLabels.submit_button;
+  const selectSubjectPlaceholder = formLabels.select_subject;
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -57,7 +83,7 @@ export const ContactFormSection = ({ section }: ContactFormSectionProps) => {
             <div className={styles.formRow}>
               <div className={styles.formGroup}>
                 <label htmlFor="firstName" className={styles.label}>
-                  First Name
+                  {firstNameLabel}
                 </label>
                 <input
                   type="text"
@@ -72,7 +98,7 @@ export const ContactFormSection = ({ section }: ContactFormSectionProps) => {
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="lastName" className={styles.label}>
-                  Last Name
+                  {lastNameLabel}
                 </label>
                 <input
                   type="text"
@@ -89,7 +115,7 @@ export const ContactFormSection = ({ section }: ContactFormSectionProps) => {
 
             <div className={styles.formGroup}>
               <label htmlFor="email" className={styles.label}>
-                Email
+                {emailLabel}
               </label>
               <input
                 type="email"
@@ -105,7 +131,7 @@ export const ContactFormSection = ({ section }: ContactFormSectionProps) => {
 
             <div className={styles.formGroup}>
               <label htmlFor="subject" className={styles.label}>
-                Subject
+                {subjectLabel}
               </label>
               <select
                 id="subject"
@@ -116,7 +142,7 @@ export const ContactFormSection = ({ section }: ContactFormSectionProps) => {
                 required
                 data-cy="contact-subject"
               >
-                <option value="">Select a subject</option>
+                <option value="">{selectSubjectPlaceholder}</option>
                 {subjectOptions.map((option) => (
                   <option
                     key={option}
@@ -130,7 +156,7 @@ export const ContactFormSection = ({ section }: ContactFormSectionProps) => {
 
             <div className={styles.formGroup}>
               <label htmlFor="message" className={styles.label}>
-                Message
+                {messageLabel}
               </label>
               <textarea
                 id="message"
@@ -149,7 +175,7 @@ export const ContactFormSection = ({ section }: ContactFormSectionProps) => {
               className={styles.submitBtn}
               data-cy="contact-submit"
             >
-              Send Message
+              {submitButtonLabel}
             </button>
           </form>
         </div>

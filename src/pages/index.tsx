@@ -191,32 +191,51 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
   if (servicesData.error) throw new Error(servicesData.error.message);
   if (toolsData.error) throw new Error(toolsData.error.message);
 
-  const pricingTiers: PricingTierLite[] = (pricingData.data || []).map(
-    (row: any) => {
-      const out: any = { id: row.id, content: row.content ?? {} };
-      if (row.title != null) out.title = row.title;
-      if (row.description != null) out.description = row.description;
-      return out as PricingTierLite;
+  if (!pricingData.data || pricingData.data.length === 0) {
+    throw new Error("[Home] Missing pricing tiers.");
+  }
+  if (!servicesData.data || servicesData.data.length === 0) {
+    throw new Error("[Home] Missing services.");
+  }
+  if (!toolsData.data || toolsData.data.length === 0) {
+    throw new Error("[Home] Missing learning tools.");
+  }
+
+  const pricingTiers: PricingTierLite[] = pricingData.data.map((row: any) => {
+    if (!row.id || !row.content) {
+      throw new Error(
+        "[Home] Pricing tier missing required fields (id, content)"
+      );
     }
-  );
-  const services: ServiceLite[] = (servicesData.data || []).map((row: any) => {
-    const out: any = { id: row.id, content: row.content ?? {} };
+    const out: any = { id: row.id, content: row.content };
+    if (row.title != null) out.title = row.title;
+    if (row.description != null) out.description = row.description;
+    return out as PricingTierLite;
+  });
+
+  const services: ServiceLite[] = servicesData.data.map((row: any) => {
+    if (!row.id || !row.content) {
+      throw new Error(
+        "[Home] Service missing required fields (id, content)"
+      );
+    }
+    const out: any = { id: row.id, content: row.content };
     if (row.title != null) out.title = row.title;
     if (row.description != null) out.description = row.description;
     return out as ServiceLite;
   });
-  const learningTools: LearningToolLite[] = (toolsData.data || []).map(
-    (row: any) => {
-      const out: any = { id: row.id, content: row.content ?? {} };
-      if (row.title != null) out.title = row.title;
-      if (row.description != null) out.description = row.description;
-      return out as LearningToolLite;
-    }
-  );
 
-  if (!pricingTiers.length) throw new Error("[Home] Missing pricing tiers.");
-  if (!services.length) throw new Error("[Home] Missing services.");
-  if (!learningTools.length) throw new Error("[Home] Missing learning tools.");
+  const learningTools: LearningToolLite[] = toolsData.data.map((row: any) => {
+    if (!row.id || !row.content) {
+      throw new Error(
+        "[Home] Learning tool missing required fields (id, content)"
+      );
+    }
+    const out: any = { id: row.id, content: row.content };
+    if (row.title != null) out.title = row.title;
+    if (row.description != null) out.description = row.description;
+    return out as LearningToolLite;
+  });
 
   return {
     props: {

@@ -12,9 +12,36 @@ import { getGlobalLayoutContent } from "@/utils/globalSections";
 interface ForgotPasswordPageProps {
   headerContent: HeaderContent | null;
   footerContent: FooterContent | null;
+  title: string;
+  subtitle: string;
+  emailLabel: string;
+  submitButtonLabel: string;
+  submitButtonLoadingLabel: string;
+  backToLoginText: string;
+  backToLoginHref: string;
+  successTitle: string;
+  successSubtitle: string;
+  successMessage1: string;
+  successMessage2: string;
+  successReturnText: string;
+  successReturnHref: string;
 }
 
-export const ForgotPasswordPage = (_props: ForgotPasswordPageProps) => {
+export const ForgotPasswordPage = ({
+  title,
+  subtitle,
+  emailLabel,
+  submitButtonLabel,
+  submitButtonLoadingLabel,
+  backToLoginText,
+  backToLoginHref,
+  successTitle,
+  successSubtitle,
+  successMessage1,
+  successMessage2,
+  successReturnText,
+  successReturnHref,
+}: ForgotPasswordPageProps) => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -47,22 +74,16 @@ export const ForgotPasswordPage = (_props: ForgotPasswordPageProps) => {
 
   if (success) {
     return (
-      <AuthContainer
-        title="Check Your Email"
-        subtitle="We've sent you a password reset link"
-      >
+      <AuthContainer title={successTitle} subtitle={successSubtitle}>
         <div className={sharedStyles.messageBox}>
           <p>
-            We've sent a password reset link to <strong>{email}</strong>.
+            {successMessage1.replace(/\{email\}/g, email)}
           </p>
-          <p>
-            Please check your email and click the link to reset your password.
-            The link will expire in 1 hour.
-          </p>
+          <p>{successMessage2}</p>
         </div>
         <div className={sharedStyles.links}>
-          <Link href="/Auth/login" className={sharedStyles.link}>
-            Return to Login
+          <Link href={successReturnHref} className={sharedStyles.link}>
+            {successReturnText}
           </Link>
         </div>
       </AuthContainer>
@@ -70,10 +91,7 @@ export const ForgotPasswordPage = (_props: ForgotPasswordPageProps) => {
   }
 
   return (
-    <AuthContainer
-      title="Forgot Password"
-      subtitle="Enter your email to reset your password"
-    >
+    <AuthContainer title={title} subtitle={subtitle}>
       <form onSubmit={handleSubmit} className={sharedStyles.form}>
         {error && <div className={sharedStyles.error}>{error}</div>}
 
@@ -81,7 +99,7 @@ export const ForgotPasswordPage = (_props: ForgotPasswordPageProps) => {
           id="email"
           name="email"
           type="email"
-          label="Email"
+          label={emailLabel}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -93,12 +111,12 @@ export const ForgotPasswordPage = (_props: ForgotPasswordPageProps) => {
           className={sharedStyles.button}
           disabled={loading}
         >
-          {loading ? "Sending..." : "Send Reset Link"}
+          {loading ? submitButtonLoadingLabel : submitButtonLabel}
         </button>
 
         <div className={sharedStyles.links}>
-          <Link href="/Auth/login" className={sharedStyles.link}>
-            Back to Login
+          <Link href={backToLoginHref} className={sharedStyles.link}>
+            {backToLoginText}
           </Link>
         </div>
       </form>
@@ -115,15 +133,101 @@ export const getStaticProps: GetStaticProps<ForgotPasswordPageProps> =
     );
 
     if (!isSupabaseConfigured) {
-      return {
-        props: { headerContent: null, footerContent: null },
-        revalidate: 300,
-      };
+      throw new Error(
+        "[ForgotPassword] Supabase environment variables are missing."
+      );
     }
 
     const { headerContent, footerContent } = await getGlobalLayoutContent(
       supabase
     );
-    return { props: { headerContent, footerContent }, revalidate: 300 };
+
+    const { data: pageData, error: pageError } = await supabase
+      .from("pages")
+      .select("id")
+      .eq("route", "/Auth/forgot-password")
+      .single();
+
+    if (pageError || !pageData?.id) {
+      throw new Error(
+        `[ForgotPassword] Missing pages row for route '/Auth/forgot-password': ${
+          pageError?.message || "no id"
+        }`
+      );
+    }
+
+    const { data: sectionData, error: sectionError } = await supabase
+      .from("page_sections")
+      .select("content")
+      .eq("page_id", pageData.id)
+      .eq("section_key", "form")
+      .eq("active", true)
+      .single();
+
+    if (sectionError || !sectionData) {
+      throw new Error(
+        `[ForgotPassword] Missing page_sections for '/Auth/forgot-password' (form): ${
+          sectionError?.message || "no data"
+        }`
+      );
+    }
+
+    const content = sectionData.content as any;
+    if (!content.form || !content.success) {
+      throw new Error(
+        "[ForgotPassword] Missing form or success content in section"
+      );
+    }
+
+    const formContent = content.form;
+    const successContent = content.success;
+
+    if (
+      !formContent.title ||
+      !formContent.subtitle ||
+      !formContent.email_label ||
+      !formContent.submit_button_label ||
+      !formContent.submit_button_loading_label ||
+      !formContent.back_to_login_text ||
+      !formContent.back_to_login_href
+    ) {
+      throw new Error(
+        "[ForgotPassword] Missing required form content fields"
+      );
+    }
+
+    if (
+      !successContent.title ||
+      !successContent.subtitle ||
+      !successContent.message1 ||
+      !successContent.message2 ||
+      !successContent.return_text ||
+      !successContent.return_href
+    ) {
+      throw new Error(
+        "[ForgotPassword] Missing required success content fields"
+      );
+    }
+
+    return {
+      props: {
+        headerContent,
+        footerContent,
+        title: formContent.title,
+        subtitle: formContent.subtitle,
+        emailLabel: formContent.email_label,
+        submitButtonLabel: formContent.submit_button_label,
+        submitButtonLoadingLabel: formContent.submit_button_loading_label,
+        backToLoginText: formContent.back_to_login_text,
+        backToLoginHref: formContent.back_to_login_href,
+        successTitle: successContent.title,
+        successSubtitle: successContent.subtitle,
+        successMessage1: successContent.message1,
+        successMessage2: successContent.message2,
+        successReturnText: successContent.return_text,
+        successReturnHref: successContent.return_href,
+      },
+      revalidate: 300,
+    };
   };
 

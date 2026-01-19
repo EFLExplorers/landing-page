@@ -40,9 +40,9 @@ npm install
 
 - In Supabase → **SQL Editor**, run:
   - `db/content-schema.sql`
-  - then **one** seed file:
-    - `db/content-seed-v5.sql` (full seed with header content ensured; safe to re-run via upserts), or
-    - `db/content-seed-simple.sql` (minimal seed)
+  - then `db/content-seed-v5.sql` (complete seed with all pages - **required**)
+  
+**Important**: The build will fail if required content is not seeded. All pages use strict mode with no fallbacks.
 
 4. Run dev server:
 
@@ -85,15 +85,27 @@ Docs:
 
 ### Which pages are DB-driven?
 
-- **SSG (build-time fetch + webhook revalidation)**:
-  - `/` (home) — **strict**: missing Supabase env or required seeded rows will fail build/SSG
-  - `/about` — **strict**
-  - `/pricing` — **strict**
-  - `/contact` — **strict**
-  - `/platforms/student` — **strict**
-  - `/platforms/teacher` — **strict**
+**ALL pages are DB-driven with strict mode** (build fails if required content missing):
 
-**All marketing pages use SSG with strict data policies** (build fails if required content missing). Content updates via webhook revalidation (no polling).
+- **Marketing pages** (SSG):
+  - `/` (home)
+  - `/about`
+  - `/pricing`
+  - `/contact` (includes DB-driven form labels)
+  - `/platforms/student`
+  - `/platforms/teacher`
+  
+- **Auth pages** (SSG):
+  - `/Auth/login` (selection page)
+  - `/Auth/register` (selection page)
+  - `/Auth/forgot-password` (form + success states)
+  - `/Auth/reset-password` (form + success states)
+  - `/Auth/register/teacher/pending` (pending message)
+
+- **System pages** (SSG):
+  - `/404` (error page content from site_sections)
+
+**Strict mode**: Missing Supabase env vars or required seeded content will cause build/SSG to fail. No fallback defaults - all content must be seeded via `content-seed-v5.sql`.
 
 ### Global header/footer behavior
 
@@ -142,3 +154,5 @@ Deploy anywhere that supports Next.js (Vercel recommended). Ensure production en
 
 - **Use named exports** for components/utilities (Next.js `pages` still require a default export).
 - **Use CSS Modules** (`*.module.css`) for styling.
+- **Strict mode**: All pages must validate required content and throw errors if missing - no fallback defaults.
+- **Database-first**: All content must be seeded in `content-seed-v5.sql` before deployment.

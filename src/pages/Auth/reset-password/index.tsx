@@ -13,9 +13,36 @@ import { getGlobalLayoutContent } from "@/utils/globalSections";
 interface ResetPasswordPageProps {
   headerContent: HeaderContent | null;
   footerContent: FooterContent | null;
+  title: string;
+  subtitle: string;
+  newPasswordLabel: string;
+  confirmPasswordLabel: string;
+  submitButtonLabel: string;
+  submitButtonLoadingLabel: string;
+  backToLoginText: string;
+  backToLoginHref: string;
+  successTitle: string;
+  successSubtitle: string;
+  successMessage: string;
+  successGoToLoginText: string;
+  successGoToLoginHref: string;
 }
 
-export const ResetPasswordPage = (_props: ResetPasswordPageProps) => {
+export const ResetPasswordPage = ({
+  title,
+  subtitle,
+  newPasswordLabel,
+  confirmPasswordLabel,
+  submitButtonLabel,
+  submitButtonLoadingLabel,
+  backToLoginText,
+  backToLoginHref,
+  successTitle,
+  successSubtitle,
+  successMessage,
+  successGoToLoginText,
+  successGoToLoginHref,
+}: ResetPasswordPageProps) => {
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -71,19 +98,13 @@ export const ResetPasswordPage = (_props: ResetPasswordPageProps) => {
 
   if (success) {
     return (
-      <AuthContainer
-        title="Password Updated"
-        subtitle="Your password has been successfully reset"
-      >
+      <AuthContainer title={successTitle} subtitle={successSubtitle}>
         <div className={sharedStyles.messageBox}>
-          <p>
-            Your password has been successfully updated. You can now log in with
-            your new password.
-          </p>
+          <p>{successMessage}</p>
         </div>
         <div className={sharedStyles.links}>
-          <Link href="/Auth/login" className={sharedStyles.link}>
-            Go to Login
+          <Link href={successGoToLoginHref} className={sharedStyles.link}>
+            {successGoToLoginText}
           </Link>
         </div>
       </AuthContainer>
@@ -91,14 +112,14 @@ export const ResetPasswordPage = (_props: ResetPasswordPageProps) => {
   }
 
   return (
-    <AuthContainer title="Reset Password" subtitle="Enter your new password">
+    <AuthContainer title={title} subtitle={subtitle}>
       <form onSubmit={handleSubmit} className={sharedStyles.form}>
         {error && <div className={sharedStyles.error}>{error}</div>}
 
         <PasswordInput
           id="password"
           name="password"
-          label="New Password"
+          label={newPasswordLabel}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -109,7 +130,7 @@ export const ResetPasswordPage = (_props: ResetPasswordPageProps) => {
         <PasswordInput
           id="confirmPassword"
           name="confirmPassword"
-          label="Confirm New Password"
+          label={confirmPasswordLabel}
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
@@ -121,12 +142,12 @@ export const ResetPasswordPage = (_props: ResetPasswordPageProps) => {
           className={sharedStyles.button}
           disabled={loading}
         >
-          {loading ? "Updating..." : "Update Password"}
+          {loading ? submitButtonLoadingLabel : submitButtonLabel}
         </button>
 
         <div className={sharedStyles.links}>
-          <Link href="/Auth/login" className={sharedStyles.link}>
-            Back to Login
+          <Link href={backToLoginHref} className={sharedStyles.link}>
+            {backToLoginText}
           </Link>
         </div>
       </form>
@@ -143,15 +164,101 @@ export const getStaticProps: GetStaticProps<ResetPasswordPageProps> =
     );
 
     if (!isSupabaseConfigured) {
-      return {
-        props: { headerContent: null, footerContent: null },
-        revalidate: 300,
-      };
+      throw new Error(
+        "[ResetPassword] Supabase environment variables are missing."
+      );
     }
 
     const { headerContent, footerContent } = await getGlobalLayoutContent(
       supabase
     );
-    return { props: { headerContent, footerContent }, revalidate: 300 };
+
+    const { data: pageData, error: pageError } = await supabase
+      .from("pages")
+      .select("id")
+      .eq("route", "/Auth/reset-password")
+      .single();
+
+    if (pageError || !pageData?.id) {
+      throw new Error(
+        `[ResetPassword] Missing pages row for route '/Auth/reset-password': ${
+          pageError?.message || "no id"
+        }`
+      );
+    }
+
+    const { data: sectionData, error: sectionError } = await supabase
+      .from("page_sections")
+      .select("content")
+      .eq("page_id", pageData.id)
+      .eq("section_key", "form")
+      .eq("active", true)
+      .single();
+
+    if (sectionError || !sectionData) {
+      throw new Error(
+        `[ResetPassword] Missing page_sections for '/Auth/reset-password' (form): ${
+          sectionError?.message || "no data"
+        }`
+      );
+    }
+
+    const content = sectionData.content as any;
+    if (!content.form || !content.success) {
+      throw new Error(
+        "[ResetPassword] Missing form or success content in section"
+      );
+    }
+
+    const formContent = content.form;
+    const successContent = content.success;
+
+    if (
+      !formContent.title ||
+      !formContent.subtitle ||
+      !formContent.new_password_label ||
+      !formContent.confirm_password_label ||
+      !formContent.submit_button_label ||
+      !formContent.submit_button_loading_label ||
+      !formContent.back_to_login_text ||
+      !formContent.back_to_login_href
+    ) {
+      throw new Error(
+        "[ResetPassword] Missing required form content fields"
+      );
+    }
+
+    if (
+      !successContent.title ||
+      !successContent.subtitle ||
+      !successContent.message ||
+      !successContent.go_to_login_text ||
+      !successContent.go_to_login_href
+    ) {
+      throw new Error(
+        "[ResetPassword] Missing required success content fields"
+      );
+    }
+
+    return {
+      props: {
+        headerContent,
+        footerContent,
+        title: formContent.title,
+        subtitle: formContent.subtitle,
+        newPasswordLabel: formContent.new_password_label,
+        confirmPasswordLabel: formContent.confirm_password_label,
+        submitButtonLabel: formContent.submit_button_label,
+        submitButtonLoadingLabel: formContent.submit_button_loading_label,
+        backToLoginText: formContent.back_to_login_text,
+        backToLoginHref: formContent.back_to_login_href,
+        successTitle: successContent.title,
+        successSubtitle: successContent.subtitle,
+        successMessage: successContent.message,
+        successGoToLoginText: successContent.go_to_login_text,
+        successGoToLoginHref: successContent.go_to_login_href,
+      },
+      revalidate: 300,
+    };
   };
 

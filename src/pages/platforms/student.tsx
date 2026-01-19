@@ -142,27 +142,49 @@ export const getStaticProps: GetStaticProps<
 
   if (planetError) throw new Error(planetError.message);
 
-  const characters: StudentCharacter[] = (characterItems || [])
-    .map((item: any) => ({
-      slug: item.slug,
-      name: item.title || "",
-      imageUrl: item.content?.imageUrl || "",
-    }))
-    .filter((c: StudentCharacter) => c.slug && c.name && c.imageUrl);
-
-  const planets: StudentPlanet[] = (planetItems || [])
-    .map((item: any) => ({
-      slug: item.slug,
-      name: item.title || "",
-      color: item.content?.color || "",
-      icon: item.content?.icon || "",
-    }))
-    .filter((p: StudentPlanet) => p.slug && p.name && p.color && p.icon);
-
-  if (!characters.length)
+  if (!characterItems || characterItems.length === 0) {
     throw new Error("[StudentPlatform] Missing student characters.");
-  if (!planets.length)
+  }
+  if (!planetItems || planetItems.length === 0) {
     throw new Error("[StudentPlatform] Missing student planets.");
+  }
+
+  const characters: StudentCharacter[] = characterItems.map((item: any) => {
+    if (!item.slug || !item.title || !item.content) {
+      throw new Error(
+        "[StudentPlatform] Student character missing required fields"
+      );
+    }
+    if (!item.content.imageUrl) {
+      throw new Error(
+        "[StudentPlatform] Student character missing imageUrl in content"
+      );
+    }
+    return {
+      slug: item.slug,
+      name: item.title,
+      imageUrl: item.content.imageUrl,
+    };
+  });
+
+  const planets: StudentPlanet[] = planetItems.map((item: any) => {
+    if (!item.slug || !item.title || !item.content) {
+      throw new Error(
+        "[StudentPlatform] Student planet missing required fields"
+      );
+    }
+    if (!item.content.color || !item.content.icon) {
+      throw new Error(
+        "[StudentPlatform] Student planet missing color or icon in content"
+      );
+    }
+    return {
+      slug: item.slug,
+      name: item.title,
+      color: item.content.color,
+      icon: item.content.icon,
+    };
+  });
 
   return {
     props: {

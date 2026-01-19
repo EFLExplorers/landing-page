@@ -10,28 +10,29 @@
 
 ## Data & Content
 
-- Supabase is the source of truth for marketing content.
+- Supabase is the source of truth for ALL content (marketing, auth, system pages).
   - Schema: `db/content-schema.sql`
-  - Seed: `db/content-seed-v3.sql` (currently a snapshot copy of v2)
+  - Seed: `db/content-seed-v5.sql` (latest, includes all pages)
 - Core tables:
-  - `pages`: one row per route (e.g. `/`, `/about`, `/pricing`, `/platforms/student`)
+  - `pages`: one row per route (e.g. `/`, `/about`, `/pricing`, `/platforms/student`, `/Auth/login`, etc.)
   - `page_sections`: sections per page (by `section_key`) with `content` JSON
   - `content_items`: list data (pricing tiers, services, learning tools, team members, pricing plans, FAQs, etc.)
-  - `site_sections`: global sections like `header` / `footer`
+  - `site_sections`: global sections like `header`, `footer`, `404`
 - Data fetching:
-  - SSG via `getStaticProps`: `/`, `/about`, `/pricing`, `/platforms/student`
-  - SSR via `getServerSideProps`: `/contact`
+  - SSG via `getStaticProps`: ALL pages (marketing, auth, system)
+  - No SSR pages - all content is pre-rendered at build time
 
 ### Global layout (header/footer) behavior (current)
 
-- Primary path: pages provide `headerContent` / `footerContent` via props (server-fetched from `site_sections`).
-- Fallback: if a page does not provide global content (notably some Auth routes using `.../page.tsx` naming), `Layout` fetches from `site_sections` on the client.
+- All pages fetch `headerContent` / `footerContent` from `site_sections` during `getStaticProps`.
+- No client-side fallback - missing header/footer content causes build to fail.
 
 ### Strict content policy (current)
 
-- `/` is strict: missing Supabase env or missing required seeded content causes SSG/build to fail.
-- Header/Footer copy is no longer hardcoded; these components render only when content is loaded from `site_sections`.
-- Home "How We Teach" has no fallback cards; `page_sections.content.tabs` must be seeded.
+- **ALL pages are strict**: missing Supabase env or missing required seeded content causes SSG/build to fail.
+- **No fallback defaults**: All content must be seeded via `content-seed-v5.sql` before build.
+- **Zero tolerance**: Missing any required field (title, description, content, etc.) will throw an error during build.
+- This ensures data integrity and prevents incomplete deployments.
 
 ## Performance notes (current)
 
@@ -48,11 +49,19 @@
 - Cypress e2e specs present for home, pricing, about, contact, student/teacher platforms.
 - `data-cy` hooks available across components.
 
+## Completed (as of latest update)
+
+- ✅ All pages are DB-driven (marketing, auth, system pages)
+- ✅ Teacher platform fully migrated to DB
+- ✅ Auth pages fully migrated to DB (login, register, forgot/reset password, pending)
+- ✅ 404 page migrated to DB (via site_sections)
+- ✅ Contact form labels migrated to DB
+- ✅ Strict mode enabled everywhere - no fallbacks
+- ✅ All content seeded in `content-seed-v5.sql`
+
 ## Next Steps (tech backlog)
 
 - Centralize CTA/link routing with role + auth-state awareness.
-- Expand DB-driven coverage to the remaining pages (teacher platform, auth pages, courses) once schema/seed is ready.
 - Add a documented \"content contract\" (section keys + JSON shapes) for editors and developers.
-- Add consistent loading/empty/error patterns where client-fetch is introduced.
 - Ensure accessibility on carousels and forms (focus, labels, ARIA, error text).
-- Document environment/build/deploy steps when available.
+- Courses page: migrate to DB-driven when ready.

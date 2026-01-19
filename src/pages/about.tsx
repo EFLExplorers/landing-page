@@ -61,20 +61,14 @@ export const AboutPage: NextPage<AboutPageProps> = ({
   teamIntroSection,
   valuesHeaderSection,
 }) => {
-  const safeTitle = pageTitle || "";
-  const safeDescription = pageDescription || "";
 
   return (
     <>
       <Head>
-        <title>{safeTitle}</title>
-        {safeDescription ? (
-          <meta name="description" content={safeDescription} />
-        ) : null}
-        {safeTitle ? <meta property="og:title" content={safeTitle} /> : null}
-        {safeDescription ? (
-          <meta property="og:description" content={safeDescription} />
-        ) : null}
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
         <meta property="og:type" content="website" />
       </Head>
       <ContentErrorBoundary contentType="about page content">
@@ -134,8 +128,14 @@ export const getStaticProps: GetStaticProps<AboutPageProps> = async () => {
     .order("sort_order", { ascending: true });
 
   const sections = sectionsData || [];
-  const pageTitle = pageData.title || "";
-  const pageDescription = pageData.meta_description || "";
+  if (!pageData.title || !pageData.meta_description) {
+    throw new Error(
+      "[About] Missing required page fields (title, meta_description)"
+    );
+  }
+
+  const pageTitle = pageData.title;
+  const pageDescription = pageData.meta_description;
 
   // Find specific sections
   const heroSection = sections.find((s) => s.section_key === "hero") || null;
@@ -187,28 +187,59 @@ export const getStaticProps: GetStaticProps<AboutPageProps> = async () => {
   if (statsData.error) throw new Error(statsData.error.message);
   if (valuesData.error) throw new Error(valuesData.error.message);
 
-  const teamMembers: TeamMember[] = (teamData.data || []).map((row: any) => ({
-    id: row.id,
-    name: row.title || "",
-    role: row.subtitle || "",
-    title: row.content?.role || "",
-    image: row.content?.image || "",
-    bio: row.description || "",
-    expertise: row.content?.expertise || [],
-  }));
+  if (!teamData.data || teamData.data.length === 0) {
+    throw new Error("[About] Missing team members.");
+  }
+  if (!statsData.data || statsData.data.length === 0) {
+    throw new Error("[About] Missing about stats.");
+  }
+  if (!valuesData.data || valuesData.data.length === 0) {
+    throw new Error("[About] Missing core values.");
+  }
 
-  const stats: AboutStat[] = (statsData.data || []).map((row: any) => ({
-    id: row.id,
-    number: row.title || "",
-    label: row.description || "",
-  }));
+  const teamMembers: TeamMember[] = teamData.data.map((row: any) => {
+    if (!row.id || !row.title || !row.subtitle || !row.description || !row.content) {
+      throw new Error(
+        "[About] Team member missing required fields"
+      );
+    }
+    return {
+      id: row.id,
+      name: row.title,
+      role: row.subtitle,
+      title: row.content.role || "",
+      image: row.content.image || "",
+      bio: row.description,
+      expertise: row.content.expertise || [],
+    };
+  });
 
-  const coreValues: CoreValue[] = (valuesData.data || []).map((row: any) => ({
-    id: row.id,
-    title: row.title || "",
-    description: row.description || "",
-    icon: row.content?.icon || "",
-  }));
+  const stats: AboutStat[] = statsData.data.map((row: any) => {
+    if (!row.id || !row.title || !row.description) {
+      throw new Error(
+        "[About] About stat missing required fields (id, title, description)"
+      );
+    }
+    return {
+      id: row.id,
+      number: row.title,
+      label: row.description,
+    };
+  });
+
+  const coreValues: CoreValue[] = valuesData.data.map((row: any) => {
+    if (!row.id || !row.title || !row.description || !row.content) {
+      throw new Error(
+        "[About] Core value missing required fields"
+      );
+    }
+    return {
+      id: row.id,
+      title: row.title,
+      description: row.description,
+      icon: row.content.icon || "",
+    };
+  });
 
   if (!heroSection) throw new Error("[About] Missing hero section.");
   if (!descriptionSection)

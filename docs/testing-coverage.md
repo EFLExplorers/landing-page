@@ -18,14 +18,23 @@
 - Forms:
   - Contact form validation (required fields, email format)
   - Success/error handling (stub API)
+  - Auth forms (forgot/reset password)
 - Dynamic controls:
   - Student planets carousel: prev/next, click planet, start/stop spin
   - Lesson modules: card select updates detail panel
 - Accessibility basics:
   - Focus states on nav/buttons
   - ARIA labels on carousel buttons
-- Data-driven future:
-  - Loading/empty/error states when sections fetch data
+- Auth pages:
+  - Login/register selection flows
+  - Password reset flow
+  - Teacher pending page
+
+## Note on Data-Driven Testing
+
+- All content is validated at build time (strict mode)
+- No need to test loading/empty states - build fails if content missing
+- Focus testing on user interactions and UI behavior
 
 ## Testing Hooks
 

@@ -156,41 +156,74 @@ export const getStaticProps: GetStaticProps<
   if (modulesData.error) throw new Error(modulesData.error.message);
   if (benefitsData.error) throw new Error(benefitsData.error.message);
 
-  const tools: TeachingToolLite[] = (toolsData.data || [])
-    .map((row: any) => ({
-      id: row.id,
-      title: row.title || "",
-      description: row.description || "",
-      icon: row.content?.icon || "",
-    }))
-    .filter((t: TeachingToolLite) => t.id && t.title && t.description);
-
-  const modules: LessonModuleLite[] = (modulesData.data || [])
-    .map((row: any) => ({
-      id: row.id,
-      name: row.title || "",
-      description: row.description || "",
-      students: row.content?.students || "",
-      lessons: row.content?.lessons || "",
-      duration: row.content?.duration || "",
-      colorKey: (row.content?.colorKey || "accent") as LessonModuleColorKey,
-    }))
-    .filter((m: LessonModuleLite) => m.id && m.name && m.description);
-
-  const benefits: TeacherBenefitLite[] = (benefitsData.data || [])
-    .map((row: any) => ({
-      id: row.id,
-      title: row.title || "",
-      description: row.description || "",
-    }))
-    .filter((b: TeacherBenefitLite) => b.id && b.title && b.description);
-
-  if (!tools.length)
+  if (!toolsData.data || toolsData.data.length === 0) {
     throw new Error("[TeacherPlatform] Missing teaching tools.");
-  if (!modules.length)
+  }
+  if (!modulesData.data || modulesData.data.length === 0) {
     throw new Error("[TeacherPlatform] Missing lesson modules.");
-  if (!benefits.length)
+  }
+  if (!benefitsData.data || benefitsData.data.length === 0) {
     throw new Error("[TeacherPlatform] Missing teacher benefits.");
+  }
+
+  const tools: TeachingToolLite[] = toolsData.data.map((row: any) => {
+    if (!row.id || !row.title || !row.description || !row.content) {
+      throw new Error(
+        "[TeacherPlatform] Teaching tool missing required fields"
+      );
+    }
+    if (!row.content.icon) {
+      throw new Error(
+        "[TeacherPlatform] Teaching tool missing icon in content"
+      );
+    }
+    return {
+      id: row.id,
+      title: row.title,
+      description: row.description,
+      icon: row.content.icon,
+    };
+  });
+
+  const modules: LessonModuleLite[] = modulesData.data.map((row: any) => {
+    if (!row.id || !row.title || !row.description || !row.content) {
+      throw new Error(
+        "[TeacherPlatform] Lesson module missing required fields"
+      );
+    }
+    if (
+      !row.content.students ||
+      !row.content.lessons ||
+      !row.content.duration ||
+      !row.content.colorKey
+    ) {
+      throw new Error(
+        "[TeacherPlatform] Lesson module missing required content fields (students, lessons, duration, colorKey)"
+      );
+    }
+    return {
+      id: row.id,
+      name: row.title,
+      description: row.description,
+      students: row.content.students,
+      lessons: row.content.lessons,
+      duration: row.content.duration,
+      colorKey: row.content.colorKey as LessonModuleColorKey,
+    };
+  });
+
+  const benefits: TeacherBenefitLite[] = benefitsData.data.map((row: any) => {
+    if (!row.id || !row.title || !row.description) {
+      throw new Error(
+        "[TeacherPlatform] Teacher benefit missing required fields (id, title, description)"
+      );
+    }
+    return {
+      id: row.id,
+      title: row.title,
+      description: row.description,
+    };
+  });
 
   return {
     props: {

@@ -47,13 +47,14 @@ This is a page-by-page text tree of the current landing site. It mirrors the str
 - `/contact`
   - `PageLayout` wrapper
   - `ContactHeroSection`: title/subtitle + email + phone
-  - `ContactFormSection`: fields first/last/email/subject/message + submit
+  - `ContactFormSection`: fields first/last/email/subject/message + submit (all labels DB-driven)
   - `ContactFAQSection`: accordion list of FAQs
   - Data sources (current):
-    - `pages` + `page_sections` (`hero`, `form`, `faq`)
+    - `pages` + `page_sections` (`hero`, `form` with form_labels, `faq`)
     - `content_items` (`faq`)
   - Notes:
-    - `/contact` uses `getServerSideProps` (SSR).
+    - Contact is strict: missing required Supabase env/seeded content causes SSG/build to fail.
+    - Form labels (First Name, Last Name, Email, Subject, Message, Submit button) are stored in `form` section's `form_labels` object.
 
 - `/platforms/teacher`
   - `TeacherHeroSection`: headline, CTA → `/Auth/register/teacher`, hero image
@@ -61,7 +62,11 @@ This is a page-by-page text tree of the current landing site. It mirrors the str
   - `LessonModulesSection`: selectable module cards (Beginner, Elementary, Pre-Intermediate, Intermediate, Upper-Intermediate, Advanced, Business English, Exam Prep, Conversation, Specialized) with lessons/duration/class size
   - `TeacherBenefitsSection`: grid of benefits (Ready-Made Content, Student Progress Tracking, Interactive Learning, Flexible Scheduling)
   - `TeacherCTASection`: CTA → `/Auth/register/teacher`
-  - Data sources (current): static component content (not DB-driven yet)
+  - Data sources (current):
+    - `pages` + `page_sections` (hero/tools/lesson-modules/benefits/cta copy)
+    - `content_items` (`teaching_tool`, `lesson_module`, `teacher_benefit`)
+  - Notes:
+    - Teacher platform is strict: missing required Supabase env/seeded content causes SSG/build to fail.
 
 - `/platforms/student`
   - `StudentHeroSection`: headline + CTA → `/Auth/register/student`
@@ -76,10 +81,22 @@ This is a page-by-page text tree of the current landing site. It mirrors the str
   - Placeholder page with title and empty course grid
   - Data sources (current): static placeholder
 
-- Auth flows (static pages)
-  - Login: `/Auth/login`, `/Auth/login/student`, `/Auth/login/teacher`, `/Auth/login/admin`
-  - Register: `/Auth/register`, `/Auth/register/student`, `/Auth/register/teacher`, `/Auth/register/teacher/pending`
-  - Password recovery: `/Auth/forgot-password`, `/Auth/reset-password`
+- Auth flows (DB-driven pages)
+  - Login selection: `/Auth/login` — platform selection page (student/teacher buttons)
+    - Data: `pages` + `page_sections` (`selection` section with title, subtitle, button labels, register prompt)
+  - Register selection: `/Auth/register` — platform selection page (student/teacher buttons)
+    - Data: `pages` + `page_sections` (`selection` section with title, subtitle, button labels, login prompt)
+  - Password recovery: `/Auth/forgot-password` — email input form + success state
+    - Data: `pages` + `page_sections` (`form` section with form content and success content)
+  - Reset password: `/Auth/reset-password` — password reset form + success state
+    - Data: `pages` + `page_sections` (`form` section with form content and success content)
+  - Teacher pending: `/Auth/register/teacher/pending` — registration pending message
+    - Data: `pages` + `page_sections` (`content` section with title, messages array, button)
+  - Notes:
+    - All auth pages are strict: missing required Supabase env/seeded content causes SSG/build to fail.
+    - Role-specific login/register pages (`/Auth/login/student`, `/Auth/login/teacher`, etc.) are handled by shared components.
 
 - System pages
-  - `/404`
+  - `/404` — error page
+    - Data: `site_sections` (`404` section with title, message, home_link_text)
+    - Notes: 404 page is strict: missing required site_sections content causes SSG/build to fail.

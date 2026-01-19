@@ -9,9 +9,24 @@ import { getGlobalLayoutContent } from "@/utils/globalSections";
 interface LoginPageProps {
   headerContent: HeaderContent | null;
   footerContent: FooterContent | null;
+  title: string;
+  subtitle: string;
+  studentButtonLabel: string;
+  teacherButtonLabel: string;
+  registerPrompt: string;
+  registerLinkText: string;
+  registerHref: string;
 }
 
-export const LoginPage = (_props: LoginPageProps) => {
+export const LoginPage = ({
+  title,
+  subtitle,
+  studentButtonLabel,
+  teacherButtonLabel,
+  registerPrompt,
+  registerLinkText,
+  registerHref,
+}: LoginPageProps) => {
   const router = useRouter();
 
   const handlePlatformSelect = (platform: "student" | "teacher") => {
@@ -21,28 +36,28 @@ export const LoginPage = (_props: LoginPageProps) => {
   return (
     <div className={styles.container}>
       <div className={styles.formContainer}>
-        <h1 className={styles.title}>Welcome Back</h1>
-        <p className={styles.subtitle}>Select your platform to continue:</p>
+        <h1 className={styles.title}>{title}</h1>
+        <p className={styles.subtitle}>{subtitle}</p>
 
         <div className={styles.buttonGroup}>
           <button
             onClick={() => handlePlatformSelect("student")}
             className={`${styles.button} ${styles.studentButton}`}
           >
-            📚 Student Login
+            {studentButtonLabel}
           </button>
           <button
             onClick={() => handlePlatformSelect("teacher")}
             className={`${styles.button} ${styles.teacherButton}`}
           >
-            👨‍🏫 Teacher Login
+            {teacherButtonLabel}
           </button>
         </div>
 
         <p className={styles.registerLink}>
-          New to EFL Explorers?{" "}
-          <Link href="/Auth/register" className={styles.link}>
-            Register here
+          {registerPrompt}{" "}
+          <Link href={registerHref} className={styles.link}>
+            {registerLinkText}
           </Link>
         </p>
       </div>
@@ -58,14 +73,70 @@ export const getStaticProps: GetStaticProps<LoginPageProps> = async () => {
   );
 
   if (!isSupabaseConfigured) {
-    return {
-      props: { headerContent: null, footerContent: null },
-      revalidate: 300,
-    };
+    throw new Error("[Login] Supabase environment variables are missing.");
   }
 
   const { headerContent, footerContent } = await getGlobalLayoutContent(
     supabase
   );
-  return { props: { headerContent, footerContent }, revalidate: 300 };
+
+  const { data: pageData, error: pageError } = await supabase
+    .from("pages")
+    .select("id")
+    .eq("route", "/Auth/login")
+    .single();
+
+  if (pageError || !pageData?.id) {
+    throw new Error(
+      `[Login] Missing pages row for route '/Auth/login': ${
+        pageError?.message || "no id"
+      }`
+    );
+  }
+
+  const { data: sectionData, error: sectionError } = await supabase
+    .from("page_sections")
+    .select("content")
+    .eq("page_id", pageData.id)
+    .eq("section_key", "selection")
+    .eq("active", true)
+    .single();
+
+  if (sectionError || !sectionData) {
+    throw new Error(
+      `[Login] Missing page_sections for '/Auth/login' (selection): ${
+        sectionError?.message || "no data"
+      }`
+    );
+  }
+
+  const content = sectionData.content as any;
+  if (
+    !content.title ||
+    !content.subtitle ||
+    !content.student_button_label ||
+    !content.teacher_button_label ||
+    !content.register_prompt ||
+    !content.register_link_text ||
+    !content.register_href
+  ) {
+    throw new Error(
+      "[Login] Missing required content fields in selection section"
+    );
+  }
+
+  return {
+    props: {
+      headerContent,
+      footerContent,
+      title: content.title,
+      subtitle: content.subtitle,
+      studentButtonLabel: content.student_button_label,
+      teacherButtonLabel: content.teacher_button_label,
+      registerPrompt: content.register_prompt,
+      registerLinkText: content.register_link_text,
+      registerHref: content.register_href,
+    },
+    revalidate: 300,
+  };
 };

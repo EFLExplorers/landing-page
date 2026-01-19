@@ -13,7 +13,12 @@ VALUES
   ('/contact', 'Contact EFL Explorers', 'Get in touch with EFL Explorers for course and platform information'),
   ('/pricing', 'Pricing - EFL Explorers', 'Choose the best plan to improve your English skills with EFL Explorers.'),
   ('/platforms/student', 'Student Platform - EFL Explorers', 'Explore the student portal and learning journey inside EFL Explorers.'),
-  ('/platforms/teacher', 'Teacher Platform - EFL Explorers', 'Explore the teacher portal and teaching toolkit inside EFL Explorers.')
+  ('/platforms/teacher', 'Teacher Platform - EFL Explorers', 'Explore the teacher portal and teaching toolkit inside EFL Explorers.'),
+  ('/Auth/login', 'Login - EFL Explorers', 'Login to your EFL Explorers account'),
+  ('/Auth/register', 'Register - EFL Explorers', 'Create your EFL Explorers account'),
+  ('/Auth/forgot-password', 'Forgot Password - EFL Explorers', 'Reset your password'),
+  ('/Auth/reset-password', 'Reset Password - EFL Explorers', 'Set your new password'),
+  ('/Auth/register/teacher/pending', 'Registration Pending - EFL Explorers', 'Your teacher registration is under review')
 ON CONFLICT (route) DO UPDATE SET
   title = EXCLUDED.title,
   meta_description = EXCLUDED.meta_description;
@@ -88,6 +93,17 @@ VALUES
       ]
     }'::jsonb,
     20,
+    true
+  ),
+  (
+    '404',
+    'error',
+    '{
+      "title": "404 - Page Not Found",
+      "message": "The page you''re looking for doesn''t exist.",
+      "home_link_text": "Go back home"
+    }'::jsonb,
+    30,
     true
   )
 ON CONFLICT (section_key) DO UPDATE SET
@@ -342,7 +358,16 @@ SELECT p.id, 'form', 'content',
   '{
     "title": "Send us a Message",
     "subtitle": "Fill out the form below and we''ll get back to you as soon as possible. We''re here to help with any questions about our English learning programs.",
-    "subject_options": ["General Inquiry", "Course Information", "Pricing", "Technical Support", "Other"]
+    "subject_options": ["General Inquiry", "Course Information", "Pricing", "Technical Support", "Other"],
+    "form_labels": {
+      "first_name": "First Name",
+      "last_name": "Last Name",
+      "email": "Email",
+      "subject": "Subject",
+      "message": "Message",
+      "submit_button": "Send Message",
+      "select_subject": "Select a subject"
+    }
   }'::jsonb,
   20, true
 FROM public.pages p WHERE p.route = '/contact'
@@ -900,6 +925,107 @@ ON CONFLICT (slug) DO UPDATE SET
   sort_order = EXCLUDED.sort_order,
   active = EXCLUDED.active,
   updated_at = now();
+
+-- ---------- Auth pages: Login selection (/Auth/login)
+INSERT INTO public.page_sections (page_id, section_key, section_type, content, sort_order, active)
+SELECT p.id, 'selection', 'content',
+  '{
+    "title": "Welcome Back",
+    "subtitle": "Select your platform to continue:",
+    "student_button_label": "📚 Student Login",
+    "teacher_button_label": "👨‍🏫 Teacher Login",
+    "register_prompt": "New to EFL Explorers?",
+    "register_link_text": "Register here",
+    "register_href": "/Auth/register"
+  }'::jsonb,
+  10, true
+FROM public.pages p WHERE p.route = '/Auth/login'
+ON CONFLICT (page_id, section_key) DO UPDATE SET content = EXCLUDED.content, active = true, sort_order = EXCLUDED.sort_order;
+
+-- ---------- Auth pages: Register selection (/Auth/register)
+INSERT INTO public.page_sections (page_id, section_key, section_type, content, sort_order, active)
+SELECT p.id, 'selection', 'content',
+  '{
+    "title": "Join EFL Explorers",
+    "subtitle": "Choose your account type:",
+    "student_button_label": "📚 Register as Student",
+    "teacher_button_label": "👨‍🏫 Register as Teacher",
+    "login_prompt": "Already have an account?",
+    "login_link_text": "Login here",
+    "login_href": "/Auth/login"
+  }'::jsonb,
+  10, true
+FROM public.pages p WHERE p.route = '/Auth/register'
+ON CONFLICT (page_id, section_key) DO UPDATE SET content = EXCLUDED.content, active = true, sort_order = EXCLUDED.sort_order;
+
+-- ---------- Auth pages: Forgot password (/Auth/forgot-password)
+INSERT INTO public.page_sections (page_id, section_key, section_type, content, sort_order, active)
+SELECT p.id, 'form', 'content',
+  '{
+    "form": {
+      "title": "Forgot Password",
+      "subtitle": "Enter your email to reset your password",
+      "email_label": "Email",
+      "submit_button_label": "Send Reset Link",
+      "submit_button_loading_label": "Sending...",
+      "back_to_login_text": "Back to Login",
+      "back_to_login_href": "/Auth/login"
+    },
+    "success": {
+      "title": "Check Your Email",
+      "subtitle": "We''ve sent you a password reset link",
+      "message1": "We''ve sent a password reset link to {email}.",
+      "message2": "Please check your email and click the link to reset your password. The link will expire in 1 hour.",
+      "return_text": "Return to Login",
+      "return_href": "/Auth/login"
+    }
+  }'::jsonb,
+  10, true
+FROM public.pages p WHERE p.route = '/Auth/forgot-password'
+ON CONFLICT (page_id, section_key) DO UPDATE SET content = EXCLUDED.content, active = true, sort_order = EXCLUDED.sort_order;
+
+-- ---------- Auth pages: Reset password (/Auth/reset-password)
+INSERT INTO public.page_sections (page_id, section_key, section_type, content, sort_order, active)
+SELECT p.id, 'form', 'content',
+  '{
+    "form": {
+      "title": "Reset Password",
+      "subtitle": "Enter your new password",
+      "new_password_label": "New Password",
+      "confirm_password_label": "Confirm New Password",
+      "submit_button_label": "Update Password",
+      "submit_button_loading_label": "Updating...",
+      "back_to_login_text": "Back to Login",
+      "back_to_login_href": "/Auth/login"
+    },
+    "success": {
+      "title": "Password Updated",
+      "subtitle": "Your password has been successfully reset",
+      "message": "Your password has been successfully updated. You can now log in with your new password.",
+      "go_to_login_text": "Go to Login",
+      "go_to_login_href": "/Auth/login"
+    }
+  }'::jsonb,
+  10, true
+FROM public.pages p WHERE p.route = '/Auth/reset-password'
+ON CONFLICT (page_id, section_key) DO UPDATE SET content = EXCLUDED.content, active = true, sort_order = EXCLUDED.sort_order;
+
+-- ---------- Auth pages: Teacher pending (/Auth/register/teacher/pending)
+INSERT INTO public.page_sections (page_id, section_key, section_type, content, sort_order, active)
+SELECT p.id, 'content', 'content',
+  '{
+    "title": "Registration Pending",
+    "messages": [
+      "Thank you for registering as a teacher with EFL Explorers. Your application is currently under review.",
+      "Our admin team will verify your credentials and approve your account. You will receive an email notification once your account has been approved.",
+      "Please note that this process may take 1-2 business days."
+    ],
+    "button_label": "Return to Login",
+    "button_href": "/Auth/login"
+  }'::jsonb,
+  10, true
+FROM public.pages p WHERE p.route = '/Auth/register/teacher/pending'
+ON CONFLICT (page_id, section_key) DO UPDATE SET content = EXCLUDED.content, active = true, sort_order = EXCLUDED.sort_order;
 
 -- ============================================
 -- 6) Legacy / compatibility seeds

@@ -38,16 +38,11 @@ export const Pricing: NextPage<PricingPageProps> = ({
   footerSection,
   plans,
 }) => {
-  const safeTitle = pageTitle || "Pricing - EFL Explorers";
-  const safeDescription =
-    pageDescription ||
-    "Choose the best plan to improve your English skills with EFL Explorers.";
-
   return (
     <>
       <Head>
-        <title>{safeTitle}</title>
-        <meta name="description" content={safeDescription} />
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
       </Head>
       <PageLayout>
         <PricingTable
@@ -107,8 +102,14 @@ export const getStaticProps: GetStaticProps<PricingPageProps> = async () => {
   }
 
   const sections = sectionsData;
-  const pageTitle = pageData.title || "";
-  const pageDescription = pageData.meta_description || "";
+  if (!pageData.title || !pageData.meta_description) {
+    throw new Error(
+      "[Pricing] Missing required page fields (title, meta_description)"
+    );
+  }
+
+  const pageTitle = pageData.title;
+  const pageDescription = pageData.meta_description;
 
   const headerSection =
     sections.find((s) => s.section_key === "pricing-header") || null;
@@ -132,18 +133,24 @@ export const getStaticProps: GetStaticProps<PricingPageProps> = async () => {
     .order("sort_order", { ascending: true });
 
   if (planError) throw new Error(planError.message);
-
-  const plans: PricingPlan[] = (planItems || []).map((item: any) => ({
-    slug: item.slug,
-    title: item.title || "",
-    badge: item.subtitle || null,
-    description: item.description || null,
-    content: item.content || {},
-  }));
-
-  if (!plans.length) {
+  if (!planItems || planItems.length === 0) {
     throw new Error("[Pricing] Missing pricing plans.");
   }
+
+  const plans: PricingPlan[] = planItems.map((item: any) => {
+    if (!item.slug || !item.title || !item.content) {
+      throw new Error(
+        "[Pricing] Pricing plan missing required fields (slug, title, content)"
+      );
+    }
+    return {
+      slug: item.slug,
+      title: item.title,
+      badge: item.subtitle || null,
+      description: item.description || null,
+      content: item.content,
+    };
+  });
 
   return {
     props: {
