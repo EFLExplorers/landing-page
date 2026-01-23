@@ -11,10 +11,8 @@ Use this to track what exists, what needs work, and gaps to fill.
 - Student platform: hero, characters, planets carousel, CTA (✅ DB-driven)
 - Auth flows: login, register, forgot/reset, pending (✅ DB-driven)
 - 404 page: error content (✅ DB-driven via site_sections)
-- Courses: placeholder (⏳ not DB-driven yet)
 
 ## Current Gaps / To-Do
-- Content: fill Courses page (placeholder - not DB-driven yet).
 - Auth/CTA routing: centralize register/login redirect rules per role; add post-auth redirect handling.
 - Accessibility: carousel controls ARIA review; focus states on buttons/links; ensure form error messaging.
 - Testing: extend Cypress to cover pricing CTAs, register flow links, student planets controls pause/play.

@@ -77,10 +77,6 @@ This is a page-by-page text tree of the current landing site. It mirrors the str
     - `pages` + `page_sections` (hero/characters/planets/cta copy)
     - `content_items` (`student_character`, `student_planet`)
 
-- `/courses`
-  - Placeholder page with title and empty course grid
-  - Data sources (current): static placeholder
-
 - Auth flows (DB-driven pages)
   - Login selection: `/Auth/login` — platform selection page (student/teacher buttons)
     - Data: `pages` + `page_sections` (`selection` section with title, subtitle, button labels, register prompt)

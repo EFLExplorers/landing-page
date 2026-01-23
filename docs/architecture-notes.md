@@ -4,8 +4,8 @@
 
 - Framework: Next.js (pages router), TypeScript, CSS Modules.
 - Layout: `_app` wraps `Layout` → `Header` + `Footer`; `PageLayout` is a light wrapper for some pages.
-- Routing: `/`, `/pricing`, `/about`, `/contact`, `/platforms/{teacher|student}`, `/courses`, auth under `/Auth/...`, system `/404`.
-- State: primarily server-fetched content (SSG) + component props; no global state manager observed.
+- Routing: `/`, `/pricing`, `/about`, `/contact`, `/platforms/{teacher|student}`, auth under `/Auth/...`, system `/404`.
+- State: primarily server-fetched content (SSG) + component props; `AuthContext` for user session management.
 - Analytics: Vercel Analytics and Speed Insights integrated in `_app.tsx` for production monitoring.
 
 ## Data & Content
@@ -39,9 +39,40 @@
 - Supabase queries avoid `select("*")` to reduce payload size.
 - Pages/components pass smaller, UI-focused DTOs instead of large DB row objects where possible.
 
-## Auth/CTA Flow (current)
+## Auth System Architecture
 
+### Authentication Context (`AuthContext`)
+- **Location**: `src/contexts/authContext.tsx`
+- **Provider**: Wraps app in `_app.tsx` to provide global auth state
+- **Features**:
+  - User session management via Supabase Auth
+  - User role tracking (`student` | `teacher` | `null`) from `users` table
+  - Session timeout: 2-hour inactivity timeout with 5-minute warning
+  - Activity tracking: Monitors mouse, keyboard, scroll, and touch events
+  - Auto sign-out on session expiry
+  - Real-time auth state changes via Supabase listeners
+
+### Auth Components Structure
+- **Core Components** (`src/components/auth/`):
+  - `AuthForm.tsx` - Base auth form wrapper
+  - `AuthModal.tsx` - Modal container for auth flows
+  - `LoginForm.tsx` / `RegistrationForm.tsx` - Role-specific forms
+  - `AuthContainer.tsx` - Layout wrapper for auth pages
+- **Shared Components** (`src/components/auth/shared/`):
+  - `FormInput.tsx` - Reusable form input component
+  - `PasswordInput.tsx` - Password field with visibility toggle
+  - `PasswordStrength.tsx` - Password strength indicator
+  - `LoadingSpinner.tsx` - Loading state indicator
+- **Utilities**:
+  - `authValidation.ts` - Form validation utilities
+  - `authHelpers.ts` - Helper functions for auth operations
+- **Types**: `auth.types.ts` - TypeScript interfaces for auth data
+
+### Auth Flow
 - Header auth links: `/Auth/login`, `/Auth/register`.
+- Selection pages route to role-specific forms: `/Auth/login/{student|teacher}`, `/Auth/register/{student|teacher}`
+- Password recovery: `/Auth/forgot-password` → `/Auth/reset-password`
+- Teacher registration: Includes pending state at `/Auth/register/teacher/pending`
 - CTAs often deep-link to `/Auth/register/{student|teacher}`; no runtime auth guard/redirect logic in UI.
 
 ## Testing
@@ -64,4 +95,3 @@
 - Centralize CTA/link routing with role + auth-state awareness.
 - Add a documented \"content contract\" (section keys + JSON shapes) for editors and developers.
 - Ensure accessibility on carousels and forms (focus, labels, ARIA, error text).
-- Courses page: migrate to DB-driven when ready.

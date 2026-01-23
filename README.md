@@ -6,7 +6,7 @@ Marketing site for the EFL Explorers / EFL ecosystem. This repo serves the publi
 
 - **Next.js (Pages Router)** + **React** + **TypeScript**
 - **Supabase** (Postgres + Auth) for content + user management
-- **CSS Modules** for styling (no Tailwind usage in UI)
+- **CSS Modules** for styling (component-scoped styles with custom utility classes)
 - **Lucide React** (icons), **Vercel Speed Insights**, **Vercel Analytics**, **Cypress** for e2e
 - **144KB bundle size** (ultra-optimized for speed)
 
@@ -59,9 +59,6 @@ Use `env-template.txt` as the source-of-truth. Key vars:
 - **Supabase (required for DB-driven pages)**
   - `NEXT_PUBLIC_SUPABASE_URL`
   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- **Admin API (server-only; only needed if you use `/api/admin`)**
-  - `SUPABASE_URL` (same project URL)
-  - `SUPABASE_SERVICE_ROLE_KEY` (**never** expose to the client)
 - **Platform URLs (used by auth/CTAs)**
   - `NEXT_PUBLIC_STUDENT_URL`
   - `NEXT_PUBLIC_TEACHER_URL`
@@ -117,7 +114,6 @@ Docs:
 - `GET /api/page-content?route=/about` — fetch `pages` + `page_sections`
 - `GET /api/content?type=service` — fetch `content_items` by type
 - `POST /api/revalidate` — revalidate key DB-driven pages (used by GitHub Actions)
-- `POST /api/admin` — admin actions (requires service-role env vars)
 
 More: `docs/api-usage.md`
 

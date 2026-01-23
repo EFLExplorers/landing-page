@@ -81,7 +81,7 @@
 
 ### Low Impact:
 7. **Reduce CSS Bundle Size**
-   - Remove unused Tailwind classes
+   - Remove unused CSS Module classes and consolidate utility classes
    - **Impact**: Smaller CSS file
    - **Effort**: Medium
 

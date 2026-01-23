@@ -34,8 +34,6 @@ Current state: ALL pages fetch directly from Supabase during `getStaticProps` (S
   - `pages` + `page_sections` for all auth page content (selection, forms, success states, pending messages)
 - 404 (`/404`)
   - `site_sections` for error page content
-- Courses (`/courses`)
-  - Placeholder (not DB-driven yet)
 
 ## Current API endpoints
 

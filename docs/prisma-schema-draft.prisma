@@ -1,0 +1,302 @@
+// Prisma Schema for EFL Explorers Landing Page
+// Generated from Supabase schema migration
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")      // Pooled connection (PgBouncer)
+  directUrl = env("DIRECT_URL")        // Direct connection for migrations
+}
+
+// ============================================
+// Authentication & User Management
+// ============================================
+
+model User {
+  id         String   @id @default(uuid())
+  email      String   @unique
+  firstName  String?  @map("first_name")
+  lastName   String?  @map("last_name")
+  role       String   // "student" | "teacher" | "admin"
+  approved   Boolean  @default(false)
+  passwordHash String? @map("password_hash") // For NextAuth migration
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  teacher    Teacher?
+
+  @@map("users")
+}
+
+model Teacher {
+  id        String   @id @default(uuid())
+  userId    String?  @unique @map("user_id")
+  email     String   @unique
+  approved  Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("teachers")
+}
+
+// ============================================
+// Content Management - Core Tables
+// ============================================
+
+model Page {
+  id             String        @id @default(uuid())
+  route          String        @unique
+  title          String?
+  metaDescription String?     @map("meta_description")
+  layout        String?       @default("default")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+  
+  sections      PageSection[]
+  contentItems  ContentItem[]
+  routeSections RouteSection[]
+
+  @@map("pages")
+}
+
+model PageSection {
+  id          String   @id @default(uuid())
+  pageId      String   @map("page_id")
+  sectionKey  String   @map("section_key")
+  sectionType String   @default("content") @map("section_type")
+  title       String?
+  subtitle    String?
+  heading     String?
+  subheading  String?
+  body        String?
+  content     Json?    @default("{}")
+  settings    Json?    @default("{}")
+  imageUrl    String?  @map("image_url")
+  ctaLabel    String?  @map("cta_label")
+  ctaHref     String?  @map("cta_href")
+  data        Json?    @default("{}")
+  sortOrder   Int      @default(0) @map("sort_order")
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  page        Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@unique([pageId, sectionKey])
+  @@index([pageId, sectionKey])
+  @@index([active, sortOrder])
+  @@map("page_sections")
+}
+
+model SiteSection {
+  id          String   @id @default(uuid())
+  sectionKey  String   @unique @map("section_key")
+  sectionType String   @default("content") @map("section_type")
+  content     Json     @default("{}")
+  settings    Json     @default("{}")
+  sortOrder   Int      @default(0) @map("sort_order")
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([active, sortOrder])
+  @@map("site_sections")
+}
+
+model RouteSection {
+  id             String   @id @default(uuid())
+  pageId         String   @map("page_id")
+  sectionKey     String   @map("section_key")
+  sectionType    String   @default("content") @map("section_type")
+  expectedContent Json    @default("{}") @map("expected_content")
+  notes          String?
+  sortOrder      Int      @default(0) @map("sort_order")
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+  
+  page           Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@unique([pageId, sectionKey])
+  @@index([pageId])
+  @@map("route_sections")
+}
+
+// ============================================
+// Flexible Content System
+// ============================================
+
+model ContentItem {
+  id          String   @id @default(uuid())
+  pageId      String?  @map("page_id")
+  sectionKey  String?  @map("section_key")
+  contentType String   @map("content_type") // 'pricing', 'service', 'faq', 'team_member', etc.
+  slug        String?  @unique
+  title       String?
+  subtitle    String?
+  description String?
+  content     Json     @default("{}")
+  metadata    Json     @default("{}")
+  sortOrder   Int      @default(0) @map("sort_order")
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  page        Page?    @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  
+  // Relationships
+  parentRelations ContentRelationship[] @relation("Parent")
+  childRelations  ContentRelationship[] @relation("Child")
+
+  @@index([contentType, active])
+  @@index([slug])
+  @@index([pageId, contentType, active, sortOrder])
+  @@map("content_items")
+}
+
+model ContentRelationship {
+  id             String      @id @default(uuid())
+  parentId       String      @map("parent_id")
+  childId        String      @map("child_id")
+  relationshipType String    @map("relationship_type")
+  sortOrder      Int         @default(0) @map("sort_order")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  
+  parent         ContentItem @relation("Parent", fields: [parentId], references: [id], onDelete: Cascade)
+  child          ContentItem @relation("Child", fields: [childId], references: [id], onDelete: Cascade)
+
+  @@unique([parentId, childId, relationshipType])
+  @@map("content_relationships")
+}
+
+// ============================================
+// Media Management
+// ============================================
+
+model MediaAsset {
+  id          String   @id @default(uuid())
+  filename    String
+  originalName String  @map("original_name")
+  url         String
+  altText     String?  @map("alt_text")
+  caption     String?
+  mimeType    String   @map("mime_type")
+  sizeBytes   Int?     @map("size_bytes")
+  dimensions  Json?    // {width, height} for images
+  metadata    Json     @default("{}")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("media_assets")
+}
+
+// ============================================
+// Legacy Tables (for backward compatibility)
+// ============================================
+
+model FAQ {
+  id         String   @id @default(uuid())
+  category   String?
+  question   String?
+  answer     String?
+  sortOrder  Int      @default(0) @map("sort_order")
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@index([category, active, sortOrder])
+  @@map("faqs")
+}
+
+model PricingTier {
+  id          String   @id @default(uuid())
+  name        String?
+  price       String?
+  period      String?
+  description String?
+  isFeatured  Boolean  @default(false) @map("is_featured")
+  sortOrder   Int      @default(0) @map("sort_order")
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([active, sortOrder])
+  @@map("pricing_tiers")
+}
+
+model Service {
+  id              String   @id @default(uuid())
+  title           String?
+  description     String?
+  icon            String?
+  backgroundIcons Json?    @map("background_icons")
+  sortOrder       Int      @default(0) @map("sort_order")
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@index([active, sortOrder])
+  @@map("services")
+}
+
+model LearningTool {
+  id          String   @id @default(uuid())
+  title       String?
+  description String?
+  icon        String?
+  sortOrder   Int      @default(0) @map("sort_order")
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([active, sortOrder])
+  @@map("learning_tools")
+}
+
+model TeamMember {
+  id        String   @id @default(uuid())
+  name      String?
+  role      String?
+  title     String?
+  imageUrl  String?  @map("image_url")
+  bio       String?
+  expertise String[] @default([])
+  sortOrder Int      @default(0) @map("sort_order")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([active, sortOrder])
+  @@map("team_members")
+}
+
+model AboutStat {
+  id        String   @id @default(uuid())
+  number    String?
+  label     String?
+  sortOrder Int      @default(0) @map("sort_order")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([active, sortOrder])
+  @@map("about_stats")
+}
+
+model CoreValue {
+  id          String   @id @default(uuid())
+  icon        String?
+  title       String?
+  description String?
+  sortOrder   Int      @default(0) @map("sort_order")
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([active, sortOrder])
+  @@map("core_values")
+}

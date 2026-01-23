@@ -13,8 +13,7 @@ High-level reference for site pages, components, and patterns.
 - Contact (`/contact`): Hero, Form, FAQ.
 - Teacher platform (`/platforms/teacher`): Hero, TeachingTools, LessonModules (selectable), Benefits, CTA.
 - Student platform (`/platforms/student`): Hero, Characters, Planets carousel, CTA.
-- Courses (`/courses`): placeholder.
-- Auth: login/register/forgot/reset pages (static).
+- Auth: login/register/forgot/reset pages (DB-driven with complex form validation and session management).
 - System: 404.
 
 ## Component Patterns
@@ -25,7 +24,7 @@ High-level reference for site pages, components, and patterns.
 - Grids: responsive columns; cap text length to avoid overflow.
 
 ## Styling Notes
-- Uses CSS Modules; keep classes scoped per component.
+- Uses CSS Modules for component styling with custom utility classes in `shared/components.css` and `utilities.css`.
 - Icons: currently emoji; plan to swap to a consistent icon set.
 - Images: Next/Image where possible; ensure alt text.
 

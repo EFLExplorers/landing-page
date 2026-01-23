@@ -1,4 +1,6 @@
 import { ReactNode } from "react";
+import styles from "./SectionWrapper.module.css";
+import { classNames } from "../../utils/classNames";
 
 interface SectionWrapperProps {
   children: ReactNode;
@@ -10,8 +12,8 @@ export const SectionWrapper = ({
   className = "",
 }: SectionWrapperProps) => {
   return (
-    <section className={`w-full py-16 sm:py-24 ${className}`}>
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+    <section className={classNames(styles.section, className)}>
+      <div className={styles.container}>
         {children}
       </div>
     </section>
